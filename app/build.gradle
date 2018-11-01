@@ -10,7 +10,7 @@ android {
         applicationId "link.mawa.android"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 1
+        versionCode 18110101
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
