@@ -1,6 +1,7 @@
 package link.mawa.android
 
 import android.app.Application
+import android.widget.Toast
 
 class App: Application() {
 
@@ -11,5 +12,9 @@ class App: Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+    }
+
+    fun toast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 }

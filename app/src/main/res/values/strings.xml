@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">mawa</string>
+    <string name="app_name">MAWA</string>
+    <string name="login">login</string>
+    <string name="logout">logout</string>
+    <string name="username">username</string>
+    <string name="password">password</string>
+    <string name="loading">loading.....</string>
+    <string name="login_error">temporary unable to login (%1$s)</string>
 </resources>

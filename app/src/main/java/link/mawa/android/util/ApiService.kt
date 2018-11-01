@@ -2,7 +2,7 @@ package link.mawa.android.util
 
 import android.util.Log
 import com.google.gson.GsonBuilder
-import link.mawa.android.bean.Consts
+import link.mawa.android.bean.Profile
 import link.mawa.android.bean.Status
 import okhttp3.Credentials
 import okhttp3.Interceptor
@@ -19,6 +19,9 @@ interface ApiService {
     @GET("statuses/public_timeline")
     fun statusPublicTimeline(@Query("since_id") since_id: String,
                              @Query("max_id") max_id: String): Call<List<Status>>
+
+    @GET("friendica/profile/show")
+    fun friendicaProfileShow(): Call<Profile>
 
     companion object Factory {
         private val client: OkHttpClient
@@ -40,7 +43,7 @@ interface ApiService {
             val gson = GsonBuilder().serializeNulls().create()
             val retrofit = Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .baseUrl(Consts.API_HOST)
+                .baseUrl("${PrefUtil.getApiUrl()}/api/")
                 .client(client)
                 .build()
             return retrofit.create(ApiService::class.java)
