@@ -13,5 +13,13 @@ data class Status(
     var external_url: String,
     var created_at: String,
     var source: String,
-    var favorited: Boolean
-)
+    var favorited: Boolean,
+    var friendica_activities: FriendicaActivities
+) {
+    override fun equals(other: Any?): Boolean {
+        if(other?.javaClass != this.javaClass)  return false
+
+        other as Status
+        return other.id == this.id
+    }
+}

@@ -11,6 +11,10 @@ class PrefUtil {
         fun default(): SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(App.instance.applicationContext)
 
+        fun didSetUserCredential(): Boolean {
+            return !getUsername().isEmpty() && !getPassword().isEmpty()
+        }
+
         fun setUsername(username: String) {
             default().edit().putString("username", username).commit()
         }

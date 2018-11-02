@@ -19,8 +19,6 @@ import javax.net.ssl.HttpsURLConnection
 
 class LoginActivity: BaseActivity() {
 
-    var tag = javaClass.simpleName
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -87,6 +85,7 @@ class LoginActivity: BaseActivity() {
                 return
             }
             ref?.get()?.login_success()
+            App.instance.myself = response.body()
         }
 
     }
