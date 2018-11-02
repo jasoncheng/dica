@@ -2,7 +2,6 @@ package link.mawa.android.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_login.*
 import link.mawa.android.App
@@ -11,6 +10,7 @@ import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Profile
 import link.mawa.android.util.ApiService
 import link.mawa.android.util.PrefUtil
+import link.mawa.android.util.eLog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -37,7 +37,7 @@ class LoginActivity: BaseActivity() {
         try {
             ApiService.create().friendicaProfileShow().enqueue(MyCallback(this))
         }catch (e: Exception) {
-            Log.e(tag, "======> ${e.message}")
+            eLog("======> ${e.message}")
             App.instance.toast(e.message!!)
             loaded()
         }

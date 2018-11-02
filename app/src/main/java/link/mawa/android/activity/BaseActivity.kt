@@ -4,13 +4,13 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import link.mawa.android.App
 import link.mawa.android.R
 import link.mawa.android.bean.Status
 import link.mawa.android.util.ApiService
+import link.mawa.android.util.iLog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -118,7 +118,7 @@ open class BaseActivity: AppCompatActivity() {
     }
 
     @Synchronized fun loadNewestStatuses(){
-        Log.i(tag, "========> loadNewestStatuses sinceId ${sinceId}")
+        iLog("========> loadNewestStatuses sinceId ${sinceId}")
         ApiService.create().statusPublicTimeline("${sinceId}", "")
             .enqueue(StatuesCallback(this, true))
     }
@@ -131,7 +131,7 @@ open class BaseActivity: AppCompatActivity() {
         }
 
         home_srl.isRefreshing = true
-        Log.i(tag, "========> loadMoreStatues maxId ${maxId}")
+        iLog("========> loadMoreStatues maxId ${maxId}")
         ApiService.create().statusPublicTimeline("", "${maxId}")
             .enqueue(StatuesCallback(this, false))
     }

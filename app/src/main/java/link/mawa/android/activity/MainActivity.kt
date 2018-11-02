@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.PopupMenu
-import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_main.*
@@ -17,6 +16,7 @@ import link.mawa.android.adapter.StatusesAdapter
 import link.mawa.android.bean.Profile
 import link.mawa.android.util.ApiService
 import link.mawa.android.util.PrefUtil
+import link.mawa.android.util.dLog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -37,7 +37,7 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
             try {
                 ApiService.create().friendicaProfileShow().enqueue(ProfileCallback(this))
             }catch (e: Exception){
-                Log.e(tag, "${e.message}")
+                dLog("${e.message}")
                 App.instance.toast(getString(R.string.login_error).format("${e.message}"))
                 logout()
                 return
