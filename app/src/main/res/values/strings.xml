@@ -7,4 +7,8 @@
     <string name="loading">loading.....</string>
     <string name="login_error">temporary unable to login (%1$s)</string>
     <string name="all_data_load">nothing else..</string>
+    <string name="compose_submit">submit</string>
+    <string name="compose_text">text</string>
+    <string name="status_saving">status saving</string>
+    <string name="compose_fail">fail to submit status (%1$s)</string>
 </resources>

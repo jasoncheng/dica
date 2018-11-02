@@ -18,7 +18,6 @@ import java.lang.ref.WeakReference
 
 open class BaseActivity: AppCompatActivity() {
 
-    val tag = this.javaClass.simpleName!!
     var statuses = ArrayList<Status>()
     var allLoaded: Boolean = false
 

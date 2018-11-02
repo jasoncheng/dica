@@ -10,18 +10,21 @@ import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Query
+import retrofit2.http.*
 
 
 interface ApiService {
 
-    @GET("statuses/public_timeline?count=5")
+    @POST("statuses/update")
+    @FormUrlEncoded
+    fun statusUpdate(@Field("status") status: String): Call<Status>
+
+    @GET("statuses/public_timeline")
     fun statusPublicTimeline(@Query("since_id") since_id: String,
                              @Query("max_id") max_id: String): Call<List<Status>>
 
     @GET("friendica/profile/show")
-    fun friendicaProfileShow(): Call<Profile>
+    fun friendicaProfileShow(@Query("profile_id") profile_id: String?): Call<Profile>
 
     companion object Factory {
         private val client: OkHttpClient

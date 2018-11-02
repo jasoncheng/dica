@@ -8,4 +8,8 @@
     <string name="loading">拼死拼活載入中</string>
     <string name="login_error">登入失敗 (%1$s)</string>
     <string name="all_data_load">沒了啦, 你看光光了喔</string>
+    <string name="compose_submit">分享</string>
+    <string name="compose_text">內容</string>
+    <string name="status_saving">努力傳送中</string>
+    <string name="compose_fail">暫時無法發佈喔 (%1$s)</string>
 </resources>

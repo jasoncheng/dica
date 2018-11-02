@@ -35,7 +35,7 @@ class LoginActivity: BaseActivity() {
     fun login() {
         loading(getString(R.string.loading))
         try {
-            ApiService.create().friendicaProfileShow().enqueue(MyCallback(this))
+            ApiService.create().friendicaProfileShow(null).enqueue(MyCallback(this))
         }catch (e: Exception) {
             eLog("======> ${e.message}")
             App.instance.toast(e.message!!)

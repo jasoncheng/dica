@@ -14,6 +14,7 @@ import link.mawa.android.App
 import link.mawa.android.R
 import link.mawa.android.adapter.StatusesAdapter
 import link.mawa.android.bean.Profile
+import link.mawa.android.fragment.ComposeDialogFragment
 import link.mawa.android.util.ApiService
 import link.mawa.android.util.PrefUtil
 import link.mawa.android.util.dLog
@@ -35,7 +36,7 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
             }
 
             try {
-                ApiService.create().friendicaProfileShow().enqueue(ProfileCallback(this))
+                ApiService.create().friendicaProfileShow(null).enqueue(ProfileCallback(this))
             }catch (e: Exception){
                 dLog("${e.message}")
                 App.instance.toast(getString(R.string.login_error).format("${e.message}"))
@@ -58,6 +59,11 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
         val myTypeface = Typeface.createFromAsset(assets, "Hand_Of_Sean_Demo.ttf")
         home_title.typeface = myTypeface
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) run { home_title.letterSpacing = 1f }
+
+        // compose
+        iv_compose.setOnClickListener {
+            ComposeDialogFragment().show(supportFragmentManager, "compose")
+        }
 
         // avatar
         home_avatar.setOnClickListener {

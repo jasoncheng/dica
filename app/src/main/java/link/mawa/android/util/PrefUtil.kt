@@ -39,5 +39,13 @@ class PrefUtil {
             var api = default().getString("api", Consts.API_HOST)
             return if (api.isEmpty()) Consts.API_HOST else api
         }
+
+        fun setLastStatus(text: String) {
+            default().edit().putString("text", text).commit()
+        }
+
+        fun getLastStatus(): String {
+            return default().getString("text", "")
+        }
     }
 }
