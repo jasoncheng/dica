@@ -16,7 +16,7 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    @GET("statuses/public_timeline")
+    @GET("statuses/public_timeline?count=5")
     fun statusPublicTimeline(@Query("since_id") since_id: String,
                              @Query("max_id") max_id: String): Call<List<Status>>
 

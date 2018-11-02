@@ -4,8 +4,10 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.PopupMenu
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -23,10 +25,16 @@ import retrofit2.Response
 import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
 
-class MainActivity : BaseActivity() {
-
+class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
     val tag = this.javaClass.simpleName!!
     var statuses = ArrayList<Status>()
+    var allLoaded: Boolean = false
+
+    // for pull newest status
+    var sinceId = 0
+
+    // for load old status
+    var maxId = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +55,26 @@ class MainActivity : BaseActivity() {
         // RecyclerView
         rv_statuses_list.layoutManager = LinearLayoutManager(this)
         rv_statuses_list.adapter = StatusesAdapter(statuses, this)
+        rv_statuses_list.setOnScrollListener(object: RecyclerView.OnScrollListener() {
+            var lastVisibleItem: Int? = 0
+            override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE &&
+                    lastVisibleItem!! + 1 == rv_statuses_list.adapter?.itemCount) {
+                    loadMore()
+                }
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView?.layoutManager as LinearLayoutManager
+                //最后一个可见的ITEM
+                lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+            }
+        })
+
+        // Refresh
+        home_srl.setOnRefreshListener(this)
 
         // Title
         val myTypeface = Typeface.createFromAsset(assets, "Hand_Of_Sean_Demo.ttf")
@@ -75,11 +103,6 @@ class MainActivity : BaseActivity() {
         finish()
     }
 
-    fun loadStatuses(){
-        val callback = MyCallback(this)
-        ApiService.create().statusPublicTimeline("0", "0").enqueue(callback)
-    }
-
     fun goLogin(){
         val intent = Intent(this, LoginActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -106,14 +129,14 @@ class MainActivity : BaseActivity() {
                 .apply(RequestOptions().circleCrop())
                 .into(act.home_avatar)
 
-            act.loadStatuses()
+            act.loadMore()
         }
 
     }
 
-    class MyCallback(activity: MainActivity): Callback<List<Status>> {
-
+    class StatuesCallback(activity: MainActivity, insertMode: Boolean): Callback<List<Status>> {
         private val ref = WeakReference<MainActivity>(activity)
+        private val insertMode = insertMode
         override fun onFailure(call: Call<List<Status>>, t: Throwable) {
             if(ref.get() == null){
                 return
@@ -126,12 +149,59 @@ class MainActivity : BaseActivity() {
             }
 
             val act = ref.get()!!
+            act.home_srl.isRefreshing = false
+            if(response.body() == null) {return}
+
             val res = response.body()
-            res?.forEach {
-                act.statuses.add(it)
-                Log.i(act.tag, it.toString())
+
+            // any more old status ?
+            if(!insertMode && res?.count()!! <= 1){
+                act.allLoaded = true
+                return
             }
-            act.rv_statuses_list.adapter.notifyDataSetChanged()
+
+            // handle sinceId & maxId
+            res?.forEach {
+                if(it.id > act.sinceId) act.sinceId = it.id
+                if(act.maxId == 0 || it.id < act.maxId) act.maxId = it.id
+            }
+
+            if(insertMode) {
+                res?.forEach {
+                    act.statuses.add(0, it)
+                    act.rv_statuses_list.adapter.notifyItemInserted(0)
+                }
+                act.rv_statuses_list.scrollToPosition(0)
+            } else {
+                res?.forEach {
+                    act.statuses.add(it)
+                    act.rv_statuses_list.adapter.notifyItemInserted(act.statuses.size-1)
+                }
+            }
         }
     }
+
+    @Synchronized fun loadNewest(){
+        Log.i(tag, "========> loadNewest sinceId ${sinceId}")
+        ApiService.create().statusPublicTimeline("${sinceId}", "")
+            .enqueue(StatuesCallback(this, true))
+    }
+
+    @Synchronized fun loadMore(){
+        if(allLoaded){
+            App.instance.toast(getString(R.string.all_data_load))
+            home_srl.isRefreshing = false
+            return
+        }
+
+        home_srl.isRefreshing = true
+        Log.i(tag, "========> loadMore maxId ${maxId}")
+        ApiService.create().statusPublicTimeline("", "${maxId}")
+            .enqueue(StatuesCallback(this, false))
+    }
+
+    override fun onRefresh() {
+        loadNewest()
+    }
+
 }
