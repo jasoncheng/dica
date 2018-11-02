@@ -19,7 +19,7 @@ interface ApiService {
     @FormUrlEncoded
     fun statusUpdate(@Field("status") status: String): Call<Status>
 
-    @GET("statuses/public_timeline")
+    @GET("statuses/public_timeline?exclude_replies=true")
     fun statusPublicTimeline(@Query("since_id") since_id: String,
                              @Query("max_id") max_id: String): Call<List<Status>>
 
