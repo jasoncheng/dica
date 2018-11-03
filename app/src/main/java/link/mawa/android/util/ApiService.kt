@@ -1,16 +1,19 @@
 package link.mawa.android.util
 
-import android.util.Log
 import com.google.gson.GsonBuilder
+import link.mawa.android.App
+import link.mawa.android.R
 import link.mawa.android.bean.Profile
 import link.mawa.android.bean.Status
-import okhttp3.Credentials
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
+import okhttp3.*
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+
+
+
+
 
 
 interface ApiService {
@@ -18,6 +21,16 @@ interface ApiService {
     @POST("statuses/update")
     @FormUrlEncoded
     fun statusUpdate(@Field("status") status: String): Call<Status>
+
+    @POST("statuses/update")
+    @Multipart
+    fun statusUpdate(
+        @Part("status") status: RequestBody,
+        @Part image: MultipartBody.Part): Call<Status>
+
+    @GET("statuses/show")
+    fun statusShow(@Query("id") id: Int,
+                   @Query("conversation") conversation: Int): Call<List<Status>>
 
     @GET("statuses/public_timeline?exclude_replies=true")
     fun statusPublicTimeline(@Query("since_id") since_id: String,
@@ -29,8 +42,11 @@ interface ApiService {
     companion object Factory {
         private val client: OkHttpClient
         get() {
-            Log.i("ApiService", "=========> ${PrefUtil.getUsername()}, ${PrefUtil.getPassword()}")
+//            Log.i("ApiService", "=========> ${PrefUtil.getUsername()}, ${PrefUtil.getPassword()}")
+//            val interceptor = HttpLoggingInterceptor()
+//            interceptor.level = HttpLoggingInterceptor.Level.BODY
             val clientBuilder = OkHttpClient.Builder()
+//            clientBuilder.addInterceptor(interceptor)
             val authToken = Credentials.basic(PrefUtil.getUsername(), PrefUtil.getPassword())
             val headerAuthorizationInterceptor = Interceptor { chain ->
                 var request = chain.request()
@@ -38,12 +54,25 @@ interface ApiService {
                 request = request.newBuilder().headers(headers).build()
                 chain.proceed(request)
             }
+            val defaultSourceInterceptor = Interceptor {
+                val original = it.request()
+                val originalHttpUrl = original.url()
+
+                val url = originalHttpUrl.newBuilder()
+                    .addQueryParameter("source", App.instance.getString(R.string.app_name))
+                    .build()
+                val requestBuilder = original.newBuilder()
+                    .url(url)
+                it.proceed(requestBuilder.build())
+            }
+
             clientBuilder.addInterceptor(headerAuthorizationInterceptor)
+            clientBuilder.addInterceptor(defaultSourceInterceptor)
             return clientBuilder.build()
         }
 
         fun create(): ApiService {
-            val gson = GsonBuilder().serializeNulls().create()
+            val gson = GsonBuilder().serializeNulls().setLenient().create()
             val retrofit = Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .baseUrl("${PrefUtil.getApiUrl()}/api/")

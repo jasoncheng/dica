@@ -1,5 +1,6 @@
 package link.mawa.android.activity
 
+import android.content.Intent
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -8,6 +9,7 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main.*
 import link.mawa.android.App
 import link.mawa.android.R
+import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Status
 import link.mawa.android.util.ApiService
 import link.mawa.android.util.iLog
@@ -43,6 +45,11 @@ open class BaseActivity: AppCompatActivity() {
     // UI
     fun loaded(){
         alertDialog?.dismiss()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        supportFragmentManager.findFragmentByTag(Consts.FG_COMPOSE).onActivityResult(requestCode, resultCode, data)
     }
 
     class OnStatusTableScrollListener(activity: BaseActivity): RecyclerView.OnScrollListener() {
@@ -87,16 +94,17 @@ open class BaseActivity: AppCompatActivity() {
 
             val res = response.body()
 
-            // any more old status ?
-            if(!insertMode && res?.count()!! <= 1){
-                act.allLoaded = true
-                return
-            }
 
             // handle sinceId & maxId
             res?.forEach {
                 if(it.id > act.sinceId) act.sinceId = it.id
                 if(act.maxId == 0 || it.id < act.maxId) act.maxId = it.id
+
+                // any more old status ?
+                if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
+                    act.allLoaded = true
+                    return
+                }
             }
 
             if(insertMode) {

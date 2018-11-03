@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import link.mawa.android.App
 import link.mawa.android.R
 import link.mawa.android.adapter.StatusesAdapter
+import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Profile
 import link.mawa.android.fragment.ComposeDialogFragment
 import link.mawa.android.util.ApiService
@@ -62,7 +63,7 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         // compose
         iv_compose.setOnClickListener {
-            ComposeDialogFragment().show(supportFragmentManager, "compose")
+            ComposeDialogFragment().show(supportFragmentManager, Consts.FG_COMPOSE)
         }
 
         // avatar

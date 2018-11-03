@@ -12,4 +12,13 @@
     <string name="compose_text">內容</string>
     <string name="status_saving">努力傳送中</string>
     <string name="compose_fail">暫時無法發佈喔 (%1$s)</string>
+    <string name="status_not_found">找不到喔</string>
+    <string name="permission_public">公開</string>
+    <string name="permission_assign">指定</string>
+    <string name="perm_deny_gallery">你沒有授權喔</string>
+    <string name="perm_deny_camera">你沒有授權相機權限</string>
+    <string name="fail_pick_photo">無法使用照片 (%1$s)</string>
+    <string name="photo_reset">重設</string>
+    <string name="photo_rotate">翻轉</string>
+    <string name="photo_crop">裁切</string>
 </resources>

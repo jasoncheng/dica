@@ -1,31 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="match_parent"
-android:orientation="vertical">
+              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+android:padding="8dp">
+
+    <LinearLayout
+            android:id="@+id/group_permission"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+        <RadioGroup
+                android:id="@+id/main_radiogroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+        <RadioButton
+                android:id="@+id/rb_public"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="@string/permission_public"/>
+            <RadioButton
+                    android:id="@+id/rb_assign"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:enabled="false"
+                    android:text="@string/permission_assign"/>
+        </RadioGroup>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/group_reply"
+                  android:visibility="gone"
+                  android:paddingLeft="4dp"
+                  android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:text="reply to..."
+        android:drawableLeft="@drawable/round_reply_black"/>
+    </LinearLayout>
 
     <EditText
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="wrap_content"
             android:hint="@string/compose_text"
             android:ems="10"
-            android:lines="5"
-            android:maxLines="10"
+            android:maxLines="5"
             android:id="@+id/et_text"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
             android:singleLine="false"
             android:gravity="top|left"
             android:layout_marginTop="8dp"/>
-    <LinearLayout
-            android:orientation="horizontal"
+
+    <android.support.constraint.ConstraintLayout
+            android:id="@+id/cl_box"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="right" android:id="@+id/linearLayout"
-            android:layout_marginEnd="8dp">
+            android:layout_height="wrap_content">
+
         <Button
                 android:text="@string/compose_submit"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/bt_submit"/>
-    </LinearLayout>
+                android:layout_height="wrap_content" android:id="@+id/bt_submit"
+                app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"/>
+        <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
+                android:src="@drawable/round_photo_size_select_actual_black"
+                android:id="@+id/iv_from_album"
+                app:layout_constraintTop_toTopOf="parent" android:layout_marginStart="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
+                android:src="@drawable/round_photo_camera_black"
+                android:id="@+id/iv_from_camera"
+                app:layout_constraintStart_toEndOf="@+id/iv_from_album" android:layout_marginStart="12dp"
+                app:layout_constraintTop_toTopOf="@+id/iv_from_album"/>
+        <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
+                android:src="@drawable/round_add_location"
+                android:id="@+id/iv_location"
+                app:layout_constraintStart_toEndOf="@+id/iv_from_camera" android:layout_marginStart="12dp"
+                app:layout_constraintTop_toTopOf="@+id/iv_from_camera"/>
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/round_add_location_small"
+                android:text="taipei, taiwan, nangang"
+                android:visibility="gone"
+                android:gravity="center_vertical"
+                android:includeFontPadding="false"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@+id/iv_from_album"
+                app:layout_constraintStart_toStartOf="@+id/iv_from_album" android:id="@+id/iv_location_info"
+                android:textSize="12sp">
+        </TextView>
+    </android.support.constraint.ConstraintLayout>
+
+    <LinearLayout android:id="@+id/photo_box" android:orientation="horizontal"
+                  android:layout_width="match_parent" android:layout_height="wrap_content" />
+
 </LinearLayout>

@@ -11,4 +11,13 @@
     <string name="compose_text">text</string>
     <string name="status_saving">status saving</string>
     <string name="compose_fail">fail to submit status (%1$s)</string>
+    <string name="status_not_found">status not found</string>
+    <string name="permission_public">public</string>
+    <string name="permission_assign">not public</string>
+    <string name="perm_deny_gallery">permission deny</string>
+    <string name="perm_deny_camera">permission deny</string>
+    <string name="fail_pick_photo">failure to pick photo (%1$s)</string>
+    <string name="photo_reset">reset</string>
+    <string name="photo_rotate">rotate</string>
+    <string name="photo_crop">crop</string>
 </resources>
