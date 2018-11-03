@@ -11,7 +11,7 @@ import link.mawa.android.bean.Consts
 import link.mawa.android.util.ApiService
 
 class StatusActivity: BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
-    var statusId: Int? = null
+    private var statusId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +28,7 @@ class StatusActivity: BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
         loadData()
     }
 
-    fun processIntent(){
+    private fun processIntent(){
         if(intent == null) {return}
         statusId = intent.getIntExtra(Consts.ID_STATUS, 0)
         if(statusId == 0){

@@ -20,4 +20,5 @@
     <string name="photo_reset">reset</string>
     <string name="photo_rotate">rotate</string>
     <string name="photo_crop">crop</string>
+    <string name="perm_deny_gps">permission denied</string>
 </resources>

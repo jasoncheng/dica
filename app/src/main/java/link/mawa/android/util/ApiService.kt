@@ -2,37 +2,39 @@ package link.mawa.android.util
 
 import com.google.gson.GsonBuilder
 import link.mawa.android.App
+import link.mawa.android.BuildConfig
 import link.mawa.android.R
 import link.mawa.android.bean.Profile
 import link.mawa.android.bean.Status
 import okhttp3.*
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
-
-
-
-
-
 interface ApiService {
 
     @POST("statuses/update")
     @FormUrlEncoded
-    fun statusUpdate(@Field("status") status: String): Call<Status>
+    fun statusUpdate(
+        @Field("status") status: String,
+        @Field("lat") lat: String,
+        @Field("long") long: String): Call<Status>
 
     @POST("statuses/update")
     @Multipart
     fun statusUpdate(
         @Part("status") status: RequestBody,
+        @Part("lat") lat: RequestBody,
+        @Part("lat") long: RequestBody,
         @Part image: MultipartBody.Part): Call<Status>
 
     @GET("statuses/show")
     fun statusShow(@Query("id") id: Int,
                    @Query("conversation") conversation: Int): Call<List<Status>>
 
-    @GET("statuses/public_timeline?exclude_replies=true")
+    @GET("statuses/friends_timeline?exclude_replies=true")
     fun statusPublicTimeline(@Query("since_id") since_id: String,
                              @Query("max_id") max_id: String): Call<List<Status>>
 
@@ -42,11 +44,14 @@ interface ApiService {
     companion object Factory {
         private val client: OkHttpClient
         get() {
-//            Log.i("ApiService", "=========> ${PrefUtil.getUsername()}, ${PrefUtil.getPassword()}")
-//            val interceptor = HttpLoggingInterceptor()
-//            interceptor.level = HttpLoggingInterceptor.Level.BODY
             val clientBuilder = OkHttpClient.Builder()
-//            clientBuilder.addInterceptor(interceptor)
+
+            if(BuildConfig.DEBUG) {
+                val interceptor = HttpLoggingInterceptor()
+                interceptor.level = HttpLoggingInterceptor.Level.BODY
+                clientBuilder.addInterceptor(interceptor)
+            }
+
             val authToken = Credentials.basic(PrefUtil.getUsername(), PrefUtil.getPassword())
             val headerAuthorizationInterceptor = Interceptor { chain ->
                 var request = chain.request()

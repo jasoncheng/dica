@@ -62,13 +62,14 @@ android:padding="8dp">
                 android:layout_height="wrap_content" android:id="@+id/bt_submit"
                 app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
                 android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
+                android:includeFontPadding="false"
                 android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"/>
         <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
                 android:src="@drawable/round_photo_size_select_actual_black"
                 android:id="@+id/iv_from_album"
-                app:layout_constraintTop_toTopOf="parent" android:layout_marginStart="8dp"
+                app:layout_constraintTop_toTopOf="parent" android:layout_marginStart="4dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
         <ImageView
@@ -76,29 +77,32 @@ android:padding="8dp">
                 android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
                 android:src="@drawable/round_photo_camera_black"
                 android:id="@+id/iv_from_camera"
-                app:layout_constraintStart_toEndOf="@+id/iv_from_album" android:layout_marginStart="12dp"
+                app:layout_constraintStart_toEndOf="@+id/iv_from_album" android:layout_marginStart="4dp"
                 app:layout_constraintTop_toTopOf="@+id/iv_from_album"/>
-        <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
-                android:src="@drawable/round_add_location"
-                android:id="@+id/iv_location"
-                app:layout_constraintStart_toEndOf="@+id/iv_from_camera" android:layout_marginStart="12dp"
-                app:layout_constraintTop_toTopOf="@+id/iv_from_camera"/>
-
         <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/round_add_location_small"
-                android:text="taipei, taiwan, nangang"
-                android:visibility="gone"
-                android:gravity="center_vertical"
+                android:drawableLeft="@drawable/round_add_location_mid"
+                android:id="@+id/iv_location"
                 android:includeFontPadding="false"
-                android:layout_marginTop="8dp"
-                app:layout_constraintTop_toBottomOf="@+id/iv_from_album"
-                app:layout_constraintStart_toStartOf="@+id/iv_from_album" android:id="@+id/iv_location_info"
-                android:textSize="12sp">
-        </TextView>
+                android:textSize="12sp"
+                app:layout_constraintStart_toEndOf="@+id/iv_from_camera" android:layout_marginStart="4dp"
+                app:layout_constraintTop_toTopOf="@+id/iv_from_camera" android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toStartOf="@+id/bt_submit"/>
+
+        <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:drawableLeft="@drawable/round_add_location_small"-->
+                <!--android:text="taipei, taiwan, nangang"-->
+                <!--android:visibility="gone"-->
+                <!--android:gravity="center_vertical"-->
+                <!--android:includeFontPadding="false"-->
+                <!--android:layout_marginTop="8dp"-->
+                <!--app:layout_constraintTop_toBottomOf="@+id/iv_from_album"-->
+                <!--app:layout_constraintStart_toStartOf="@+id/iv_from_album" android:id="@+id/tv_location_info"-->
+                <!--android:textSize="12sp">-->
+        <!--</TextView>-->
     </android.support.constraint.ConstraintLayout>
 
     <LinearLayout android:id="@+id/photo_box" android:orientation="horizontal"

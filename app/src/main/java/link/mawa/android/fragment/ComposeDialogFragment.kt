@@ -1,14 +1,21 @@
 package link.mawa.android.fragment
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.dlg_compose.*
 import kotlinx.android.synthetic.main.dlg_compose.view.*
 import link.mawa.android.App
@@ -33,16 +40,16 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.lang.ref.WeakReference
+import java.util.*
 import javax.net.ssl.HttpsURLConnection
-
-
-
-
 
 class ComposeDialogFragment: BaseDialogFragment() {
 
     var mediaFile: File? = null
     var roomView: View? = null
+    var lastAddress: Address? = null
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         roomView = inflater?.inflate(R.layout.dlg_compose, container)
@@ -59,6 +66,16 @@ class ComposeDialogFragment: BaseDialogFragment() {
         roomView?.iv_from_camera?.setOnClickListener {
             Nammu.askForPermission(activity,
             arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), cameraPermCallback)
+        }
+        roomView?.iv_location?.setOnClickListener {
+            if(lastAddress != null){
+                (it as TextView).text = ""
+                lastAddress = null
+            } else {
+                Nammu.askForPermission(activity,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), locationPermCallback)
+            }
+
         }
         return roomView!!
     }
@@ -90,19 +107,36 @@ class ComposeDialogFragment: BaseDialogFragment() {
         EasyImage.handleActivityResult(requestCode, resultCode, data, activity, imageSelectedCallback)
     }
 
+    private fun getLastLocation(location: Location) {
+        val view = roomView?.iv_location!!
+        view.text = getString(R.string.loading)
+        val geocoder = Geocoder(context, Locale.getDefault())
+        Thread(Runnable {
+            try {
+                var addresses = geocoder.getFromLocation(
+                    location.latitude, location.longitude, 1
+                )
+                lastAddress = addresses.first()
+                this@ComposeDialogFragment.activity?.runOnUiThread {
+                    view.text = lastAddress?.getAddressLine(0)
+                }
+            } catch (e: Exception) {
+                view.text = ""
+                e.printStackTrace()
+            }
+        }).start()
+    }
+
     private val imageSelectedCallback = object : DefaultCallback() {
         override fun onImagesPicked(p0: MutableList<File>, p1: EasyImage.ImageSource?, p2: Int) {
-            dLog("============> onImagesPicked")
             handleImagePick(p0[0])
         }
 
         override fun onImagePickerError(e: Exception?, source: EasyImage.ImageSource?, type: Int) {
-            dLog("============> onImagePickerError")
             App.instance.toast(getString(R.string.fail_pick_photo).format(e?.message))
         }
 
         override fun onCanceled(source: EasyImage.ImageSource?, type: Int) {
-            dLog("============> onCanceled")
         }
     }
 
@@ -126,9 +160,23 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
     }
 
+    private val locationPermCallback = object : PermissionCallback {
+        @SuppressLint("MissingPermission")
+        override fun permissionGranted() {
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
+            fusedLocationClient.lastLocation.addOnSuccessListener {
+                it ?: return@addOnSuccessListener
+                getLastLocation(it)
+            }
+        }
+
+        override fun permissionRefused() {
+            App.instance.toast(getString(R.string.perm_deny_gps))
+        }
+    }
+
     private fun handleImagePick(imageFile: File) {
         val filePath = imageFile.absolutePath
-        dLog("========> file Selected ${filePath}")
         if (filePath.toLowerCase().endsWith(".gif")) {
             return
         }
@@ -185,15 +233,25 @@ class ComposeDialogFragment: BaseDialogFragment() {
     private fun composeSubmit() {
         (activity as BaseActivity).loading(getString(R.string.status_saving))
         val text = et_text.text.toString()
+        var lat:String = ""
+        var long:String = ""
+        if(lastAddress != null){
+            lat = "${lastAddress?.latitude}"
+            long = "${lastAddress?.longitude}"
+        }
+
         if(mediaFile == null){
-            ApiService.create().statusUpdate(text).enqueue(StatusUpdateCallback(this))
+            ApiService.create().statusUpdate(text, lat, long).enqueue(StatusUpdateCallback(this))
             return
         }
 
         val requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), mediaFile)
         val body = MultipartBody.Part.createFormData("media", mediaFile?.name, requestFile)
         val status = RequestBody.create(MediaType.parse("multipart/form-data"), text)
-        ApiService.create().statusUpdate(status, body).enqueue(StatusUpdateCallback(this))
+
+        val latBody = RequestBody.create(MediaType.parse("multipart/form-data"), lat)
+        val longBody = RequestBody.create(MediaType.parse("multipart/form-data"), long)
+        ApiService.create().statusUpdate(status, latBody, longBody, body).enqueue(StatusUpdateCallback(this))
     }
 
     private fun composeDone() {
