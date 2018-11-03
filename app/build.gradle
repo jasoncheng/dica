@@ -10,7 +10,7 @@ android {
         applicationId "link.mawa.android"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 18110201
+        versionCode 18110401
         versionName "1.0"
     }
     buildTypes {
