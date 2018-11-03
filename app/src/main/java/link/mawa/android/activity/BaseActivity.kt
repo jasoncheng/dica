@@ -1,6 +1,8 @@
 package link.mawa.android.activity
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -45,6 +47,11 @@ open class BaseActivity: AppCompatActivity() {
     // UI
     fun loaded(){
         alertDialog?.dismiss()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
