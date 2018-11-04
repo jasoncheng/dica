@@ -20,8 +20,8 @@
                 app:layout_constraintStart_toEndOf="@+id/avatar" android:layout_marginStart="8dp"
                 android:layout_marginTop="4dp" app:layout_constraintTop_toTopOf="parent"/>
         <ImageView
-                android:layout_width="34dp"
-                android:layout_height="34dp" tools:srcCompat="@tools:sample/avatars"
+                android:layout_width="@dimen/status_avatar_size"
+                android:layout_height="@dimen/status_avatar_size" tools:srcCompat="@tools:sample/avatars"
                 android:id="@+id/avatar"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="8dp" android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"/>
@@ -48,7 +48,10 @@
             android:padding="8dp">
 
     </TextView>
-    <ImageView android:layout_width="match_parent" android:layout_height="wrap_content"
+    <ImageView android:layout_width="match_parent"
+               android:layout_marginLeft="6dp"
+               android:layout_marginRight="6dp"
+               android:layout_height="wrap_content"
                android:id="@+id/media"
                android:scaleType="fitXY"
                android:adjustViewBounds="true"/>

@@ -22,7 +22,7 @@ interface ApiService {
         @Field("lat") lat: String,
         @Field("long") long: String): Call<Status>
 
-    @POST("statuses/update")
+    @POST("statuses/update_with_media")
     @Multipart
     fun statusUpdate(
         @Part("status") status: RequestBody,
@@ -30,7 +30,7 @@ interface ApiService {
         @Part("lat") long: RequestBody,
         @Part image: MultipartBody.Part): Call<Status>
 
-    @GET("statuses/show")
+    @GET("statuses/show?include_entities=true")
     fun statusShow(@Query("id") id: Int,
                    @Query("conversation") conversation: Int): Call<List<Status>>
 

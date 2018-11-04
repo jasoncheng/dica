@@ -19,13 +19,18 @@ import link.mawa.android.bean.Status
 import link.mawa.android.util.dLog
 import java.util.*
 
-class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<StatusViewHolder>() {
+class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<BasicViewHolder>() {
+
+    enum class VIEW_TYPE {
+        STATUS,
+        REPLY
+    }
 
     private val requestOptions = RequestOptions()
         .fitCenter()
-        .transforms(RoundedCorners(34))!!
+        .transforms(RoundedCorners(18))!!
 
-    override fun onBindViewHolder(holder: StatusViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BasicViewHolder, position: Int) {
         val st = data[position]
         holder.userName.text = st.user.screen_name
         holder.content.text = st.text
@@ -38,7 +43,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             .into(holder.avatar)
 
         if(st.attachments != null && st.attachments.size > 0){
-            holder.media.setTag(R.id.image, position)
+            holder.media.setTag(R.id.media_image, position)
             holder.media.visibility = View.VISIBLE
             val attachment = st.attachments[0]
             Glide.with(context.applicationContext)
@@ -50,17 +55,26 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StatusViewHolder {
-        val holder = StatusViewHolder(
-            LayoutInflater.from(context).inflate(
-                R.layout.status_list_item,
-                parent,
-                false
+    override fun getItemViewType(position: Int): Int {
+        val st = data[position]
+        return if(st.in_reply_to_status_id != 0){ VIEW_TYPE.REPLY.ordinal } else { VIEW_TYPE.STATUS.ordinal }
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BasicViewHolder {
+        var holder: BasicViewHolder? = null
+        if(viewType == VIEW_TYPE.REPLY.ordinal) {
+            holder = ReplyViewHolder(
+                LayoutInflater.from(context).inflate(R.layout.reply_list_item, parent, false)
             )
-        )
-        holder.content.setOnClickListener { gotoStatusPage(it) }
-        holder.media.setOnClickListener { gotoStatusPage(it) }
-        return holder
+        } else {
+            holder = StatusViewHolder(
+                LayoutInflater.from(context).inflate(R.layout.status_list_item, parent, false)
+            )
+            holder.content.setOnClickListener { gotoStatusPage(it) }
+            holder.media.setOnClickListener { gotoStatusPage(it) }
+        }
+
+        return holder!!
     }
 
     override fun getItemCount(): Int {
@@ -68,9 +82,10 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 
     private fun gotoStatusPage(view: View){
-        var position = view.tag as Int
-        if(view is ImageView){
-            position = view.getTag(R.id.image) as Int
+        var position: Int = if(view is ImageView){
+            view.getTag(R.id.media_image) as Int
+        } else {
+            view.tag as Int
         }
 
         val st = data[position]
@@ -81,10 +96,13 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 }
 
-class StatusViewHolder(view: View): RecyclerView.ViewHolder(view) {
+open class BasicViewHolder(view: View): RecyclerView.ViewHolder(view) {
     val userName = view.tv_status_user_name!!
     val avatar = view.avatar!!
     var content = view.tv_content!!
     var datetime = view.tv_datetime!!
     var media = view.media!!
 }
+
+class StatusViewHolder(view: View): BasicViewHolder(view)
+class ReplyViewHolder(view: View): BasicViewHolder(view)

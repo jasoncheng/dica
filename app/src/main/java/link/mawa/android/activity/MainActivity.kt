@@ -83,7 +83,7 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
         setAvatar()
 
         if(App.instance.myself != null){
-            loadMoreStatues()
+            loadMore()
         }
     }
 
@@ -124,13 +124,24 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
 
             App.instance.myself = response.body()
             act.setAvatar()
-            act.loadMoreStatues()
+            act.loadMore()
         }
 
     }
 
-    override fun onRefresh() {
-        loadNewestStatuses()
+    override fun loadMore() {
+        super.loadMore()
+        ApiService.create().statusPublicTimeline("", "${maxId}")
+            .enqueue(StatuesCallback(this, false, null))
     }
 
+    override fun loadNewest() {
+        super.loadNewest()
+        ApiService.create().statusPublicTimeline("${sinceId}", "")
+            .enqueue(StatuesCallback(this, true, null))
+    }
+
+    override fun onRefresh() {
+        loadNewest()
+    }
 }

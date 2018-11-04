@@ -256,7 +256,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     private fun composeDone() {
         et_text.setText("")
-        (activity as MainActivity).loadNewestStatuses()
+        (activity as MainActivity).loadNewest()
         dismiss()
     }
 }

@@ -9,6 +9,7 @@ data class Status(
     var geo: String,
     var in_reply_to_user_id: Int,
     var in_reply_to_status_id: Int,
+    var in_reply_to_screen_name: String,
     var friendica_private: Boolean,
     var external_url: String,
     var created_at: String,

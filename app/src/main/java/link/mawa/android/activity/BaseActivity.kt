@@ -13,7 +13,6 @@ import link.mawa.android.App
 import link.mawa.android.R
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Status
-import link.mawa.android.util.ApiService
 import link.mawa.android.util.iLog
 import retrofit2.Call
 import retrofit2.Callback
@@ -45,8 +44,12 @@ open class BaseActivity: AppCompatActivity() {
     }
 
     // UI
-    fun loaded(){
+    open fun loaded(){
         alertDialog?.dismiss()
+    }
+
+    interface IStatusCallback {
+        fun statusesLoaded(data: List<Status>?)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +73,7 @@ open class BaseActivity: AppCompatActivity() {
             }
             if(newState == RecyclerView.SCROLL_STATE_IDLE &&
                 lastVisibleItem!! + 1 == recyclerView?.adapter?.itemCount) {
-                ref.get()!!.loadMoreStatues()
+                ref.get()!!.loadMore()
             }
         }
 
@@ -81,9 +84,11 @@ open class BaseActivity: AppCompatActivity() {
         }
     }
 
-    class StatuesCallback(activity: BaseActivity, insertMode: Boolean): Callback<List<Status>> {
+    class StatuesCallback(activity: BaseActivity, insertMode: Boolean, callback: IStatusCallback?): Callback<List<Status>> {
         private val ref = WeakReference<BaseActivity>(activity)
         private val insertMode = insertMode
+        private val callback: IStatusCallback? = callback
+
         override fun onFailure(call: Call<List<Status>>, t: Throwable) {
             if(ref.get() == null){
                 return
@@ -114,6 +119,13 @@ open class BaseActivity: AppCompatActivity() {
                 }
             }
 
+            // if handle data by it self
+            if(callback != null){
+                callback.statusesLoaded(res!!)
+                return
+            }
+
+            // common process
             if(insertMode) {
                 res?.forEach continuing@ {
                     if(act.statuses.contains(it)) {return@continuing}
@@ -131,13 +143,11 @@ open class BaseActivity: AppCompatActivity() {
         }
     }
 
-    @Synchronized fun loadNewestStatuses(){
-        iLog("========> loadNewestStatuses sinceId ${sinceId}")
-        ApiService.create().statusPublicTimeline("${sinceId}", "")
-            .enqueue(StatuesCallback(this, true))
+    @Synchronized open fun loadNewest(){
+        iLog("========> loadNewest sinceId ${sinceId}")
     }
 
-    @Synchronized fun loadMoreStatues(){
+    @Synchronized open fun loadMore(){
         if(allLoaded){
             App.instance.toast(getString(R.string.all_data_load))
             home_srl.isRefreshing = false
@@ -145,8 +155,6 @@ open class BaseActivity: AppCompatActivity() {
         }
 
         home_srl.isRefreshing = true
-        iLog("========> loadMoreStatues maxId ${maxId}")
-        ApiService.create().statusPublicTimeline("", "${maxId}")
-            .enqueue(StatuesCallback(this, false))
+        iLog("========> loadMore maxId ${maxId}")
     }
 }

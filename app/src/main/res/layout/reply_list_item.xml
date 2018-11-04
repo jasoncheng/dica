@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+               xmlns:app="http://schemas.android.com/apk/res-auto"
+               xmlns:tools="http://schemas.android.com/tools"
+               android:paddingLeft="8dp"
+               android:paddingRight="8dp"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="vertical">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:padding="4dp"
+                  android:background="@drawable/reply_bg"
+                  android:orientation="horizontal">
+        <ImageView
+                android:layout_width="@dimen/reply_avatar_size"
+                android:layout_height="@dimen/reply_avatar_size" tools:srcCompat="@tools:sample/avatars"
+                android:layout_margin="4dp"
+                android:id="@+id/avatar" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+            <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                <TextView
+                        android:id="@+id/tv_status_user_name"
+                        android:layout_width="0dp"
+                        android:textSize="14sp"
+                        android:layout_height="wrap_content"
+                        android:text="username"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_marginEnd="8dp"
+                        app:layout_constraintStart_toStartOf="parent"/>
+                <TextView
+                        android:text="TextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:textColor="#999"
+                        android:id="@+id/tv_datetime"
+                        app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_status_user_name"/>
+            </android.support.constraint.ConstraintLayout>
+
+            <TextView
+                    android:text="TextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="4dp"
+                    android:id="@+id/tv_content"
+                    android:autoLink="all" android:textSize="13sp">
+
+            </TextView>
+
+            <ImageView android:layout_width="match_parent"
+                       android:layout_marginLeft="6dp"
+                       android:layout_marginRight="6dp"
+                       android:layout_height="wrap_content"
+                       android:id="@+id/media"
+                       android:scaleType="fitXY"
+                       android:adjustViewBounds="true"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+          android:background="#efefef"
+          android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"/>
+</LinearLayout>

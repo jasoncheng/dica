@@ -91,7 +91,7 @@ class PhotoProcessFragment: BaseDialogFragment() {
         val file = File("$out/$originalFileName")
         try {
             outStream = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outStream)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, Consts.COMPRESS_PHOTO_QUALITY, outStream)
             outStream!!.close()
             activity?.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)))
 
