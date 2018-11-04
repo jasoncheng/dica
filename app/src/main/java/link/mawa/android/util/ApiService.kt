@@ -19,6 +19,7 @@ interface ApiService {
     @FormUrlEncoded
     fun statusUpdate(
         @Field("status") status: String,
+        @Field("in_reply_to_status_id") in_reply_to_status_id: Int,
         @Field("lat") lat: String,
         @Field("long") long: String): Call<Status>
 
@@ -26,6 +27,7 @@ interface ApiService {
     @Multipart
     fun statusUpdate(
         @Part("status") status: RequestBody,
+        @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
         @Part("lat") lat: RequestBody,
         @Part("lat") long: RequestBody,
         @Part image: MultipartBody.Part): Call<Status>

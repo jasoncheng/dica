@@ -21,4 +21,8 @@
     <string name="photo_rotate">rotate</string>
     <string name="photo_crop">crop</string>
     <string name="perm_deny_gps">permission denied</string>
+    <string name="status_like">like</string>
+    <string name="status_share">share</string>
+    <string name="status_comment">comment</string>
+    <string name="status_reply_to">Reply To: %1$s</string>
 </resources>

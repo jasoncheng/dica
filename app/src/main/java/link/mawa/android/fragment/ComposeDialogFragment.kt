@@ -21,7 +21,6 @@ import kotlinx.android.synthetic.main.dlg_compose.view.*
 import link.mawa.android.App
 import link.mawa.android.R
 import link.mawa.android.activity.BaseActivity
-import link.mawa.android.activity.MainActivity
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Status
 import link.mawa.android.util.ApiService
@@ -49,11 +48,15 @@ class ComposeDialogFragment: BaseDialogFragment() {
     var roomView: View? = null
     var lastAddress: Address? = null
 
+    var in_reply_status_id: Int? = 0
+    var in_reply_screenname: String? = ""
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         roomView = inflater?.inflate(R.layout.dlg_compose, container)
         dialog.setTitle("")
+
 
         roomView?.et_text?.setText(PrefUtil.getLastStatus())
         roomView?.bt_submit?.setOnClickListener {
@@ -77,6 +80,16 @@ class ComposeDialogFragment: BaseDialogFragment() {
             }
 
         }
+
+        // Reply to?
+        if(arguments != null){
+            in_reply_screenname = arguments?.getString(Consts.EXTRA_IN_REPLY_USERNAME)
+            in_reply_status_id = arguments?.getInt(Consts.EXTRA_IN_REPLY_STATUS_ID, 0)
+            var str = getString(R.string.status_reply_to).format(in_reply_screenname)
+            roomView?.group_reply?.visibility = View.VISIBLE
+            roomView?.tv_reply_to?.text = str
+        }
+
         return roomView!!
     }
 
@@ -241,7 +254,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
 
         if(mediaFile == null){
-            ApiService.create().statusUpdate(text, lat, long).enqueue(StatusUpdateCallback(this))
+            ApiService.create().statusUpdate(text, in_reply_status_id!!, lat, long).enqueue(StatusUpdateCallback(this))
             return
         }
 
@@ -249,14 +262,15 @@ class ComposeDialogFragment: BaseDialogFragment() {
         val body = MultipartBody.Part.createFormData("media", mediaFile?.name, requestFile)
         val status = RequestBody.create(MediaType.parse("multipart/form-data"), text)
 
+        val statusIdBody = RequestBody.create(MediaType.parse("multipart/form-data"), "$in_reply_status_id")
         val latBody = RequestBody.create(MediaType.parse("multipart/form-data"), lat)
         val longBody = RequestBody.create(MediaType.parse("multipart/form-data"), long)
-        ApiService.create().statusUpdate(status, latBody, longBody, body).enqueue(StatusUpdateCallback(this))
+        ApiService.create().statusUpdate(status, statusIdBody, latBody, longBody, body).enqueue(StatusUpdateCallback(this))
     }
 
     private fun composeDone() {
         et_text.setText("")
-        (activity as MainActivity).loadNewest()
+        (activity as BaseActivity).loadNewest()
         dismiss()
     }
 }
