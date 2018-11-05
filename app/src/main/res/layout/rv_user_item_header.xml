@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+                                             android:layout_height="wrap_content">
+
+    <ImageView
+            android:layout_width="@dimen/user_page_profile_avatar"
+            android:layout_height="@dimen/user_page_profile_avatar" tools:srcCompat="@tools:sample/avatars"
+            android:id="@+id/user_avatar_large" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginTop="16dp"
+            app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+            android:text="screen_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/tv_screen_name" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/user_avatar_large"
+            android:textAppearance="@android:style/TextAppearance.Material.Title"/>
+    <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:id="@+id/view" app:layout_constraintTop_toBottomOf="@+id/tv_screen_name"
+            android:layout_marginTop="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="32dp" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="32dp" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+</android.support.constraint.ConstraintLayout>

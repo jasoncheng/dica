@@ -66,7 +66,7 @@ class LoginActivity: BaseActivity() {
         private fun failStr(message:String): String? {
             if(ref.get() == null) return null
             var act = ref.get()
-            return act?.getString(R.string.login_error)?.format(message)
+            return act?.getString(R.string.common_error)?.format(message)
         }
 
         override fun onFailure(call: Call<Profile>, t: Throwable) {

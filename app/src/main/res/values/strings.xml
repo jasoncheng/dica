@@ -5,7 +5,7 @@
     <string name="username">username</string>
     <string name="password">password</string>
     <string name="loading">loading.....</string>
-    <string name="login_error">temporary unable to login (%1$s)</string>
+    <string name="common_error">temporary unable to use (%1$s)</string>
     <string name="all_data_load">nothing else..</string>
     <string name="compose_submit">submit</string>
     <string name="compose_text">text</string>
@@ -25,4 +25,7 @@
     <string name="status_share">share</string>
     <string name="status_comment">comment</string>
     <string name="status_reply_to">Reply To: %1$s</string>
+    <string name="no_api_support">no API support yet</string>
+    <string name="not_implement_yet">not implement yet</string>
+    <string name="user_not_found">user not found</string>
 </resources>

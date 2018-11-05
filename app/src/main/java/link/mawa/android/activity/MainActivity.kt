@@ -40,7 +40,7 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
                 ApiService.create().friendicaProfileShow(null).enqueue(ProfileCallback(this))
             }catch (e: Exception){
                 dLog("${e.message}")
-                App.instance.toast(getString(R.string.login_error).format("${e.message}"))
+                App.instance.toast(getString(R.string.common_error).format("${e.message}"))
                 logout()
                 return
             }

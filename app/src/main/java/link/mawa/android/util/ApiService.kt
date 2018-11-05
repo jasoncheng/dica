@@ -7,6 +7,7 @@ import link.mawa.android.R
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Profile
 import link.mawa.android.bean.Status
+import link.mawa.android.bean.User
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -43,8 +44,17 @@ interface ApiService {
     fun statusPublicTimeline(@Query("since_id") since_id: String,
                              @Query("max_id") max_id: String): Call<List<Status>>
 
+    @GET("statuses/user_timeline?exclude_replies=true")
+    fun statusUserTimeline(
+        @Query("user_id") user_id: Int,
+        @Query("since_id") since_id: String,
+        @Query("max_id") max_id: String): Call<List<Status>>
+
     @GET("friendica/profile/show")
     fun friendicaProfileShow(@Query("profile_id") profile_id: String?): Call<Profile>
+
+    @GET("users/show")
+    fun usersShow(@Query("user_id") user_id: String): Call<User>
 
     companion object Factory {
         private val client: OkHttpClient

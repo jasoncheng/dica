@@ -1,5 +1,7 @@
 package link.mawa.android.bean
 
+import java.io.Serializable
+
 data class User(
     var id: Int,
     var profile_image_url_large: String,
@@ -11,4 +13,4 @@ data class User(
     var statuses_count: Int,
     var followers_count: Int,
     var following: Boolean
-)
+): Serializable

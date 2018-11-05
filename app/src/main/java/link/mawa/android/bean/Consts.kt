@@ -7,6 +7,9 @@ object Consts {
     val API_READ_TIMEOUT = 30.toLong()
     val CACHE_SIZE_IN_MB = 10
 
+
+    var REQ_PHOTO_PATH = 999
+
     var API_HOST = "https://mawa.link"
     val ID_STATUS = "statusId"
     var FG_COMPOSE = "compose"
@@ -14,9 +17,8 @@ object Consts {
     var SDCARD_FOLDER_OUT = "out"
 
     var EXTRA_PHOTO_URI = "photoUri"
-
+    var EXTRA_USER = "user"
+    var EXTRA_USER_ID = "userId"
     var EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
     var EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
-
-    var REQ_PHOTO_PATH = 999
 }

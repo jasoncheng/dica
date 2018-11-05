@@ -13,6 +13,7 @@ import link.mawa.android.App
 import link.mawa.android.R
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Status
+import link.mawa.android.util.dLog
 import link.mawa.android.util.iLog
 import retrofit2.Call
 import retrofit2.Callback
@@ -105,7 +106,7 @@ open class BaseActivity: AppCompatActivity() {
             if(response.body() == null) {return}
 
             val res = response.body()
-
+            dLog(res.toString())
             // handle sinceId & maxId
             res?.forEach {
                 if(it.id > act.sinceId) act.sinceId = it.id

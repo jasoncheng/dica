@@ -2,4 +2,5 @@
 <resources>
     <dimen name="status_avatar_size">34dp</dimen>
     <dimen name="reply_avatar_size">26dp</dimen>
+    <dimen name="user_page_profile_avatar">140dp</dimen>
 </resources>
