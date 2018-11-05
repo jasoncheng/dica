@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder
 import link.mawa.android.App
 import link.mawa.android.BuildConfig
 import link.mawa.android.R
+import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Profile
 import link.mawa.android.bean.Status
 import okhttp3.*
@@ -12,6 +13,7 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import java.util.concurrent.TimeUnit
 
 interface ApiService {
 
@@ -61,6 +63,7 @@ interface ApiService {
                 request = request.newBuilder().headers(headers).build()
                 chain.proceed(request)
             }
+
             val defaultSourceInterceptor = Interceptor {
                 val original = it.request()
                 val originalHttpUrl = original.url()
@@ -75,6 +78,8 @@ interface ApiService {
 
             clientBuilder.addInterceptor(headerAuthorizationInterceptor)
             clientBuilder.addInterceptor(defaultSourceInterceptor)
+            clientBuilder.connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            clientBuilder.readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
             return clientBuilder.build()
         }
 

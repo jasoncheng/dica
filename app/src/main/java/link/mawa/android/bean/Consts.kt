@@ -3,6 +3,8 @@ package link.mawa.android.bean
 object Consts {
 
     val COMPRESS_PHOTO_QUALITY = 70
+    val API_CONNECT_TIMEOUT = 30.toLong()
+    val API_READ_TIMEOUT = 30.toLong()
 
     var API_HOST = "https://mawa.link"
     val ID_STATUS = "statusId"
