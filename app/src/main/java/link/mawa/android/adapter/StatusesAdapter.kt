@@ -19,7 +19,6 @@ import link.mawa.android.activity.StatusActivity
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Status
 import link.mawa.android.fragment.ComposeDialogFragment
-import link.mawa.android.util.dLog
 import java.util.*
 
 class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<BasicViewHolder>() {
@@ -122,7 +121,6 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         val i = Intent(context, StatusActivity::class.java)
         i.putExtra(Consts.ID_STATUS, st.id)
         context.startActivity(i)
-        dLog(st.toString())
     }
 }
 

@@ -13,6 +13,7 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 interface ApiService {
@@ -57,17 +58,16 @@ interface ApiService {
             }
 
             val authToken = Credentials.basic(PrefUtil.getUsername(), PrefUtil.getPassword())
-            val headerAuthorizationInterceptor = Interceptor { chain ->
-                var request = chain.request()
+            val basicAuthInterceptor = Interceptor {
+                var request = it.request()
                 val headers = request.headers().newBuilder().add("Authorization", authToken).build()
                 request = request.newBuilder().headers(headers).build()
-                chain.proceed(request)
+                it.proceed(request)
             }
 
-            val defaultSourceInterceptor = Interceptor {
+            val statusSourceInterceptor = Interceptor {
                 val original = it.request()
                 val originalHttpUrl = original.url()
-
                 val url = originalHttpUrl.newBuilder()
                     .addQueryParameter("source", App.instance.getString(R.string.app_name))
                     .build()
@@ -76,11 +76,26 @@ interface ApiService {
                 it.proceed(requestBuilder.build())
             }
 
-            clientBuilder.addInterceptor(headerAuthorizationInterceptor)
-            clientBuilder.addInterceptor(defaultSourceInterceptor)
-            clientBuilder.connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
-            clientBuilder.readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
-            return clientBuilder.build()
+            val cacheInterceptor = Interceptor {
+                val request = if(NetworkUtil.isNetworkConnected()) {
+                    it.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build()
+                } else {
+                    it.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build()
+                }
+
+                it.proceed(request)
+            }
+
+            val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
+            val cache = Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
+
+            return clientBuilder.cache(cache)
+                .addInterceptor(basicAuthInterceptor)
+                .addInterceptor(statusSourceInterceptor)
+                .addInterceptor(cacheInterceptor)
+                .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
+                .build()
         }
 
         fun create(): ApiService {

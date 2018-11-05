@@ -106,7 +106,6 @@ open class BaseActivity: AppCompatActivity() {
 
             val res = response.body()
 
-
             // handle sinceId & maxId
             res?.forEach {
                 if(it.id > act.sinceId) act.sinceId = it.id
@@ -144,7 +143,7 @@ open class BaseActivity: AppCompatActivity() {
     }
 
     @Synchronized open fun loadNewest(){
-        iLog("========> loadNewest sinceId ${sinceId}")
+        iLog("loadNewest sinceId ${sinceId}")
     }
 
     @Synchronized open fun loadMore(){
@@ -155,6 +154,6 @@ open class BaseActivity: AppCompatActivity() {
         }
 
         home_srl.isRefreshing = true
-        iLog("========> loadMore maxId ${maxId}")
+        iLog("loadMore maxId ${maxId}")
     }
 }
