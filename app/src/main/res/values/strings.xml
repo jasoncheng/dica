@@ -28,4 +28,5 @@
     <string name="no_api_support">no API support yet</string>
     <string name="not_implement_yet">not implement yet</string>
     <string name="user_not_found">user not found</string>
+    <string name="likes_counter">%1$s people like</string>
 </resources>

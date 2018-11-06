@@ -29,4 +29,5 @@
     <string name="no_api_support">API 還不支援</string>
     <string name="not_implement_yet">功能尚未開發</string>
     <string name="user_not_found">找不到用戶喔</string>
+    <string name="likes_counter">%1$s 人喜歡</string>
 </resources>

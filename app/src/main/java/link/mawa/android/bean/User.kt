@@ -12,5 +12,13 @@ data class User(
     var friends_count: Int,
     var statuses_count: Int,
     var followers_count: Int,
-    var following: Boolean
-): Serializable
+    var following: Boolean,
+    var location: String,
+    var description: String
+): Serializable {
+    override fun equals(other: Any?): Boolean {
+        if(other?.javaClass != this.javaClass) return false
+        other as User
+        return other.id == this.id
+    }
+}

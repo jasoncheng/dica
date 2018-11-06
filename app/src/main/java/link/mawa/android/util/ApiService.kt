@@ -11,8 +11,11 @@ import link.mawa.android.bean.User
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -55,6 +58,15 @@ interface ApiService {
 
     @GET("users/show")
     fun usersShow(@Query("user_id") user_id: String): Call<User>
+
+    @POST("friendica/activity/like")
+    @FormUrlEncoded
+    fun like(@Field("id") id: Int): Call<String>
+
+    @POST("friendica/activity/unlike")
+    @FormUrlEncoded
+    fun unlike(@Field("id") id: Int): Call<String>
+
 
     companion object Factory {
         private val client: OkHttpClient
@@ -111,11 +123,37 @@ interface ApiService {
         fun create(): ApiService {
             val gson = GsonBuilder().serializeNulls().setLenient().create()
             val retrofit = Retrofit.Builder()
+                .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .baseUrl("${PrefUtil.getApiUrl()}/api/")
                 .client(client)
                 .build()
             return retrofit.create(ApiService::class.java)
         }
+
+        // for BAD format JSON response, so i have to do this.
+        fun like(isLike: Boolean, id: Int, callback: ILike) {
+            var fn= if(isLike) { ApiService.create().like(id) } else { ApiService.create().unlike(id) }
+            fn.enqueue(object: Callback<String>{
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    t.message?.let { eLog(it) }
+                    callback.fail()
+                }
+
+                override fun onResponse(call: Call<String>, response: Response<String>) {
+                    if(response.code() == 200 && response.body().toString().contains("ok")) {
+                        callback.done()
+                        return
+                    }
+                    callback.fail()
+                }
+
+            })
+        }
     }
+}
+
+interface ILike {
+    fun done()
+    fun fail()
 }

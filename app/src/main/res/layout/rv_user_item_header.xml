@@ -7,23 +7,27 @@
     <ImageView
             android:layout_width="@dimen/user_page_profile_avatar"
             android:layout_height="@dimen/user_page_profile_avatar" tools:srcCompat="@tools:sample/avatars"
-            android:id="@+id/user_avatar_large" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginTop="16dp"
+            android:id="@+id/avatar" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginTop="24dp"
             app:layout_constraintTop_toTopOf="parent"/>
     <TextView
             android:text="screen_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:id="@+id/tv_screen_name" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/user_avatar_large"
+            android:id="@+id/tv_status_user_name" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/avatar"
             android:textAppearance="@android:style/TextAppearance.Material.Title"/>
-    <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:id="@+id/view" app:layout_constraintTop_toBottomOf="@+id/tv_screen_name"
-            android:layout_marginTop="8dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="32dp" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="32dp" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_description"
+            android:padding="10dp"
+            android:textColor="#333"
+            android:autoLink="all"
+            app:layout_constraintTop_toBottomOf="@+id/tv_status_user_name" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="8dp"
+            android:textAlignment="center"/>
 </android.support.constraint.ConstraintLayout>

@@ -64,14 +64,7 @@
                        android:scaleType="fitXY"
                        android:adjustViewBounds="true"/>
 
-            <LinearLayout android:layout_width="match_parent"
-                          android:id="@+id/actGroup"
-                          android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@+id/tv_like" android:drawablePadding="4dp" android:layout_width="wrap_content"
-                          android:padding="8dp" android:layout_height="wrap_content" android:text="@string/status_like" android:drawableLeft="@drawable/thumb_up"/>
-                <TextView android:id="@+id/tv_comment" android:drawablePadding="4dp"  android:layout_width="wrap_content" android:padding="8dp" android:layout_height="wrap_content" android:text="@string/status_comment" android:drawableLeft="@drawable/comment"/>
-                <TextView android:id="@+id/tv_share" android:drawablePadding="4dp"  android:layout_width="wrap_content" android:padding="8dp" android:layout_height="wrap_content" android:text="@string/status_share" android:drawableLeft="@drawable/share_small"/>
-            </LinearLayout>
+            <include layout="@layout/status_action_box" android:id="@+id/actGroup" />
         </LinearLayout>
     </LinearLayout>
 
