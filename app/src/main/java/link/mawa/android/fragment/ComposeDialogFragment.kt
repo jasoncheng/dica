@@ -2,6 +2,7 @@ package link.mawa.android.fragment
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
@@ -80,6 +81,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
             }
 
         }
+        roomView?.rb_public?.setOnClickListener{ App.instance.selectedGroup.clear() }
+        roomView?.rb_assign?.setOnClickListener{ choiceGroupDialog() }
 
         // Reply to?
         if(arguments != null){
@@ -100,6 +103,11 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     override fun onStart() {
         super.onStart()
+
+        if(App.instance.mygroup == null){
+            App.instance.loadGroup()
+        }
+
         dialog.window.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
@@ -254,7 +262,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
 
         if(mediaFile == null){
-            ApiService.create().statusUpdate(text, in_reply_status_id!!, lat, long).enqueue(StatusUpdateCallback(this))
+            ApiService.create().statusUpdate(text, in_reply_status_id!!, lat, long, App.instance.selectedGroup).enqueue(StatusUpdateCallback(this))
             return
         }
 
@@ -265,12 +273,56 @@ class ComposeDialogFragment: BaseDialogFragment() {
         val statusIdBody = RequestBody.create(MediaType.parse("multipart/form-data"), "$in_reply_status_id")
         val latBody = RequestBody.create(MediaType.parse("multipart/form-data"), lat)
         val longBody = RequestBody.create(MediaType.parse("multipart/form-data"), long)
-        ApiService.create().statusUpdate(status, statusIdBody, latBody, longBody, body).enqueue(StatusUpdateCallback(this))
+        var map = LinkedHashMap<String, RequestBody>()
+        App.instance.selectedGroup.forEach {
+            map.put("group_allow[]", RequestBody.create(MediaType.parse("text/plain"),it.toString()))
+        }
+        ApiService.create().statusUpdate(status, statusIdBody, latBody, longBody, map, body).enqueue(StatusUpdateCallback(this))
     }
 
     private fun composeDone() {
         et_text.setText("")
         (activity as BaseActivity).loadNewest()
         dismiss()
+
+        // Reload Group
+        App.instance.loadGroup()
+    }
+
+    private fun choiceGroupDialog(){
+        val size = App.instance.mygroup?.size
+        var arrName = size?.let { arrayOfNulls<String>(it) }
+        var arrayId = size?.let { IntArray(it) }
+        var arraySelected = size?.let { BooleanArray(it) }
+        var idx = 0
+
+        App.instance.mygroup?.forEach {
+            var name = "${it.name} (${it.user.size})"
+            arrName?.set(idx, name)
+            arrayId?.set(idx, it.gid)
+            arraySelected?.set(idx, App.instance.selectedGroup.contains(it.gid))
+            idx++
+        }
+
+        val builder = activity?.let { AlertDialog.Builder(it) }
+        builder?.setTitle("")
+        builder?.setMultiChoiceItems(arrName, arraySelected) { dialog, index, isSelect ->
+            if(!isSelect){
+                arrayId?.get(index)?.let { App.instance.selectedGroup.remove(it) }
+            } else {
+                arrayId?.get(index)?.let { App.instance.selectedGroup.add(it) }
+            }
+        }
+        builder?.setCancelable(true)
+        builder?.setNegativeButton(android.R.string.cancel){ dialog, index ->
+
+        }
+        builder?.setPositiveButton(android.R.string.ok) { dialog, button ->
+            App.instance.selectedGroup.forEach { dLog("GroupSelected ${it}") }
+            if(App.instance.selectedGroup.size == 0){
+                roomView?.rb_public?.isChecked = true
+            }
+        }
+        builder?.create()?.show()
     }
 }

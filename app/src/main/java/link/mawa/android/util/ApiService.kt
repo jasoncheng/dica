@@ -4,10 +4,7 @@ import com.google.gson.GsonBuilder
 import link.mawa.android.App
 import link.mawa.android.BuildConfig
 import link.mawa.android.R
-import link.mawa.android.bean.Consts
-import link.mawa.android.bean.Profile
-import link.mawa.android.bean.Status
-import link.mawa.android.bean.User
+import link.mawa.android.bean.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -19,6 +16,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
 import java.io.File
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.HttpsURLConnection
 
 interface ApiService {
 
@@ -28,7 +26,8 @@ interface ApiService {
         @Field("status") status: String,
         @Field("in_reply_to_status_id") in_reply_to_status_id: Int,
         @Field("lat") lat: String,
-        @Field("long") long: String): Call<Status>
+        @Field("long") long: String,
+        @Field("group_allow[]") group_allow: ArrayList<Int>?): Call<Status>
 
     @POST("statuses/update_with_media")
     @Multipart
@@ -37,6 +36,7 @@ interface ApiService {
         @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
         @Part("lat") lat: RequestBody,
         @Part("lat") long: RequestBody,
+        @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part image: MultipartBody.Part): Call<Status>
 
     @GET("statuses/show?include_entities=true")
@@ -67,6 +67,8 @@ interface ApiService {
     @FormUrlEncoded
     fun unlike(@Field("id") id: Int): Call<String>
 
+    @GET("friendica/group_show")
+    fun friendicaGroupShow(): Call<ArrayList<Group>>
 
     companion object Factory {
         private val client: OkHttpClient
@@ -141,7 +143,8 @@ interface ApiService {
                 }
 
                 override fun onResponse(call: Call<String>, response: Response<String>) {
-                    if(response.code() == 200 && response.body().toString().contains("ok")) {
+                    if(response.code() == HttpsURLConnection.HTTP_OK
+                        && response.body().toString().contains("ok")) {
                         callback.done()
                         return
                     }
