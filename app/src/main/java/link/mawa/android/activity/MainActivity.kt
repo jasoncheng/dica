@@ -1,8 +1,6 @@
 package link.mawa.android.activity
 
 import android.content.Intent
-import android.graphics.Typeface
-import android.os.Build
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
@@ -16,9 +14,7 @@ import link.mawa.android.adapter.StatusesAdapter
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Profile
 import link.mawa.android.fragment.ComposeDialogFragment
-import link.mawa.android.util.ApiService
-import link.mawa.android.util.PrefUtil
-import link.mawa.android.util.dLog
+import link.mawa.android.util.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -56,11 +52,6 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
         // Refresh
         home_srl.setOnRefreshListener(this)
 
-        // Title
-        val myTypeface = Typeface.createFromAsset(assets, "Hand_Of_Sean_Demo.ttf")
-        home_title.typeface = myTypeface
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) run { home_title.letterSpacing = 1f }
-
         // compose
         iv_compose.setOnClickListener {
             ComposeDialogFragment().show(supportFragmentManager, Consts.FG_COMPOSE)
@@ -84,6 +75,30 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         if(App.instance.myself != null){
             loadMore()
+        }
+
+
+        // TODO: update site information (no API)
+        val homeName = PrefUtil.getSiteName()
+        if(!homeName.isNullOrEmpty() && homeName != getString(R.string.app_name)){
+            home_title?.text = homeName
+        } else {
+            HtmlCrawler.run(PrefUtil.getApiUrl(), MyHtmlCrawler(this))
+        }
+    }
+
+    class MyHtmlCrawler(val activity: MainActivity): IHtmlCrawler {
+        private val ref = WeakReference<MainActivity>(activity)
+        override fun done(meta: Meta) {
+            if(!meta.title.isNullOrEmpty()){
+                PrefUtil.setSiteName(meta.title!!)
+                if(ref.get() != null){
+                    ref.get()?.home_title?.text = meta.title
+                }
+            }
+            if(!meta.icon.isNullOrEmpty()){
+                PrefUtil.setSiteIcon(meta.icon!!)
+            }
         }
     }
 

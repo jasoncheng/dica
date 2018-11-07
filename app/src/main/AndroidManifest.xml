@@ -14,13 +14,15 @@
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:windowSoftInputMode="stateHidden|adjustResize"
             android:supportsRtl="true"
             android:testOnly="false"
             android:theme="@style/AppTheme">
         <meta-data android:name=".util.MyGlideModule" android:value="GlideModule" />
         <activity android:name=".activity.MainActivity">
             <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>

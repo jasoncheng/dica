@@ -3,6 +3,7 @@ package link.mawa.android.util
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import link.mawa.android.App
+import link.mawa.android.R
 import link.mawa.android.bean.Consts
 
 class PrefUtil {
@@ -46,6 +47,22 @@ class PrefUtil {
 
         fun getLastStatus(): String {
             return default().getString("text", "")
+        }
+
+        fun setSiteName(text: String) {
+            default().edit().putString("sitename", text).commit()
+        }
+
+        fun getSiteName(): String {
+            return default().getString("sitename", App.instance.getString(R.string.app_name))
+        }
+
+        fun setSiteIcon(text: String) {
+            default().edit().putString("favicon", text).commit()
+        }
+
+        fun getSiteIcon(): String {
+            return default().getString("favicon", "")
         }
     }
 }

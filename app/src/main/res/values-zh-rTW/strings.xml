@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MAWA</string>
+    <string name="app_name">MiXi</string>
     <string name="login">登入</string>
     <string name="logout">登出</string>
     <string name="username">帳號</string>
@@ -30,4 +30,7 @@
     <string name="not_implement_yet">功能尚未開發</string>
     <string name="user_not_found">找不到用戶喔</string>
     <string name="likes_counter">%1$s 人喜歡</string>
+    <string name="index_public_timeline">公開的</string>
+    <string name="index_friends_timeline">朋友的</string>
+    <string name="app_description">A simple unofficial client for Friendica</string>
 </resources>

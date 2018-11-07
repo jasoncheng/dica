@@ -7,4 +7,5 @@
     <color name="replyItemBg">#EFEFEF</color>
     <color name="user_large_profile_divider">#EFEFEF</color>
     <color name="like_counter">#880E4F</color>
+    <color name="app_description">#cccccc</color>
 </resources>

@@ -1,8 +1,8 @@
 package link.mawa.android.activity
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import kotlinx.android.synthetic.main.activity_login.*
 import link.mawa.android.App
 import link.mawa.android.R
@@ -30,6 +30,9 @@ class LoginActivity: BaseActivity() {
             PrefUtil.setApiUrl(et_api.text.toString())
             login()
         }
+
+        setMiXiLink()
+        setFriendicaLink()
     }
 
     fun login() {
@@ -43,21 +46,27 @@ class LoginActivity: BaseActivity() {
         }
     }
 
-    fun login_success() {
+    fun loginSuccess() {
         var intent = Intent(App.instance.applicationContext, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
         finish()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        showSystemUI()
+    fun setMiXiLink(){
+        tv_app_name.setOnClickListener {
+            val browserIntent = Intent(Intent.ACTION_VIEW)
+            browserIntent.data = Uri.parse(Consts.MIXI_URL)
+            startActivity(browserIntent)
+        }
     }
 
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) hideSystemUI()
+    fun setFriendicaLink(){
+        tv_app_description.setOnClickListener {
+            val browserIntent = Intent(Intent.ACTION_VIEW)
+            browserIntent.data = Uri.parse(Consts.FRIENDICA_WEB)
+            startActivity(browserIntent)
+        }
     }
 
     class MyCallback(activity: LoginActivity): Callback<Profile> {
@@ -84,24 +93,10 @@ class LoginActivity: BaseActivity() {
                 ref?.get()?.loaded()
                 return
             }
-            ref?.get()?.login_success()
+            ref?.get()?.loginSuccess()
             App.instance.myself = response.body()
         }
 
     }
 
-    private fun hideSystemUI() {
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
-                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_FULLSCREEN)
-    }
-
-    private fun showSystemUI() {
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-    }
 }

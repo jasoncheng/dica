@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MAWA</string>
+    <string name="app_name">MiXi</string>
     <string name="login">login</string>
     <string name="logout">logout</string>
     <string name="username">username</string>
@@ -29,4 +29,7 @@
     <string name="not_implement_yet">not implement yet</string>
     <string name="user_not_found">user not found</string>
     <string name="likes_counter">%1$s people like</string>
+    <string name="index_public_timeline">public</string>
+    <string name="index_friends_timeline">friends</string>
+    <string name="app_description">A simple unofficial client for Friendica</string>
 </resources>
