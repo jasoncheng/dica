@@ -14,7 +14,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.dlg_compose.*
@@ -24,10 +23,7 @@ import link.mawa.android.R
 import link.mawa.android.activity.BaseActivity
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Status
-import link.mawa.android.util.ApiService
-import link.mawa.android.util.PrefUtil
-import link.mawa.android.util.dLog
-import link.mawa.android.util.eLog
+import link.mawa.android.util.*
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -221,7 +217,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         box.removeAllViews()
         box.addView(imgView)
         box.visibility = View.VISIBLE
-        Glide.with(context).load(imageFile).into(imgView)
+        GlideApp.with(context!!).load(imageFile).into(imgView!!)
         imgView.setOnClickListener {
             (it.parent as ViewGroup).removeView(it)
             mediaFile = null

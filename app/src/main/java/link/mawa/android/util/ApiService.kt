@@ -14,6 +14,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
+import retrofit2.http.Headers
 import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.HttpsURLConnection
@@ -71,13 +72,16 @@ interface ApiService {
     fun friendicaGroupShow(): Call<ArrayList<Group>>
 
     companion object Factory {
+
+        var cookies = HashSet<String>()
+
         private val client: OkHttpClient
         get() {
             val clientBuilder = OkHttpClient.Builder()
 
             if(BuildConfig.DEBUG) {
                 val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.BODY
+                interceptor.level = HttpLoggingInterceptor.Level.HEADERS
                 clientBuilder.addInterceptor(interceptor)
             }
 
@@ -85,6 +89,7 @@ interface ApiService {
             val basicAuthInterceptor = Interceptor {
                 var request = it.request()
                 val headers = request.headers().newBuilder().add("Authorization", authToken).build()
+                dLog("=======>headers "+headers.names().toString())
                 request = request.newBuilder().headers(headers).build()
                 it.proceed(request)
             }
@@ -101,6 +106,9 @@ interface ApiService {
             }
 
             val cacheInterceptor = Interceptor {
+                it.request().headers().toMultimap().forEach { key, value ->
+                    dLog("Request Header ${key} ${value}")
+                }
                 val request = if(NetworkUtil.isNetworkConnected()) {
                     it.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build()
                 } else {
@@ -110,11 +118,31 @@ interface ApiService {
                 it.proceed(request)
             }
 
+            val saveCookieInterceptor = Interceptor {
+                val res = it.proceed(it.request())
+                res.headers().toMultimap().forEach { key, value ->
+                    dLog("Response Header ${key} ${value}")
+                }
+
+                res
+            }
+
+            val addCookieInterceptor = Interceptor {
+                val builder = it.request().newBuilder()!!
+                cookies.forEach { it ->
+                    builder.addHeader("Cookie", it)
+                }
+                it.proceed(builder.build())
+            }
+
             val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
             val cache = Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
 
+
             return clientBuilder.cache(cache)
                 .addInterceptor(basicAuthInterceptor)
+                .addInterceptor(addCookieInterceptor)
+                .addInterceptor(saveCookieInterceptor)
                 .addInterceptor(statusSourceInterceptor)
                 .addInterceptor(cacheInterceptor)
                 .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)

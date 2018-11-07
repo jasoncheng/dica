@@ -37,7 +37,7 @@ class StatusActivity: BaseActivity(), SwipeRefreshLayout.OnRefreshListener, Base
             App.instance.toast(getString(R.string.status_not_found))
         }
 
-        App.instance.toast("status #${statusId}")
+//        App.instance.toast("status #${statusId}")
         loadNewest()
     }
 

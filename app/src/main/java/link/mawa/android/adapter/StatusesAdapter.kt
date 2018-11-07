@@ -172,7 +172,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         Glide.with(context.applicationContext)
             .load(st.user.profile_image_url_large)
             .apply(RequestOptions().circleCrop())
-            .into(holder.avatar)
+            .into(holder.avatar!!)
     }
 
     private fun doLayoutContent(holder: BasicStatusViewHolder, st: Status, pos: Int){
@@ -186,7 +186,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             Glide.with(context.applicationContext)
                 .load(attachment.url)
                 .apply(requestOptions)
-                .into(holder.media)
+                .into(holder.media!!)
         } else {
             holder.media?.visibility = View.GONE
         }
@@ -204,7 +204,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         Glide.with(context.applicationContext)
             .load(ownerInfo?.profile_image_url_large)
             .apply(RequestOptions().circleCrop())
-            .into(holder.avatar)
+            .into(holder.avatar!!)
     }
 
     private fun actLike(view: View){

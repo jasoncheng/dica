@@ -18,6 +18,7 @@
             android:supportsRtl="true"
             android:testOnly="false"
             android:theme="@style/AppTheme">
+        <meta-data android:name=".util.MyGlideModule" android:value="GlideModule" />
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

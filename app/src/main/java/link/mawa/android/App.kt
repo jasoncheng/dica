@@ -9,7 +9,10 @@ import link.mawa.android.util.dLog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
 import javax.net.ssl.HttpsURLConnection
+
+
 
 class App: Application() {
 
@@ -41,17 +44,6 @@ class App: Application() {
                 dLog(mygroup.toString())
             }
         })
-    }
-
-    //TODO: so ugly here.....
-    fun groupSelected(): IntArray? {
-        var ar = mygroup?.size?.let { IntArray(it) }
-        var idx = 0
-        selectedGroup.forEach {
-            ar?.set(idx, it)
-            idx++
-        }
-        return ar
     }
 
     fun toast(message: String) {
