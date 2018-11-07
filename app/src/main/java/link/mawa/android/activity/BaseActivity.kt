@@ -132,15 +132,17 @@ open class BaseActivity: AppCompatActivity() {
                 res?.forEach continuing@ {
                     if(act.statuses.contains(it)) {return@continuing}
                     act.statuses.add(0, it)
-                    act.rv_statuses_list.adapter.notifyItemInserted(0)
+//                    act.rv_statuses_list.adapter.notifyItemInserted(0)
                 }
+                act.rv_statuses_list.adapter.notifyDataSetChanged()
                 act.rv_statuses_list.scrollToPosition(0)
             } else {
                 res?.forEach continuing@ {
                     if(act.statuses.contains(it)) {return@continuing}
                     act.statuses.add(it)
-                    act.rv_statuses_list.adapter.notifyItemInserted(act.statuses.size-1)
+//                    act.rv_statuses_list.adapter.notifyItemInserted(act.statuses.size-1)
                 }
+                act.rv_statuses_list.adapter.notifyDataSetChanged()
             }
         }
     }
