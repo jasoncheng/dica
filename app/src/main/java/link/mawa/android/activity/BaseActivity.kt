@@ -13,6 +13,7 @@ import link.mawa.android.App
 import link.mawa.android.R
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Status
+import link.mawa.android.util.FriendicaUtil
 import link.mawa.android.util.iLog
 import retrofit2.Call
 import retrofit2.Callback
@@ -110,6 +111,8 @@ open class BaseActivity: AppCompatActivity() {
             res?.forEach {
                 if(it.id > act.sinceId) act.sinceId = it.id
                 if(act.maxId == 0 || it.id < act.maxId) act.maxId = it.id
+
+                FriendicaUtil.stripStatusTextProxyUrl(it)
 
                 // any more old status ?
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
