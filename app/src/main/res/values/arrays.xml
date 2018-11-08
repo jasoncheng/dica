@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="index_tab">
+        <item>@string/index_friends_timeline</item>
+        <item>@string/index_public_timeline</item>
+        <item>@string/index_my_timeline</item>
+    </string-array>
+</resources>

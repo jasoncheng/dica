@@ -1,9 +1,7 @@
 package link.mawa.android.activity
 
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.activity_status.*
+import kotlinx.android.synthetic.main.activity_user.*
 import link.mawa.android.App
 import link.mawa.android.R
 import link.mawa.android.adapter.StatusesAdapter
@@ -11,7 +9,8 @@ import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Status
 import link.mawa.android.bean.User
 import link.mawa.android.util.ApiService
-import link.mawa.android.util.dLog
+import link.mawa.android.util.IStatusDataSouce
+import link.mawa.android.util.StatusTimeline
 import link.mawa.android.util.eLog
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,7 +18,7 @@ import retrofit2.Response
 import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
 
-class UserActivity: BaseActivity(), SwipeRefreshLayout.OnRefreshListener, BaseActivity.IStatusCallback {
+class UserActivity: BaseActivity(), IStatusDataSouce {
 
     var user: User? = null
     var userId: String? = null
@@ -27,20 +26,7 @@ class UserActivity: BaseActivity(), SwipeRefreshLayout.OnRefreshListener, BaseAc
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user)
-
         handleIntent()
-    }
-
-    fun doLayout(){
-        dLog("doLayout: ${user.toString()}")
-        // UI
-        rv_statuses_list.layoutManager = LinearLayoutManager(this)
-        rv_statuses_list.adapter = StatusesAdapter(statuses, this)
-        (rv_statuses_list.adapter as StatusesAdapter).ownerInfo = user
-        rv_statuses_list.setOnScrollListener(OnStatusTableScrollListener(this))
-        rv_statuses_list.adapter.notifyDataSetChanged()
-        // Refresh UI
-        home_srl.setOnRefreshListener(this)
     }
 
     private fun handleIntent(){
@@ -48,7 +34,6 @@ class UserActivity: BaseActivity(), SwipeRefreshLayout.OnRefreshListener, BaseAc
         userId = intent.getStringExtra(Consts.EXTRA_USER_ID)
 
         if(user != null){
-            doLayout()
             initLoad()
             return
         }
@@ -59,7 +44,6 @@ class UserActivity: BaseActivity(), SwipeRefreshLayout.OnRefreshListener, BaseAc
             return
         }
 
-        doLayout()
         ApiService.create().usersShow(userId!!).enqueue(CallbackUser(this))
     }
 
@@ -86,32 +70,24 @@ class UserActivity: BaseActivity(), SwipeRefreshLayout.OnRefreshListener, BaseAc
     }
 
     fun initLoad(){
-        ApiService.create().statusUserTimeline(user?.id!!, "","")
-            .enqueue(StatuesCallback(this, false, this))
+        stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
+        (rv_statuses_list.adapter as StatusesAdapter).ownerInfo = user
+        stl?.loadMore(this)
     }
 
-    override fun statusesLoaded(data: List<Status>?) {
-        if(data == null){ return }
+    override fun loaded(data: List<Status>) {
+        if(data == null) return
         data.forEach {
-            statuses.add(it)
+            stl?.add(it)
         }
         rv_statuses_list.adapter.notifyDataSetChanged()
     }
 
-    override fun loadMore() {
-        super.loadMore()
-        dLog("loadMore ${user?.id!!}")
-        ApiService.create().statusUserTimeline(user?.id!!, "","${maxId}")
-            .enqueue(StatuesCallback(this, false, null))
+    override fun sourceOld(): Call<List<Status>>? {
+        return ApiService.create().statusUserTimeline(user?.id!!, "","${stl?.maxId}")
     }
 
-    override fun loadNewest() {
-        super.loadNewest()
-        ApiService.create().statusUserTimeline(user?.id!!,"${sinceId}", "")
-            .enqueue(StatuesCallback(this, true, null))
-    }
-
-    override fun onRefresh() {
-        loadNewest()
+    override fun sourceNew(): Call<List<Status>>? {
+        return ApiService.create().statusUserTimeline(user?.id!!,"${stl?.sinceId}", "")
     }
 }

@@ -33,4 +33,5 @@
     <string name="index_public_timeline">公開的</string>
     <string name="index_friends_timeline">朋友的</string>
     <string name="app_description">A simple unofficial client for Friendica</string>
+    <string name="index_my_timeline">自己的</string>
 </resources>

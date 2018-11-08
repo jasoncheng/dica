@@ -2,15 +2,14 @@ package link.mawa.android.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
+import android.support.v4.view.ViewPager
 import android.support.v7.widget.PopupMenu
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import link.mawa.android.App
 import link.mawa.android.R
-import link.mawa.android.adapter.StatusesAdapter
+import link.mawa.android.adapter.IndexPageAdapter
 import link.mawa.android.bean.Consts
 import link.mawa.android.bean.Profile
 import link.mawa.android.fragment.ComposeDialogFragment
@@ -21,11 +20,12 @@ import retrofit2.Response
 import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
 
-class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
+class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // if user not login yet
         if(App.instance.myself == null){
             if(!PrefUtil.didSetUserCredential()){
                 logout()
@@ -44,14 +44,6 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
 
         setContentView(R.layout.activity_main)
 
-        // RecyclerView
-        rv_statuses_list.layoutManager = LinearLayoutManager(this)
-        rv_statuses_list.adapter = StatusesAdapter(statuses, this)
-        rv_statuses_list.setOnScrollListener(OnStatusTableScrollListener(this))
-
-        // Refresh
-        home_srl.setOnRefreshListener(this)
-
         // compose
         iv_compose.setOnClickListener {
             ComposeDialogFragment().show(supportFragmentManager, Consts.FG_COMPOSE)
@@ -62,7 +54,7 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
             var pop = PopupMenu(this, it)
             var inflater = pop.menuInflater
             inflater.inflate(R.menu.index_avatar_menu, pop.menu)
-            pop.setOnMenuItemClickListener {
+            pop.setOnMenuItemClickListener { it ->
                 when(it.itemId) {
                     R.id.menu_logout -> logout()
                 }
@@ -74,17 +66,33 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
         setAvatar()
 
         if(App.instance.myself != null){
-            loadMore()
+            initViewPager()
         }
 
 
-        // TODO: update site information (no API)
+        // TODO: fetch site information for update title (no API)
         val homeName = PrefUtil.getSiteName()
         if(!homeName.isNullOrEmpty() && homeName != getString(R.string.app_name)){
             home_title?.text = homeName
         } else {
             HtmlCrawler.run(PrefUtil.getApiUrl(), MyHtmlCrawler(this))
         }
+    }
+
+    fun initViewPager(){
+        val names = resources.getStringArray(R.array.index_tab)
+        vp_index.adapter = IndexPageAdapter(this, supportFragmentManager)
+        vp_index.setOnPageChangeListener(object: ViewPager.OnPageChangeListener{
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {
+            }
+
+            override fun onPageSelected(position: Int) {
+                tv_home_page_name.text = names[position]
+            }
+        })
     }
 
     class MyHtmlCrawler(val activity: MainActivity): IHtmlCrawler {
@@ -139,24 +147,8 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener {
 
             App.instance.myself = response.body()
             act.setAvatar()
-            act.loadMore()
+            act.initViewPager()
         }
 
-    }
-
-    override fun loadMore() {
-        super.loadMore()
-        ApiService.create().statusPublicTimeline("", "${maxId}")
-            .enqueue(StatuesCallback(this, false, null))
-    }
-
-    override fun loadNewest() {
-        super.loadNewest()
-        ApiService.create().statusPublicTimeline("${sinceId}", "")
-            .enqueue(StatuesCallback(this, true, null))
-    }
-
-    override fun onRefresh() {
-        loadNewest()
     }
 }

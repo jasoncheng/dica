@@ -29,14 +29,6 @@
                 android:layout_marginEnd="8dp" android:layout_marginTop="8dp"
                 app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"/>
-        <!--<ImageView-->
-                <!--android:layout_width="27dp"-->
-                <!--android:layout_height="27dp"-->
-                <!--app:layout_constraintStart_toStartOf="parent"-->
-                <!--android:layout_marginStart="8dp" android:id="@+id/iv_compose"-->
-                <!--android:src="@drawable/round_create_black_24dp" android:layout_marginTop="8dp"-->
-                <!--app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"-->
-                <!--app:layout_constraintBottom_toBottomOf="parent"/>-->
         <TextView
                 android:text="@string/index_friends_timeline"
                 android:layout_width="wrap_content"
@@ -48,26 +40,20 @@
         />
     </android.support.constraint.ConstraintLayout>
 
-    <android.support.v4.widget.SwipeRefreshLayout android:layout_below="@+id/constraintLayout"
-                                                  android:layout_width="match_parent"
-                                                  android:layout_height="wrap_content"
-                                                  android:id="@+id/home_srl">
-        <android.support.v7.widget.RecyclerView
+    <android.support.v4.view.ViewPager
+            android:id="@+id/vp_index"
+            android:layout_below="@+id/constraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-                android:id="@+id/rv_statuses_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp" android:layout_marginBottom="8dp"/>
-    </android.support.v4.widget.SwipeRefreshLayout>
     <android.support.design.widget.FloatingActionButton
             android:id="@+id/iv_compose"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_anchor="@+id/home_srl"
+            app:layout_anchor="@+id/vp_index"
             android:src="@drawable/round_create_black_24dp"
-            android:layout_alignBottom="@+id/home_srl"
-            android:layout_alignRight="@+id/home_srl"
+            android:layout_alignBottom="@+id/vp_index"
+            android:layout_alignRight="@+id/vp_index"
             app:layout_anchorGravity="bottom|right|end"
             app:fabSize="mini"
             android:layout_margin="16dp" />

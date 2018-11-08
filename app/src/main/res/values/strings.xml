@@ -32,4 +32,5 @@
     <string name="index_public_timeline">public</string>
     <string name="index_friends_timeline">friends</string>
     <string name="app_description">A simple unofficial client for Friendica</string>
+    <string name="index_my_timeline">my</string>
 </resources>

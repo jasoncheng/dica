@@ -278,7 +278,6 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     private fun composeDone() {
         et_text.setText("")
-        (activity as BaseActivity).loadNewest()
         dismiss()
 
         // Reload Group

@@ -44,8 +44,12 @@ interface ApiService {
     fun statusShow(@Query("id") id: Int,
                    @Query("conversation") conversation: Int): Call<List<Status>>
 
-    @GET("statuses/friends_timeline?exclude_replies=true")
+    @GET("statuses/public_timeline?exclude_replies=true")
     fun statusPublicTimeline(@Query("since_id") since_id: String,
+                             @Query("max_id") max_id: String): Call<List<Status>>
+
+    @GET("statuses/friends_timeline?exclude_replies=true")
+    fun statusFriendsTimeline(@Query("since_id") since_id: String,
                              @Query("max_id") max_id: String): Call<List<Status>>
 
     @GET("statuses/user_timeline?exclude_replies=true")
