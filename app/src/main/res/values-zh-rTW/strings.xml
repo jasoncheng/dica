@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MiXi</string>
+    <string name="app_name">DiCa</string>
     <string name="login">登入</string>
     <string name="logout">登出</string>
     <string name="username">帳號</string>

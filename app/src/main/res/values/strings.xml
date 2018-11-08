@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MiXi</string>
+    <string name="app_name">DiCa</string>
     <string name="login">login</string>
     <string name="logout">logout</string>
     <string name="username">username</string>
