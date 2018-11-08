@@ -12,8 +12,8 @@ android {
         applicationId 'cool.mixi.dica'
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 18110502
-        versionName "1.0"
+        versionCode 18110802
+        versionName "0.0.1"
     }
     buildTypes {
         release {

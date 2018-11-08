@@ -7,3 +7,5 @@
 /captures
 .externalNativeBuild
 app/release.keystore
+app/build.gradle.release
+app/build.gradle.debug
