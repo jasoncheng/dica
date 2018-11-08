@@ -1,9 +1,9 @@
-package link.mawa.android.fragment
+package cool.mixi.dica.fragment
 
 import android.os.Build
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentManager
-import link.mawa.android.util.eLog
+import cool.mixi.dica.util.eLog
 
 open class BaseDialogFragment: DialogFragment() {
     fun myShow(manager: FragmentManager?, tag: String) {

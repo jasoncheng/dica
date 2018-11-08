@@ -1,17 +1,17 @@
-package link.mawa.android.fragment
+package cool.mixi.dica.fragment
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import cool.mixi.dica.App
+import cool.mixi.dica.R
+import cool.mixi.dica.bean.Status
+import cool.mixi.dica.util.IStatusDataSouce
+import cool.mixi.dica.util.StatusTimeline
+import cool.mixi.dica.util.dLog
 import kotlinx.android.synthetic.main.fg_timeline.*
-import link.mawa.android.App
-import link.mawa.android.R
-import link.mawa.android.bean.Status
-import link.mawa.android.util.IStatusDataSouce
-import link.mawa.android.util.StatusTimeline
-import link.mawa.android.util.dLog
 import retrofit2.Call
 
 abstract class TimelineFragment: Fragment(), IStatusDataSouce {

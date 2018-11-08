@@ -1,4 +1,4 @@
-package link.mawa.android.fragment
+package cool.mixi.dica.fragment
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
@@ -14,8 +14,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.fg_photo_process.view.*
-import link.mawa.android.R
-import link.mawa.android.bean.Consts
+import cool.mixi.dica.R
+import cool.mixi.dica.bean.Consts
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream

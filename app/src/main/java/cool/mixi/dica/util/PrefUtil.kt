@@ -1,16 +1,24 @@
-package link.mawa.android.util
+package cool.mixi.dica.util
 
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import link.mawa.android.App
-import link.mawa.android.R
-import link.mawa.android.bean.Consts
+import cool.mixi.dica.App
+import cool.mixi.dica.R
+import cool.mixi.dica.bean.Consts
 
 class PrefUtil {
 
     companion object {
         fun default(): SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(App.instance.applicationContext)
+
+        fun resetAll() {
+            setApiUrl("")
+            setLastStatus("")
+            setPassword("")
+            setSiteIcon("")
+            setSiteName("")
+        }
 
         fun didSetUserCredential(): Boolean {
             return !getUsername().isEmpty() && !getPassword().isEmpty()

@@ -1,7 +1,7 @@
-package link.mawa.android.util
+package cool.mixi.dica.util
 
 import android.text.TextUtils
-import link.mawa.android.bean.Status
+import cool.mixi.dica.bean.Status
 import java.nio.charset.StandardCharsets
 import java.util.regex.Pattern
 

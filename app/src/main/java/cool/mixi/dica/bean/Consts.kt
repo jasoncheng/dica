@@ -1,4 +1,4 @@
-package link.mawa.android.bean
+package cool.mixi.dica.bean
 
 object Consts {
 
@@ -11,7 +11,7 @@ object Consts {
     var REQ_PHOTO_PATH = 999
 
     var FRIENDICA_WEB = "https://friendi.ca"
-    var MIXI_URL = "http://mixi.cool"
+    var MIXI_URL = "http://dica.mixi.cool"
     var API_HOST = "https://mawa.link"
     val ID_STATUS = "statusId"
     var FG_COMPOSE = "compose"

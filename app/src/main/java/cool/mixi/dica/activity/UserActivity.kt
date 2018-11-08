@@ -1,17 +1,17 @@
-package link.mawa.android.activity
+package cool.mixi.dica.activity
 
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_user.*
-import link.mawa.android.App
-import link.mawa.android.R
-import link.mawa.android.adapter.StatusesAdapter
-import link.mawa.android.bean.Consts
-import link.mawa.android.bean.Status
-import link.mawa.android.bean.User
-import link.mawa.android.util.ApiService
-import link.mawa.android.util.IStatusDataSouce
-import link.mawa.android.util.StatusTimeline
-import link.mawa.android.util.eLog
+import cool.mixi.dica.App
+import cool.mixi.dica.R
+import cool.mixi.dica.adapter.StatusesAdapter
+import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Status
+import cool.mixi.dica.bean.User
+import cool.mixi.dica.util.ApiService
+import cool.mixi.dica.util.IStatusDataSouce
+import cool.mixi.dica.util.StatusTimeline
+import cool.mixi.dica.util.eLog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -44,7 +44,11 @@ class UserActivity: BaseActivity(), IStatusDataSouce {
             return
         }
 
-        ApiService.create().usersShow(userId!!).enqueue(CallbackUser(this))
+        ApiService.create().usersShow(userId!!).enqueue(
+            CallbackUser(
+                this
+            )
+        )
     }
 
     class CallbackUser(activity: UserActivity): Callback<User> {

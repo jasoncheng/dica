@@ -1,4 +1,4 @@
-package link.mawa.android.util
+package cool.mixi.dica.util
 
 import android.util.Log
 import java.security.MessageDigest

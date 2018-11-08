@@ -1,4 +1,4 @@
-package link.mawa.android.util
+package cool.mixi.dica.util
 
 import android.content.Context
 import com.bumptech.glide.Glide
@@ -16,7 +16,9 @@ import java.io.InputStream
 class MyGlideModule : AppGlideModule() {
 
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
-        registry?.append(String::class.java,InputStream::class.java, HeaderLoader.Factory())
+        registry?.append(String::class.java,InputStream::class.java,
+            HeaderLoader.Factory()
+        )
     }
 
     override fun isManifestParsingEnabled(): Boolean {
@@ -35,7 +37,10 @@ class MyGlideModule : AppGlideModule() {
 
         override fun getHeaders(model: String?, width: Int, height: Int, options: Options?): Headers? {
             val headersBuilder = LazyHeaders.Builder()
-            headersBuilder.addHeader("Authorization", Credentials.basic(PrefUtil.getUsername(), PrefUtil.getUsername()))
+            headersBuilder.addHeader("Authorization", Credentials.basic(
+                PrefUtil.getUsername(),
+                PrefUtil.getUsername()
+            ))
             headersBuilder.addHeader("Referer", "https://mawa.link")
             headersBuilder.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36")
             return headersBuilder.build()

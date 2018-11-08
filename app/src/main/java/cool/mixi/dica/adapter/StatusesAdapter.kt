@@ -1,4 +1,4 @@
-package link.mawa.android.adapter
+package cool.mixi.dica.adapter
 
 import android.content.Context
 import android.content.Intent
@@ -21,17 +21,17 @@ import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
 import kotlinx.android.synthetic.main.status_action_box.view.*
 import kotlinx.android.synthetic.main.status_list_item.view.*
-import link.mawa.android.App
-import link.mawa.android.R
-import link.mawa.android.activity.BaseActivity
-import link.mawa.android.activity.StatusActivity
-import link.mawa.android.activity.UserActivity
-import link.mawa.android.bean.Consts
-import link.mawa.android.bean.Status
-import link.mawa.android.bean.User
-import link.mawa.android.fragment.ComposeDialogFragment
-import link.mawa.android.util.ApiService
-import link.mawa.android.util.ILike
+import cool.mixi.dica.App
+import cool.mixi.dica.R
+import cool.mixi.dica.activity.BaseActivity
+import cool.mixi.dica.activity.StatusActivity
+import cool.mixi.dica.activity.UserActivity
+import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Status
+import cool.mixi.dica.bean.User
+import cool.mixi.dica.fragment.ComposeDialogFragment
+import cool.mixi.dica.util.ApiService
+import cool.mixi.dica.util.ILike
 import java.util.*
 
 

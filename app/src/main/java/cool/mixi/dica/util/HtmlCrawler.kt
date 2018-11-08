@@ -1,4 +1,4 @@
-package link.mawa.android.util
+package cool.mixi.dica.util
 
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
@@ -20,7 +20,7 @@ class HtmlCrawler {
 
     companion object {
         fun run(url: String, callback: IHtmlCrawler) {
-            var meta = Meta(url,null,null, null)
+            var meta = Meta(url, null, null, null)
             doAsync {
                 var agent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
                 val doc = Jsoup.connect(meta.url).userAgent(agent).followRedirects(true).get()

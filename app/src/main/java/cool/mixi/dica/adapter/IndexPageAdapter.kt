@@ -1,13 +1,13 @@
-package link.mawa.android.adapter
+package cool.mixi.dica.adapter
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
-import link.mawa.android.R
-import link.mawa.android.activity.MainActivity
-import link.mawa.android.fragment.FriendsTimelineFragment
-import link.mawa.android.fragment.MyTimelineFragment
-import link.mawa.android.fragment.PublicTimelineFragment
+import cool.mixi.dica.R
+import cool.mixi.dica.activity.MainActivity
+import cool.mixi.dica.fragment.TimelineFriendsFragment
+import cool.mixi.dica.fragment.TimelineMyFragment
+import cool.mixi.dica.fragment.TimelinePublicFragment
 
 class IndexPageAdapter(val activity: MainActivity, fragmentManager: FragmentManager): FragmentPagerAdapter(fragmentManager){
 
@@ -15,9 +15,9 @@ class IndexPageAdapter(val activity: MainActivity, fragmentManager: FragmentMana
 
     override fun getItem(position: Int): Fragment {
         return when(position) {
-            0 -> FriendsTimelineFragment()
-            1 -> PublicTimelineFragment()
-            else -> MyTimelineFragment()
+            0 -> TimelineFriendsFragment()
+            1 -> TimelinePublicFragment()
+            else -> TimelineMyFragment()
         }
     }
 

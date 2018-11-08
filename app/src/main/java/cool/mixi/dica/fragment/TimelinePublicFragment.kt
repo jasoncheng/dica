@@ -4,7 +4,7 @@ import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.ApiService
 import retrofit2.Call
 
-class PublicTimelineFragment: TimelineFragment() {
+class TimelinePublicFragment: TimelineFragment() {
     override fun sourceOld(): Call<List<Status>> {
         return ApiService.create().statusPublicTimeline("", "${stl?.maxId}")
     }

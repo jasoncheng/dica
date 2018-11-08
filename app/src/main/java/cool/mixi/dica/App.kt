@@ -1,11 +1,11 @@
-package link.mawa.android
+package cool.mixi.dica
 
 import android.app.Application
 import android.widget.Toast
-import link.mawa.android.bean.Group
-import link.mawa.android.bean.Profile
-import link.mawa.android.util.ApiService
-import link.mawa.android.util.dLog
+import cool.mixi.dica.bean.Group
+import cool.mixi.dica.bean.Profile
+import cool.mixi.dica.util.ApiService
+import cool.mixi.dica.util.dLog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

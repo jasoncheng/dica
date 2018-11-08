@@ -1,4 +1,4 @@
-package link.mawa.android.activity
+package cool.mixi.dica.activity
 
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
-import link.mawa.android.R
-import link.mawa.android.bean.Consts
-import link.mawa.android.util.StatusTimeline
+import cool.mixi.dica.R
+import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.util.StatusTimeline
 
 open class BaseActivity: AppCompatActivity() {
 

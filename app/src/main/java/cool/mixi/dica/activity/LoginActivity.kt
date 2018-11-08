@@ -1,16 +1,16 @@
-package link.mawa.android.activity
+package cool.mixi.dica.activity
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import cool.mixi.dica.App
+import cool.mixi.dica.R
+import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Profile
+import cool.mixi.dica.util.ApiService
+import cool.mixi.dica.util.PrefUtil
+import cool.mixi.dica.util.eLog
 import kotlinx.android.synthetic.main.activity_login.*
-import link.mawa.android.App
-import link.mawa.android.R
-import link.mawa.android.bean.Consts
-import link.mawa.android.bean.Profile
-import link.mawa.android.util.ApiService
-import link.mawa.android.util.PrefUtil
-import link.mawa.android.util.eLog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -38,7 +38,11 @@ class LoginActivity: BaseActivity() {
     fun login() {
         loading(getString(R.string.loading))
         try {
-            ApiService.create().friendicaProfileShow(null).enqueue(MyCallback(this))
+            ApiService.create().friendicaProfileShow(null).enqueue(
+                MyCallback(
+                    this
+                )
+            )
         }catch (e: Exception) {
             eLog("======> ${e.message}")
             App.instance.toast(e.message!!)

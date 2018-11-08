@@ -1,4 +1,4 @@
-package link.mawa.android.fragment
+package cool.mixi.dica.fragment
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -14,16 +14,20 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import cool.mixi.dica.App
+import cool.mixi.dica.R
+import cool.mixi.dica.activity.BaseActivity
+import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Status
+import cool.mixi.dica.util.ApiService
+import cool.mixi.dica.util.PrefUtil
+import cool.mixi.dica.util.dLog
+import cool.mixi.dica.util.eLog
 import kotlinx.android.synthetic.main.dlg_compose.*
 import kotlinx.android.synthetic.main.dlg_compose.view.*
-import link.mawa.android.App
-import link.mawa.android.R
-import link.mawa.android.activity.BaseActivity
-import link.mawa.android.bean.Consts
-import link.mawa.android.bean.Status
-import link.mawa.android.util.*
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -217,7 +221,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         box.removeAllViews()
         box.addView(imgView)
         box.visibility = View.VISIBLE
-        GlideApp.with(context!!).load(imageFile).into(imgView!!)
+        Glide.with(context!!).load(imageFile).into(imgView!!)
         imgView.setOnClickListener {
             (it.parent as ViewGroup).removeView(it)
             mediaFile = null
@@ -258,7 +262,9 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
 
         if(mediaFile == null){
-            ApiService.create().statusUpdate(text, in_reply_status_id!!, lat, long, App.instance.selectedGroup).enqueue(StatusUpdateCallback(this))
+            ApiService.create().statusUpdate(text, in_reply_status_id!!, lat, long, App.instance.selectedGroup).enqueue(
+                StatusUpdateCallback(this)
+            )
             return
         }
 
@@ -273,7 +279,9 @@ class ComposeDialogFragment: BaseDialogFragment() {
         App.instance.selectedGroup.forEach {
             map.put("group_allow[]", RequestBody.create(MediaType.parse("text/plain"),it.toString()))
         }
-        ApiService.create().statusUpdate(status, statusIdBody, latBody, longBody, map, body).enqueue(StatusUpdateCallback(this))
+        ApiService.create().statusUpdate(status, statusIdBody, latBody, longBody, map, body).enqueue(
+            StatusUpdateCallback(this)
+        )
     }
 
     private fun composeDone() {

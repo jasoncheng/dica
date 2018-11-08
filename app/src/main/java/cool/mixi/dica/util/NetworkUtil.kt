@@ -1,8 +1,8 @@
-package link.mawa.android.util
+package cool.mixi.dica.util
 
 import android.content.Context
 import android.net.ConnectivityManager
-import link.mawa.android.App
+import cool.mixi.dica.App
 
 
 class NetworkUtil {

@@ -1,10 +1,11 @@
-package link.mawa.android.util
+package cool.mixi.dica.util
 
 import com.google.gson.GsonBuilder
-import link.mawa.android.App
-import link.mawa.android.BuildConfig
-import link.mawa.android.R
-import link.mawa.android.bean.*
+import cool.mixi.dica.App
+import cool.mixi.dica.bean.*
+import cool.mixi.dica.BuildConfig
+import cool.mixi.dica.R
+import cool.mixi.dica.bean.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -14,7 +15,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
-import retrofit2.http.Headers
 import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.HttpsURLConnection
@@ -89,7 +89,10 @@ interface ApiService {
                 clientBuilder.addInterceptor(interceptor)
             }
 
-            val authToken = Credentials.basic(PrefUtil.getUsername(), PrefUtil.getPassword())
+            val authToken = Credentials.basic(
+                PrefUtil.getUsername(),
+                PrefUtil.getPassword()
+            )
             val basicAuthInterceptor = Interceptor {
                 var request = it.request()
                 val headers = request.headers().newBuilder().add("Authorization", authToken).build()
@@ -167,7 +170,8 @@ interface ApiService {
 
         // for BAD format JSON response, so i have to do this.
         fun like(isLike: Boolean, id: Int, callback: ILike) {
-            var fn= if(isLike) { ApiService.create().like(id) } else { ApiService.create().unlike(id) }
+            var fn= if(isLike) { create()
+                .like(id) } else { create().unlike(id) }
             fn.enqueue(object: Callback<String>{
                 override fun onFailure(call: Call<String>, t: Throwable) {
                     t.message?.let { eLog(it) }

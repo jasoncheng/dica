@@ -1,4 +1,4 @@
-package link.mawa.android.activity
+package cool.mixi.dica.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,14 +6,14 @@ import android.support.v4.view.ViewPager
 import android.support.v7.widget.PopupMenu
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import cool.mixi.dica.App
+import cool.mixi.dica.R
+import cool.mixi.dica.adapter.IndexPageAdapter
+import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Profile
+import cool.mixi.dica.fragment.ComposeDialogFragment
+import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.activity_main.*
-import link.mawa.android.App
-import link.mawa.android.R
-import link.mawa.android.adapter.IndexPageAdapter
-import link.mawa.android.bean.Consts
-import link.mawa.android.bean.Profile
-import link.mawa.android.fragment.ComposeDialogFragment
-import link.mawa.android.util.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -33,7 +33,11 @@ class MainActivity : BaseActivity() {
             }
 
             try {
-                ApiService.create().friendicaProfileShow(null).enqueue(ProfileCallback(this))
+                ApiService.create().friendicaProfileShow(null).enqueue(
+                    ProfileCallback(
+                        this
+                    )
+                )
             }catch (e: Exception){
                 dLog("${e.message}")
                 App.instance.toast(getString(R.string.common_error).format("${e.message}"))
@@ -75,7 +79,10 @@ class MainActivity : BaseActivity() {
         if(!homeName.isNullOrEmpty() && homeName != getString(R.string.app_name)){
             home_title?.text = homeName
         } else {
-            HtmlCrawler.run(PrefUtil.getApiUrl(), MyHtmlCrawler(this))
+            HtmlCrawler.run(
+                PrefUtil.getApiUrl(),
+                MyHtmlCrawler(this)
+            )
         }
     }
 
@@ -119,8 +126,8 @@ class MainActivity : BaseActivity() {
 
     private fun logout() {
         App.instance.myself = null
-        PrefUtil.setApiUrl("")
-        PrefUtil.setUsername("")
+        App.instance.mygroup = null
+        PrefUtil.resetAll()
         goLogin()
         finish()
     }

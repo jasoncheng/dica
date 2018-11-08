@@ -1,13 +1,13 @@
-package link.mawa.android.util
+package cool.mixi.dica.util
 
 import android.content.Context
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import link.mawa.android.App
-import link.mawa.android.R
-import link.mawa.android.adapter.StatusesAdapter
-import link.mawa.android.bean.Status
+import cool.mixi.dica.App
+import cool.mixi.dica.R
+import cool.mixi.dica.adapter.StatusesAdapter
+import cool.mixi.dica.bean.Status
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -21,7 +21,8 @@ interface IStatusDataSouce {
 
 class StatusTimeline(val context: Context, val table: RecyclerView,
                      private val swipeRefreshLayout: SwipeRefreshLayout,
-                     val dataSouce: IStatusDataSouce) : SwipeRefreshLayout.OnRefreshListener {
+                     val dataSouce: IStatusDataSouce
+) : SwipeRefreshLayout.OnRefreshListener {
 
     private var statuses = ArrayList<Status>()
 

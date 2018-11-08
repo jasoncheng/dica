@@ -1,4 +1,4 @@
-package link.mawa.android.bean
+package cool.mixi.dica.bean
 
 import java.io.Serializable
 
