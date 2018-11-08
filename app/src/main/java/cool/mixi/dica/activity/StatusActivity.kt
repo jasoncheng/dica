@@ -1,7 +1,6 @@
 package cool.mixi.dica.activity
 
 import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_status.*
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Consts
@@ -9,6 +8,7 @@ import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.ApiService
 import cool.mixi.dica.util.IStatusDataSouce
 import cool.mixi.dica.util.StatusTimeline
+import kotlinx.android.synthetic.main.activity_status.*
 import retrofit2.Call
 import java.util.*
 
@@ -30,11 +30,16 @@ class StatusActivity: BaseActivity(), IStatusDataSouce {
         }
 
         stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
-        stl?.loadNewest(null)
+        home_srl.setOnRefreshListener {
+            stl?.loadNewest(this)
+        }
+
+        stl?.loadNewest(this)
     }
 
 
     override fun loaded(data: List<Status>) {
+        stl?.allLoaded = true
         Collections.reverse(data)
         stl?.clear()
         stl?.addAll(data!!)
@@ -42,7 +47,6 @@ class StatusActivity: BaseActivity(), IStatusDataSouce {
     }
 
     override fun sourceOld(): Call<List<Status>>? {
-        stl?.allLoaded = true
         return null
     }
 

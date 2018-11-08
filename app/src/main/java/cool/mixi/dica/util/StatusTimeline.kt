@@ -21,10 +21,12 @@ interface IStatusDataSouce {
 
 class StatusTimeline(val context: Context, val table: RecyclerView,
                      private val swipeRefreshLayout: SwipeRefreshLayout,
-                     val dataSouce: IStatusDataSouce
+                     private val dataSouce: IStatusDataSouce
 ) : SwipeRefreshLayout.OnRefreshListener {
 
     private var statuses = ArrayList<Status>()
+    // is load more toast show
+    var noMoreDataToastShow = false
 
     // if everything is loaded
     var allLoaded: Boolean = false
@@ -67,14 +69,17 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
     @Synchronized open fun loadMore(callback: IStatusDataSouce?){
         if(allLoaded){
-            App.instance.toast(context.getString(R.string.all_data_load))
+            if(!noMoreDataToastShow){
+                App.instance.toast(context.getString(R.string.all_data_load))
+                noMoreDataToastShow = true
+            }
             swipeRefreshLayout.isRefreshing = false
             return
         }
 
         iLog("loadMore maxId ${maxId}")
-        swipeRefreshLayout.isRefreshing = true
         dataSouce.sourceOld()?.enqueue(StatuesCallback(this, false, callback))
+        swipeRefreshLayout.isRefreshing = true
     }
 
     class OnStatusTableScrollListener(stl: StatusTimeline): RecyclerView.OnScrollListener() {
