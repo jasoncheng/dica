@@ -19,11 +19,53 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep public class * implements com.bumptech.glide.module.GlideModule
--keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+-keepattributes Signature, InnerClasses, EnclosingMethod
+
+# Dica
+-keepclassmembers class cool.mixi.dica.bean.** {*;}
+# Android
+-keep class com.google.**
+-dontwarn com.google.**
+-dontwarn android.support.**
+-dontnote android.support.v4.**
+-keep class android.support.v4.** { *; }
+-dontnote android.support.v7.**
+-keep public class android.support.v7.widget.** { *; }
+-keep public class android.support.v7.internal.widget.** { *; }
+-keep public class android.support.v7.internal.view.menu.** { *; }
+-keep public class * extends android.support.v4.view.ActionProvider {
+    public <init>(android.content.Context);
+}
+-keep class android.webkit.WebViewClient
+-keep class * extends android.webkit.WebViewClient
+-keepclassmembers class * extends android.webkit.WebViewClient {
+    <methods>;
+}
+
+# Glide
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public class * extends com.bumptech.glide.AppGlideModule
 -keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
     **[] $VALUES;
     public *;
 }
+
+# retrofit
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-dontwarn javax.annotation.**
+-dontwarn kotlin.Unit
+-dontwarn retrofit2.-KotlinExtensions
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+
+# Jsoup
+-keep public class org.jsoup.** {
+public *;
+}
+-keepnames class org.jsoup.nodes.Entities
