@@ -8,24 +8,26 @@ android:padding="8dp">
 
     <LinearLayout
             android:id="@+id/group_permission"
+            android:orientation="horizontal"
             android:layout_width="match_parent" android:layout_height="wrap_content">
         <RadioGroup
                 android:id="@+id/main_radiogroup"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
                 android:orientation="horizontal">
         <RadioButton
                 android:id="@+id/rb_public"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
                 android:checked="true"
                 android:text="@string/permission_public"/>
             <RadioButton
                     android:id="@+id/rb_assign"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
                     android:text="@string/permission_assign"/>
         </RadioGroup>
     </LinearLayout>
@@ -88,6 +90,7 @@ android:padding="8dp">
                 android:id="@+id/iv_location"
                 android:includeFontPadding="false"
                 android:textSize="12sp"
+                android:gravity="center_vertical"
                 app:layout_constraintStart_toEndOf="@+id/iv_from_camera" android:layout_marginStart="4dp"
                 android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toStartOf="@+id/bt_submit" android:layout_marginTop="8dp"

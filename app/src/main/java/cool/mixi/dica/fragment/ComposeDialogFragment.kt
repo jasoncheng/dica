@@ -16,6 +16,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import cool.mixi.dica.App
 import cool.mixi.dica.R
@@ -181,13 +183,27 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
     }
 
+    val locationCallback: LocationCallback by lazy {
+        (object: LocationCallback() {
+            override fun onLocationResult(p0: LocationResult?) {
+                super.onLocationResult(p0)
+            }
+        })
+    }
+
     private val locationPermCallback = object : PermissionCallback {
         @SuppressLint("MissingPermission")
         override fun permissionGranted() {
+            dLog("fetch last location")
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
             fusedLocationClient.lastLocation.addOnSuccessListener {
+                dLog("fetch last location callback ${it}")
                 it ?: return@addOnSuccessListener
                 getLastLocation(it)
+                dLog(it.altitude.toString())
+            }
+            fusedLocationClient.lastLocation.addOnFailureListener {
+                it?.message?.let { it1 -> App.instance.toast(it1) }
             }
         }
 
