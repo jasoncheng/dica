@@ -1,7 +1,7 @@
-package link.mawa.android.fragment
+package cool.mixi.dica.fragment
 
-import link.mawa.android.bean.Status
-import link.mawa.android.util.ApiService
+import cool.mixi.dica.bean.Status
+import cool.mixi.dica.util.ApiService
 import retrofit2.Call
 
 class FriendsTimelineFragment: TimelineFragment() {
