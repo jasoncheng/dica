@@ -38,9 +38,10 @@ import java.util.*
 
 class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
 
-    open var ownerInfo: User? = null
+    var ownerInfo: User? = null
     private val likeDrawable = context.getDrawable(R.drawable.thumb_up_sel)
     private val unlikeDrawable = context.getDrawable(R.drawable.thumb_up)
+    private val privateMessage = context.getDrawable(R.drawable.lock)
 
     enum class ViewType {
         USER_PROFILE,
@@ -63,15 +64,25 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             pos = position - 1
         }
 
-        // MainActivity + StatusActivity + Others...
         val st = data[pos]
         var date = Date(st.created_at)
+        var lockContainer = holder.datetime
         if(context !is UserActivity){
             doLayoutUserBox(holder, st, pos)
             holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time)
+            lockContainer = holder.userName
+
         } else {
             holder.datetime?.text = date.toLocaleString()
         }
+
+        // private message icon
+        if(st.friendica_private) {
+            lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
+        } else {
+            lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+        }
+
         doLayoutContent(holder, st, pos)
         doLayoutLikeRelated(holder.like!!, pos)
     }
