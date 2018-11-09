@@ -113,6 +113,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
         override fun onFailure(call: Call<List<Status>>, t: Throwable) {
             if(ref.get() == null){
+                dLog("fail ${t.message}")
                 return
             }
         }
@@ -124,7 +125,10 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
             val act = ref.get()!!
             act.swipeRefreshLayout.isRefreshing = false
-            if(response.body() == null) {return}
+            if(response.body() == null) {
+                callback?.loaded(ArrayList())
+                return
+            }
 
             val res = response.body()
 
