@@ -3,7 +3,6 @@ package cool.mixi.dica.util
 import com.google.gson.GsonBuilder
 import cool.mixi.dica.App
 import cool.mixi.dica.BuildConfig
-import cool.mixi.dica.R
 import cool.mixi.dica.bean.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
@@ -20,6 +19,7 @@ interface ApiService {
     @POST("statuses/update")
     @FormUrlEncoded
     fun statusUpdate(
+        @Field("source") source: String,
         @Field("status") status: String,
         @Field("in_reply_to_status_id") in_reply_to_status_id: Int,
         @Field("lat") lat: String,
@@ -29,6 +29,7 @@ interface ApiService {
     @POST("statuses/update_with_media")
     @Multipart
     fun statusUpdate(
+        @Part("source") source: RequestBody,
         @Part("status") status: RequestBody,
         @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
         @Part("lat") lat: RequestBody,
@@ -104,16 +105,16 @@ interface ApiService {
                     it.proceed(request)
                 }
 
-                val statusSourceInterceptor = Interceptor {
-                    val original = it.request()
-                    val originalHttpUrl = original.url()
-                    val url = originalHttpUrl.newBuilder()
-                        .addQueryParameter("source", App.instance.getString(R.string.app_name))
-                        .build()
-                    val requestBuilder = original.newBuilder()
-                        .url(url)
-                    it.proceed(requestBuilder.build())
-                }
+//                val statusSourceInterceptor = Interceptor {
+//                    val original = it.request()
+//                    val originalHttpUrl = original.url()
+//                    val url = originalHttpUrl.newBuilder()
+//                        .addQueryParameter("source", App.instance.getString(R.string.app_name))
+//                        .build()
+//                    val requestBuilder = original.newBuilder()
+//                        .url(url)
+//                    it.proceed(requestBuilder.build())
+//                }
 
                 val cacheInterceptor = Interceptor {
                     it.request().headers().toMultimap().forEach { key, value ->
