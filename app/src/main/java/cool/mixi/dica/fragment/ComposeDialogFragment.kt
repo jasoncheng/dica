@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.location.Address
-import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,18 +15,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.BaseActivity
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
-import cool.mixi.dica.util.ApiService
-import cool.mixi.dica.util.PrefUtil
-import cool.mixi.dica.util.dLog
-import cool.mixi.dica.util.eLog
+import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.dlg_compose.*
 import kotlinx.android.synthetic.main.dlg_compose.view.*
 import okhttp3.MediaType
@@ -118,36 +111,35 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        dLog("=============> onActivityResult callback lol.......$requestCode")
         if(requestCode == Consts.REQ_PHOTO_PATH) {
             try {
                 mediaFile = File(data?.getStringExtra(Consts.EXTRA_PHOTO_URI))
-                dLog("=============> onActivityResult: ${mediaFile?.absolutePath} ${mediaFile?.exists()}")
                 addPhotoPreview(mediaFile!!)
             }catch (e: java.lang.Exception){}
             return
         }
+
         EasyImage.handleActivityResult(requestCode, resultCode, data, activity, imageSelectedCallback)
     }
 
-    private fun getLastLocation(location: Location) {
-        val view = roomView?.iv_location!!
-        view.text = getString(R.string.loading)
-        val geocoder = Geocoder(context, Locale.getDefault())
-        Thread(Runnable {
-            try {
-                var addresses = geocoder.getFromLocation(
-                    location.latitude, location.longitude, 1
-                )
-                lastAddress = addresses.first()
-                this@ComposeDialogFragment.activity?.runOnUiThread {
-                    view.text = lastAddress?.getAddressLine(0)
+    private fun setMyLocation() {
+        roomView?.iv_location?.text = getString(R.string.loading)
+        LocationUtil.instance.getLocation(object: IGetLocation {
+            override fun done(location: Location?) {
+                if (location != null) {
+                    setMyAddress(location)
                 }
-            } catch (e: Exception) {
-                view.text = ""
-                e.printStackTrace()
             }
-        }).start()
+        })
+    }
+
+    private fun setMyAddress(location: Location){
+        LocationUtil.instance.getAddress(location, object: IGetAddress{
+            override fun done(address: Address) {
+                lastAddress = address
+                roomView?.iv_location?.text = address.getAddressLine(0)
+            }
+        })
     }
 
     private val imageSelectedCallback = object : DefaultCallback() {
@@ -183,28 +175,10 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
     }
 
-    val locationCallback: LocationCallback by lazy {
-        (object: LocationCallback() {
-            override fun onLocationResult(p0: LocationResult?) {
-                super.onLocationResult(p0)
-            }
-        })
-    }
-
     private val locationPermCallback = object : PermissionCallback {
         @SuppressLint("MissingPermission")
         override fun permissionGranted() {
-            dLog("fetch last location")
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
-            fusedLocationClient.lastLocation.addOnSuccessListener {
-                dLog("fetch last location callback ${it}")
-                it ?: return@addOnSuccessListener
-                getLastLocation(it)
-                dLog(it.altitude.toString())
-            }
-            fusedLocationClient.lastLocation.addOnFailureListener {
-                it?.message?.let { it1 -> App.instance.toast(it1) }
-            }
+            setMyLocation()
         }
 
         override fun permissionRefused() {
@@ -270,15 +244,16 @@ class ComposeDialogFragment: BaseDialogFragment() {
     private fun composeSubmit() {
         (activity as BaseActivity).loading(getString(R.string.status_saving))
         val text = et_text.text.toString()
-        var lat:String = ""
-        var long:String = ""
+        var lat = ""
+        var long = ""
+        var source = activity?.getString(R.string.app_name)
         if(lastAddress != null){
             lat = "${lastAddress?.latitude}"
             long = "${lastAddress?.longitude}"
         }
 
         if(mediaFile == null){
-            ApiService.create().statusUpdate(text, in_reply_status_id!!, lat, long, App.instance.selectedGroup).enqueue(
+            ApiService.create().statusUpdate(source!!, text, in_reply_status_id!!, lat, long, App.instance.selectedGroup).enqueue(
                 StatusUpdateCallback(this)
             )
             return
@@ -289,13 +264,14 @@ class ComposeDialogFragment: BaseDialogFragment() {
         val status = RequestBody.create(MediaType.parse("multipart/form-data"), text)
 
         val statusIdBody = RequestBody.create(MediaType.parse("multipart/form-data"), "$in_reply_status_id")
+        val sourceBody = RequestBody.create(MediaType.parse("multipart/form-data"), source)
         val latBody = RequestBody.create(MediaType.parse("multipart/form-data"), lat)
         val longBody = RequestBody.create(MediaType.parse("multipart/form-data"), long)
         var map = LinkedHashMap<String, RequestBody>()
         App.instance.selectedGroup.forEach {
-            map.put("group_allow[]", RequestBody.create(MediaType.parse("text/plain"),it.toString()))
+            map["group_allow[]"] = RequestBody.create(MediaType.parse("text/plain"),it.toString())
         }
-        ApiService.create().statusUpdate(status, statusIdBody, latBody, longBody, map, body).enqueue(
+        ApiService.create().statusUpdate(sourceBody, status, statusIdBody, latBody, longBody, map, body).enqueue(
             StatusUpdateCallback(this)
         )
     }
@@ -303,8 +279,6 @@ class ComposeDialogFragment: BaseDialogFragment() {
     private fun composeDone() {
         et_text.setText("")
         dismiss()
-
-        // Reload Group
         App.instance.loadGroup()
     }
 
@@ -337,11 +311,15 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
         }
         builder?.setPositiveButton(android.R.string.ok) { dialog, button ->
-            App.instance.selectedGroup.forEach { dLog("GroupSelected ${it}") }
-            if(App.instance.selectedGroup.size == 0){
-                roomView?.rb_public?.isChecked = true
-            }
+            afterGroupSelected()
         }
+        builder?.setOnDismissListener { afterGroupSelected() }
         builder?.create()?.show()
+    }
+
+    fun afterGroupSelected(){
+        if(App.instance.selectedGroup.size == 0){
+            roomView?.rb_public?.isChecked = true
+        }
     }
 }

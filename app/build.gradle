@@ -10,11 +10,12 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId 'cool.mixi.dica'
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 27
-        versionCode 18110802
-        versionName "0.0.1"
+        versionCode 18110901
+        versionName "0.0.2"
     }
+
     buildTypes {
         debug {
         }

@@ -17,19 +17,13 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 
 * Enable for all [Friendica](https://friendi.ca) base website
 * Simple Public / Friends / MySelf timeline in dashboard
-* Simple User Page
+* Simple user page
 * Simple status page
-* Status Post (photo / location tag / group permission)
+* Status post (photo / location tag / group permission)
+* Support offline capacity
+* Notification
 * Like / UnLike status
 
-***CHANGELOG***
-
-* v0.0.1 (18110802)
-	
-	> First version release
-* v0.0.2
-
-	> 
 
 ***DOWNLOAD***
 

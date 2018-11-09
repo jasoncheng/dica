@@ -10,6 +10,8 @@ object Consts {
 
     var REQ_PHOTO_PATH = 999
 
+    var OTYPE_ITEM = "item"
+
     var FRIENDICA_WEB = "https://friendi.ca"
     var MIXI_URL = "http://dica.mixi.cool"
     var API_HOST = "https://mawa.link"
@@ -21,6 +23,7 @@ object Consts {
     var EXTRA_PHOTO_URI = "photoUri"
     var EXTRA_USER = "user"
     var EXTRA_USER_ID = "userId"
+    var EXTRA_NOTIFICATIONS = "notifications"
     var EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
     var EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
 }
