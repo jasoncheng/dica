@@ -2,22 +2,18 @@ package cool.mixi.dica.util
 
 import com.google.gson.GsonBuilder
 import cool.mixi.dica.App
-import cool.mixi.dica.bean.*
 import cool.mixi.dica.BuildConfig
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
 import java.io.File
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.HttpsURLConnection
 
 interface ApiService {
 
@@ -50,7 +46,7 @@ interface ApiService {
 
     @GET("statuses/friends_timeline?exclude_replies=true")
     fun statusFriendsTimeline(@Query("since_id") since_id: String,
-                             @Query("max_id") max_id: String): Call<List<Status>>
+                              @Query("max_id") max_id: String): Call<List<Status>>
 
     @GET("statuses/user_timeline?exclude_replies=true")
     fun statusUserTimeline(
@@ -75,87 +71,95 @@ interface ApiService {
     @GET("friendica/group_show")
     fun friendicaGroupShow(): Call<ArrayList<Group>>
 
+    @GET("friendica/notifications")
+    fun friendicaNotifications(): Call<List<Notification>>
+
+    @POST("friendica/notification/seen")
+    @FormUrlEncoded
+    fun friendicaNotificationSeen(@Field("id") nid: Int): Call<String>
+
     companion object Factory {
 
         var cookies = HashSet<String>()
 
         private val client: OkHttpClient
-        get() {
-            val clientBuilder = OkHttpClient.Builder()
+            get() {
+                val clientBuilder = OkHttpClient.Builder()
 
-            if(BuildConfig.DEBUG) {
-                val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.HEADERS
-                clientBuilder.addInterceptor(interceptor)
-            }
+                if(BuildConfig.DEBUG) {
+                    val interceptor = HttpLoggingInterceptor()
+                    interceptor.level = HttpLoggingInterceptor.Level.BODY
+                    clientBuilder.addInterceptor(interceptor)
+                }
 
-            val authToken = Credentials.basic(
-                PrefUtil.getUsername(),
-                PrefUtil.getPassword()
-            )
-            val basicAuthInterceptor = Interceptor {
-                var request = it.request()
-                val headers = request.headers().newBuilder().add("Authorization", authToken).build()
-                dLog("=======>headers "+headers.names().toString())
-                request = request.newBuilder().headers(headers).build()
-                it.proceed(request)
-            }
+                val authToken = Credentials.basic(
+                    PrefUtil.getUsername(),
+                    PrefUtil.getPassword()
+                )
+                val basicAuthInterceptor = Interceptor {
+                    var request = it.request()
+                    val headers = request.headers().newBuilder().add("Authorization", authToken).build()
+                    dLog("=======>headers "+headers.names().toString())
+                    request = request.newBuilder().headers(headers).build()
+                    it.proceed(request)
+                }
 
-            val statusSourceInterceptor = Interceptor {
-                val original = it.request()
-                val originalHttpUrl = original.url()
-                val url = originalHttpUrl.newBuilder()
-                    .addQueryParameter("source", App.instance.getString(R.string.app_name))
+                val statusSourceInterceptor = Interceptor {
+                    val original = it.request()
+                    val originalHttpUrl = original.url()
+                    val url = originalHttpUrl.newBuilder()
+                        .addQueryParameter("source", App.instance.getString(R.string.app_name))
+                        .build()
+                    val requestBuilder = original.newBuilder()
+                        .url(url)
+                    it.proceed(requestBuilder.build())
+                }
+
+                val cacheInterceptor = Interceptor {
+                    it.request().headers().toMultimap().forEach { key, value ->
+                        dLog("Request Header ${key} ${value}")
+                    }
+                    dLog("Request Body ${it.request().body().toString()}")
+                    val request = if(NetworkUtil.isNetworkConnected()) {
+                        it.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build()
+                    } else {
+                        it.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build()
+                    }
+
+                    it.proceed(request)
+                }
+
+                val saveCookieInterceptor = Interceptor {
+                    val res = it.proceed(it.request())
+                    res.headers().toMultimap().forEach { key, value ->
+                        dLog("Response Header ${key} ${value}")
+                    }
+
+                    res
+                }
+
+                val addCookieInterceptor = Interceptor {
+                    val builder = it.request().newBuilder()!!
+                    cookies.forEach { it ->
+                        builder.addHeader("Cookie", it)
+                    }
+                    it.proceed(builder.build())
+                }
+
+                val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
+                val cache = Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
+
+
+                return clientBuilder.cache(cache)
+                    .addInterceptor(basicAuthInterceptor)
+                    .addInterceptor(addCookieInterceptor)
+                    .addInterceptor(saveCookieInterceptor)
+//                    .addInterceptor(statusSourceInterceptor)
+                    .addInterceptor(cacheInterceptor)
+                    .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                    .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
                     .build()
-                val requestBuilder = original.newBuilder()
-                    .url(url)
-                it.proceed(requestBuilder.build())
             }
-
-            val cacheInterceptor = Interceptor {
-                it.request().headers().toMultimap().forEach { key, value ->
-                    dLog("Request Header ${key} ${value}")
-                }
-                val request = if(NetworkUtil.isNetworkConnected()) {
-                    it.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build()
-                } else {
-                    it.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build()
-                }
-
-                it.proceed(request)
-            }
-
-            val saveCookieInterceptor = Interceptor {
-                val res = it.proceed(it.request())
-                res.headers().toMultimap().forEach { key, value ->
-                    dLog("Response Header ${key} ${value}")
-                }
-
-                res
-            }
-
-            val addCookieInterceptor = Interceptor {
-                val builder = it.request().newBuilder()!!
-                cookies.forEach { it ->
-                    builder.addHeader("Cookie", it)
-                }
-                it.proceed(builder.build())
-            }
-
-            val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
-            val cache = Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
-
-
-            return clientBuilder.cache(cache)
-                .addInterceptor(basicAuthInterceptor)
-                .addInterceptor(addCookieInterceptor)
-                .addInterceptor(saveCookieInterceptor)
-                .addInterceptor(statusSourceInterceptor)
-                .addInterceptor(cacheInterceptor)
-                .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
-                .build()
-        }
 
         fun create(): ApiService {
             val gson = GsonBuilder().serializeNulls().setLenient().create()
@@ -167,32 +171,5 @@ interface ApiService {
                 .build()
             return retrofit.create(ApiService::class.java)
         }
-
-        // for BAD format JSON response, so i have to do this.
-        fun like(isLike: Boolean, id: Int, callback: ILike) {
-            var fn= if(isLike) { create()
-                .like(id) } else { create().unlike(id) }
-            fn.enqueue(object: Callback<String>{
-                override fun onFailure(call: Call<String>, t: Throwable) {
-                    t.message?.let { eLog(it) }
-                    callback.fail()
-                }
-
-                override fun onResponse(call: Call<String>, response: Response<String>) {
-                    if(response.code() == HttpsURLConnection.HTTP_OK
-                        && response.body().toString().contains("ok")) {
-                        callback.done()
-                        return
-                    }
-                    callback.fail()
-                }
-
-            })
-        }
     }
-}
-
-interface ILike {
-    fun done()
-    fun fail()
 }

@@ -10,6 +10,7 @@ class TimelineFriendsFragment: TimelineFragment() {
     }
 
     override fun sourceNew(): Call<List<Status>> {
+        reloadNotification()
         return ApiService.create().statusFriendsTimeline("${stl?.sinceId}", "")
     }
 }

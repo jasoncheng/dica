@@ -10,6 +10,7 @@ class TimelinePublicFragment: TimelineFragment() {
     }
 
     override fun sourceNew(): Call<List<Status>> {
+        reloadNotification()
         return ApiService.create().statusPublicTimeline("${stl?.sinceId}", "")
     }
 }

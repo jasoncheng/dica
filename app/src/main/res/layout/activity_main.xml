@@ -38,6 +38,22 @@
                 app:layout_constraintBottom_toBottomOf="@+id/home_title"
                 app:layout_constraintStart_toEndOf="@+id/home_title" android:layout_marginStart="8dp"
         />
+      <TextView
+              android:text="0"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/tv_unread"
+              android:includeFontPadding="false"
+              android:textColor="@color/unread_count"
+              android:shadowColor="#333333"
+              android:shadowDy="0"
+              android:shadowDx="6"
+              android:padding="4dp"
+              android:textAppearance="@android:style/TextAppearance.Material.Large" android:typeface="normal"
+              android:textSize="24sp" app:layout_constraintEnd_toEndOf="@+id/home_avatar"
+              android:layout_marginEnd="20dp"
+              android:visibility="gone"
+              app:layout_constraintTop_toTopOf="parent" android:textStyle="bold"/>
     </android.support.constraint.ConstraintLayout>
 
     <android.support.v4.view.ViewPager

@@ -18,9 +18,6 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
-import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
-import kotlinx.android.synthetic.main.status_action_box.view.*
-import kotlinx.android.synthetic.main.status_list_item.view.*
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.BaseActivity
@@ -30,8 +27,11 @@ import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
 import cool.mixi.dica.fragment.ComposeDialogFragment
-import cool.mixi.dica.util.ApiService
+import cool.mixi.dica.util.FriendicaUtil
 import cool.mixi.dica.util.ILike
+import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
+import kotlinx.android.synthetic.main.status_action_box.view.*
+import kotlinx.android.synthetic.main.status_list_item.view.*
 import java.util.*
 
 
@@ -226,7 +226,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
 
         doLayoutLikeRelated(view as TextView, position)
-        ApiService.like(!isLike, st.id, object : ILike {
+        FriendicaUtil.like(!isLike, st.id, object : ILike {
             override fun done() {}
             override fun fail() {
                 App.instance.toast(context.getString(R.string.common_error).format(""))

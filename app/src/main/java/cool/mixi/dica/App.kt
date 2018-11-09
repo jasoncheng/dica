@@ -12,11 +12,8 @@ import retrofit2.Response
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
 
-
-
 class App: Application() {
 
-    // Caching
     var myself: Profile? = null
     var mygroup: ArrayList<Group>? = null
     var selectedGroup: ArrayList<Int> = ArrayList()
@@ -33,9 +30,7 @@ class App: Application() {
 
     fun loadGroup(){
         ApiService.create().friendicaGroupShow().enqueue(object: Callback<ArrayList<Group>>{
-            override fun onFailure(call: Call<ArrayList<Group>>, t: Throwable) {
-            }
-
+            override fun onFailure(call: Call<ArrayList<Group>>, t: Throwable){}
             override fun onResponse(call: Call<ArrayList<Group>>, response: Response<ArrayList<Group>>) {
                 if(response.code() != HttpsURLConnection.HTTP_OK || response.body() == null){
                     return
@@ -47,6 +42,6 @@ class App: Application() {
     }
 
     fun toast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

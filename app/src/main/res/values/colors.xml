@@ -8,4 +8,6 @@
     <color name="user_large_profile_divider">#EFEFEF</color>
     <color name="like_counter">#880E4F</color>
     <color name="app_description">#cccccc</color>
+    <color name="notification_unread">#e8eaf6</color>
+    <color name="unread_count">#b71c1c</color>
 </resources>
