@@ -20,6 +20,7 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 * Simple User Page
 * Simple status page
 * Status Post (photo / location tag / group permission)
+* Notification
 * Like / UnLike status
 
 ***CHANGELOG***
