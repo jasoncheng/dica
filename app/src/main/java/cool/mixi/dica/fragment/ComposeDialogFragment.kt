@@ -279,8 +279,6 @@ class ComposeDialogFragment: BaseDialogFragment() {
     private fun composeDone() {
         et_text.setText("")
         dismiss()
-
-        // Reload Group
         App.instance.loadGroup()
     }
 
@@ -313,11 +311,15 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
         }
         builder?.setPositiveButton(android.R.string.ok) { dialog, button ->
-            App.instance.selectedGroup.forEach { dLog("GroupSelected ${it}") }
-            if(App.instance.selectedGroup.size == 0){
-                roomView?.rb_public?.isChecked = true
-            }
+            afterGroupSelected()
         }
+        builder?.setOnDismissListener { afterGroupSelected() }
         builder?.create()?.show()
+    }
+
+    fun afterGroupSelected(){
+        if(App.instance.selectedGroup.size == 0){
+            roomView?.rb_public?.isChecked = true
+        }
     }
 }

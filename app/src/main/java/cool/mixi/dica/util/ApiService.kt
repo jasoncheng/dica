@@ -100,21 +100,9 @@ interface ApiService {
                 val basicAuthInterceptor = Interceptor {
                     var request = it.request()
                     val headers = request.headers().newBuilder().add("Authorization", authToken).build()
-                    dLog("=======>headers "+headers.names().toString())
                     request = request.newBuilder().headers(headers).build()
                     it.proceed(request)
                 }
-
-//                val statusSourceInterceptor = Interceptor {
-//                    val original = it.request()
-//                    val originalHttpUrl = original.url()
-//                    val url = originalHttpUrl.newBuilder()
-//                        .addQueryParameter("source", App.instance.getString(R.string.app_name))
-//                        .build()
-//                    val requestBuilder = original.newBuilder()
-//                        .url(url)
-//                    it.proceed(requestBuilder.build())
-//                }
 
                 val cacheInterceptor = Interceptor {
                     it.request().headers().toMultimap().forEach { key, value ->
@@ -130,22 +118,23 @@ interface ApiService {
                     it.proceed(request)
                 }
 
-                val saveCookieInterceptor = Interceptor {
-                    val res = it.proceed(it.request())
-                    res.headers().toMultimap().forEach { key, value ->
-                        dLog("Response Header ${key} ${value}")
-                    }
-
-                    res
-                }
-
-                val addCookieInterceptor = Interceptor {
-                    val builder = it.request().newBuilder()!!
-                    cookies.forEach { it ->
-                        builder.addHeader("Cookie", it)
-                    }
-                    it.proceed(builder.build())
-                }
+                //TODO: cannot get Set-Cookie, temporary disable
+//                val saveCookieInterceptor = Interceptor {
+//                    val res = it.proceed(it.request())
+//                    res.headers().toMultimap().forEach { key, value ->
+//                        dLog("Response Header ${key} ${value}")
+//                    }
+//
+//                    res
+//                }
+//
+//                val addCookieInterceptor = Interceptor {
+//                    val builder = it.request().newBuilder()!!
+//                    cookies.forEach { it ->
+//                        builder.addHeader("Cookie", it)
+//                    }
+//                    it.proceed(builder.build())
+//                }
 
                 val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
                 val cache = Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
@@ -153,9 +142,8 @@ interface ApiService {
 
                 return clientBuilder.cache(cache)
                     .addInterceptor(basicAuthInterceptor)
-                    .addInterceptor(addCookieInterceptor)
-                    .addInterceptor(saveCookieInterceptor)
-//                    .addInterceptor(statusSourceInterceptor)
+//                    .addInterceptor(addCookieInterceptor)
+//                    .addInterceptor(saveCookieInterceptor)
                     .addInterceptor(cacheInterceptor)
                     .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
                     .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
