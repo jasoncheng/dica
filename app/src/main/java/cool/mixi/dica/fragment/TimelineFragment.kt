@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import cool.mixi.dica.App
 import cool.mixi.dica.R
+import cool.mixi.dica.activity.MainActivity
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.IStatusDataSouce
 import cool.mixi.dica.util.StatusTimeline
@@ -31,6 +32,10 @@ abstract class TimelineFragment: Fragment(), IStatusDataSouce {
 
     override fun loaded(data: List<Status>){
         dLog("")
+    }
+
+    fun reloadNotification(){
+        (activity as MainActivity).getNotifications()
     }
 
     abstract override fun sourceOld(): Call<List<Status>>

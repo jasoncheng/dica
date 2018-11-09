@@ -2,16 +2,20 @@ package cool.mixi.dica.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.view.ViewCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.PopupMenu
+import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.adapter.IndexPageAdapter
 import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Notification
 import cool.mixi.dica.bean.Profile
 import cool.mixi.dica.fragment.ComposeDialogFragment
+import cool.mixi.dica.fragment.NotificationDialog
 import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
@@ -21,6 +25,8 @@ import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
 
 class MainActivity : BaseActivity() {
+
+    var notifications: ArrayList<Notification> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,12 +61,19 @@ class MainActivity : BaseActivity() {
 
         // avatar
         home_avatar.setOnClickListener {
+            val unreadCount = getUnSeenCount()
+            if(unreadCount > 0){
+                showNotifications()
+                return@setOnClickListener
+            }
+
             var pop = PopupMenu(this, it)
             var inflater = pop.menuInflater
             inflater.inflate(R.menu.index_avatar_menu, pop.menu)
             pop.setOnMenuItemClickListener { it ->
                 when(it.itemId) {
                     R.id.menu_logout -> logout()
+                    R.id.menu_notifications -> showNotifications()
                 }
                 true
             }
@@ -84,6 +97,11 @@ class MainActivity : BaseActivity() {
                 MyHtmlCrawler(this)
             )
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        getNotifications()
     }
 
     fun initViewPager(){
@@ -157,5 +175,57 @@ class MainActivity : BaseActivity() {
             act.initViewPager()
         }
 
+    }
+
+    // Notifications start here
+
+    class MyNotificationCallback(activity: MainActivity): Callback<List<Notification>> {
+        private val ref = WeakReference<MainActivity>(activity)
+        override fun onFailure(call: Call<List<Notification>>, t: Throwable) {}
+        override fun onResponse(call: Call<List<Notification>>, response: Response<List<Notification>>) {
+            if(ref.get() == null) { return }
+            val activity = ref.get()
+            activity?.notifications?.clear()
+            response.body()?.forEach {
+                activity?.notifications?.add(it)
+            }
+            activity?.getNotificationDialog()?.refreshDataSource()
+            activity?.updateUnreadUI()
+        }
+    }
+
+    fun updateUnreadUI() {
+        ViewCompat.setElevation(tv_unread, 9.toFloat())
+        val count = getUnSeenCount()
+        if(count == 0){
+            tv_unread.visibility = View.GONE
+        } else {
+            tv_unread.visibility = View.VISIBLE
+            tv_unread.text = count.toString()
+            tv_unread.setOnClickListener{ showNotifications() }
+        }
+    }
+
+    private fun getNotificationDialog(): NotificationDialog? {
+        return supportFragmentManager.findFragmentByTag(Consts.EXTRA_NOTIFICATIONS) as? NotificationDialog
+    }
+
+    private fun showNotifications() {
+        val dlg = NotificationDialog()
+        dlg.data = notifications
+        dlg.myShow(supportFragmentManager, Consts.EXTRA_NOTIFICATIONS)
+    }
+
+    private fun getUnSeenCount(): Int {
+        var c = 0
+        notifications.forEach {
+            if(it.seen == 0) c++
+        }
+        return c
+    }
+
+    fun getNotifications(){
+        dLog("getNotifications")
+        ApiService.create().friendicaNotifications().enqueue(MyNotificationCallback(this))
     }
 }

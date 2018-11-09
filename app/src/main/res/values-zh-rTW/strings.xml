@@ -34,4 +34,6 @@
     <string name="index_friends_timeline">朋友的</string>
     <string name="app_description">A simple unofficial client for Friendica</string>
     <string name="index_my_timeline">自己的</string>
+    <string name="notifications">通知</string>
+    <string name="mark_all_notifications_seen">全部標示已讀</string>
 </resources>
