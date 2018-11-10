@@ -29,6 +29,7 @@ import cool.mixi.dica.bean.User
 import cool.mixi.dica.fragment.ComposeDialogFragment
 import cool.mixi.dica.util.FriendicaUtil
 import cool.mixi.dica.util.ILike
+import kotlinx.android.synthetic.main.empty_view.view.*
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
 import kotlinx.android.synthetic.main.status_action_box.view.*
 import kotlinx.android.synthetic.main.status_list_item.view.*
@@ -40,6 +41,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
     var ownerInfo: User? = null
     var isFavoritesFragment: Boolean = false
+    var initLoaded: Boolean = false
     private val likeDrawable = context.getDrawable(R.drawable.thumb_up_sel)
     private val unlikeDrawable = context.getDrawable(R.drawable.thumb_up)
     private val privateMessage = context.getDrawable(R.drawable.lock)
@@ -49,7 +51,8 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         USER_PROFILE,
         STATUS,
         STATUS_SIMPLE,
-        REPLY
+        REPLY,
+        EMPTY
     }
 
     private val requestOptions = RequestOptions()
@@ -57,6 +60,15 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         .transforms(RoundedCorners(18))!!
 
     override fun onBindViewHolder(holder: BasicStatusViewHolder, position: Int) {
+        if(holder is EmptyViewHolder){
+            if(initLoaded){
+                holder.empty_description?.visibility = View.VISIBLE
+            } else {
+                holder.empty_description?.visibility = View.GONE
+            }
+            return
+        }
+
         var pos = position
         if(context is UserActivity){
             if(position == 0){
@@ -91,6 +103,10 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 
     override fun getItemViewType(position: Int): Int {
+        if( data.size == 0){
+            return ViewType.EMPTY.ordinal
+        }
+
         if(context is UserActivity){
             if (position == 0){
                 return ViewType.USER_PROFILE.ordinal
@@ -103,10 +119,14 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BasicStatusViewHolder {
-        // HeaderView
+        // EmptyView & UserPage HeaderView
         if(viewType == ViewType.USER_PROFILE.ordinal){
             return UserProfileViewHolder(
                 LayoutInflater.from(context).inflate(R.layout.rv_user_item_header, parent, false)
+            )
+        } else if(viewType == ViewType.EMPTY.ordinal) {
+            return EmptyViewHolder(
+                LayoutInflater.from(context).inflate(R.layout.empty_view, parent, false)
             )
         }
 
@@ -139,6 +159,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
     override fun getItemCount(): Int {
         val extraSize = if(context is UserActivity) 1 else 0
+
+        // for empty view
+        if(extraSize == 0 && data.size == 0){
+            return 1
+        }
+
         return data.size + extraSize
     }
 
@@ -320,7 +346,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name
     open var avatar:ImageView? = view.avatar
-
+    var empty_description: TextView? = view.tv_empty
     var content:TextView? = view.tv_content
     var datetime:TextView? = view.tv_datetime
     var media:ImageView? = view.media
@@ -337,3 +363,4 @@ class UserProfileViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusNoUserInfoViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusReplyViewHolder(view: View): BasicStatusViewHolder(view)
+class EmptyViewHolder(view: View): BasicStatusViewHolder(view)

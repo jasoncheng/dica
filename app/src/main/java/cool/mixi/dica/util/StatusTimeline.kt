@@ -168,6 +168,15 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 return
             }
 
+            // no any data
+            if(act.statuses.size == 0 && res!!.isEmpty()){
+                dLog("StatuesCallback: no data")
+                val adapter = act.table.adapter as StatusesAdapter
+                adapter.initLoaded = true
+                adapter.notifyDataSetChanged()
+                return
+            }
+
             // common process
             if(act.ifRequireClear) {
                 act.statuses.clear()

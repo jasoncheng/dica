@@ -38,4 +38,5 @@
     <string name="status_not_exists">item not exists</string>
   <string name="index_favorites_timeline">favorites</string>
     <string name="status_favorites">favorites</string>
+    <string name="no_any_status">no data here</string>
 </resources>
