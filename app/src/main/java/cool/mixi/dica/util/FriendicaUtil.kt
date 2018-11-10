@@ -1,6 +1,8 @@
 package cool.mixi.dica.util
 
 import android.text.TextUtils
+import cool.mixi.dica.App
+import cool.mixi.dica.R
 import cool.mixi.dica.bean.Status
 import retrofit2.Call
 import retrofit2.Callback
@@ -25,6 +27,7 @@ class FriendicaUtil {
     companion object {
         private val proxyImagePattern = Pattern.compile("\\/proxy\\/([a-z0-9]{2})\\/",
             Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL)
+        private val serviceUnavailable = App.instance.getString(R.string.common_error)
 
         fun stripStatusTextProxyUrl(status: Status) {
             if(status.text == null || status.text.isEmpty()) {
@@ -70,6 +73,27 @@ class FriendicaUtil {
                         return
                     }
                     callback.fail()
+                }
+
+            })
+        }
+
+        fun favorites(isFavorites: Boolean, id: Int) {
+            var fn= if(isFavorites) {
+                ApiService.create().favoritesCreate(id)
+            } else { ApiService.create().favoritesDestroy(id) }
+
+            fn.enqueue(object: Callback<Status> {
+                override fun onResponse(call: Call<Status>, response: Response<Status>) {
+                    if(response.code() != HttpsURLConnection.HTTP_OK){
+                        eLog("favorites ${response.body()} ${response.errorBody()}")
+                        App.instance.toast(serviceUnavailable.format(response.body()))
+                    }
+                }
+
+                override fun onFailure(call: Call<Status>, t: Throwable) {
+                    eLog("favorites ${t?.message}")
+                    App.instance.toast(serviceUnavailable.format(t.message))
                 }
 
             })
