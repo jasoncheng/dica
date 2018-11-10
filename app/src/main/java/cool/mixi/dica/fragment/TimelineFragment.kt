@@ -49,6 +49,7 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
         stl?.clear()
         stl?.addAll(data)
         try {
+            (statuses_list.adapter as StatusesAdapter).initLoaded = true
             statuses_list.adapter.notifyDataSetChanged()
         }catch(e: Exception){
             eLog("${e.message}")

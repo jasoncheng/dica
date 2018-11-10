@@ -76,7 +76,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
     @Synchronized open fun loadMore(callback: IStatusDataSource?){
         if(allLoaded){
-            dLog("loadMore: all loaded")
             if(!noMoreDataToastShow){
                 App.instance.toast(context.getString(R.string.all_data_load))
                 noMoreDataToastShow = true
@@ -126,7 +125,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         }
 
         override fun onResponse(call: Call<List<Status>>, response: Response<List<Status>>) {
-            dLog("StatuesCallback response  ${response.errorBody()}, ${response.message()}")
             if(ref.get() == null){
                 return
             }
@@ -151,7 +149,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
                     act.allLoaded = true
                     act.table.adapter.notifyItemChanged(idx)
-                    dLog("stop here")
                     return
                 }
             }
@@ -164,10 +161,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
             // no any data
             if(act.statuses.size == 0 && res!!.isEmpty()){
-                dLog("StatuesCallback: no data")
-                val adapter = act.table.adapter as StatusesAdapter
-                adapter.initLoaded = true
-                adapter.notifyDataSetChanged()
+                act.table.adapter.notifyDataSetChanged()
                 return
             }
 
@@ -184,7 +178,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                     act.statuses.add(it)
                     act.table.adapter.notifyItemInserted(act.table.adapter.itemCount)
                 }
-//                act.table.adapter.notifyDataSetChanged()
             }
         }
     }
