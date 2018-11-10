@@ -37,7 +37,6 @@ class StatusActivity: BaseActivity(), IStatusDataSource {
         stl?.loadNewest(this)
     }
 
-
     override fun loaded(data: List<Status>) {
         if(data.isEmpty()){
             App.instance.toast(getString(R.string.status_not_exists))

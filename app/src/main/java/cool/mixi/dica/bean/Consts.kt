@@ -8,22 +8,25 @@ object Consts {
     val CACHE_SIZE_IN_MB = 10
 
 
-    var REQ_PHOTO_PATH = 999
+    val REQ_PHOTO_PATH = 999
 
-    var OTYPE_ITEM = "item"
+    val OTYPE_ITEM = "item"
 
-    var FRIENDICA_WEB = "https://friendi.ca"
-    var MIXI_URL = "http://dica.mixi.cool"
-    var API_HOST = "https://mawa.link"
+    val FRIENDICA_WEB = "https://friendi.ca"
+    val MIXI_URL = "http://dica.mixi.cool"
+    val API_HOST = "https://mawa.link"
     val ID_STATUS = "statusId"
-    var FG_COMPOSE = "compose"
-    var FG_PHOTO_CROP = "crop"
-    var SDCARD_FOLDER_OUT = "out"
 
-    var EXTRA_PHOTO_URI = "photoUri"
-    var EXTRA_USER = "user"
-    var EXTRA_USER_ID = "userId"
-    var EXTRA_NOTIFICATIONS = "notifications"
-    var EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
-    var EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
+    val FG_COMPOSE = "compose"
+    val FG_PHOTO_CROP = "crop"
+    val FG_USERS = "users"
+
+    val SDCARD_FOLDER_OUT = "out"
+
+    val EXTRA_PHOTO_URI = "photoUri"
+    val EXTRA_USER = "user"
+    val EXTRA_USER_ID = "userId"
+    val EXTRA_NOTIFICATIONS = "notifications"
+    val EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
+    val EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
 }

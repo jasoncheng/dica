@@ -27,6 +27,7 @@ import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
 import cool.mixi.dica.fragment.ComposeDialogFragment
+import cool.mixi.dica.fragment.UsersDialog
 import cool.mixi.dica.util.FriendicaUtil
 import cool.mixi.dica.util.ILike
 import kotlinx.android.synthetic.main.empty_view.view.*
@@ -60,11 +61,11 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         .transforms(RoundedCorners(18))!!
 
     override fun onBindViewHolder(holder: BasicStatusViewHolder, position: Int) {
-        if(holder is EmptyViewHolder){
+        if(holder is EmptyHolder){
             if(initLoaded){
-                holder.empty_description?.visibility = View.VISIBLE
+                holder.emptyDescription?.visibility = View.VISIBLE
             } else {
-                holder.empty_description?.visibility = View.GONE
+                holder.emptyDescription?.visibility = View.GONE
             }
             return
         }
@@ -103,15 +104,15 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 
     override fun getItemViewType(position: Int): Int {
-        if( data.size == 0){
-            return ViewType.EMPTY.ordinal
-        }
-
         if(context is UserActivity){
             if (position == 0){
                 return ViewType.USER_PROFILE.ordinal
+            } else if(data.size == 0){
+                return ViewType.EMPTY.ordinal
             }
             return ViewType.STATUS_SIMPLE.ordinal
+        } else if(data.size == 0){
+            return ViewType.EMPTY.ordinal
         }
 
         val st = data[position]
@@ -119,26 +120,30 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BasicStatusViewHolder {
+        val inflater = LayoutInflater.from(context)
+
         // EmptyView & UserPage HeaderView
         if(viewType == ViewType.USER_PROFILE.ordinal){
             return UserProfileViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.rv_user_item_header, parent, false)
+                inflater.inflate(R.layout.rv_user_item_header, parent, false)
             )
         } else if(viewType == ViewType.EMPTY.ordinal) {
-            return EmptyViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.empty_view, parent, false)
-            )
+            return if(context is UserActivity) {
+                EmptyHolder(inflater.inflate(R.layout.empty_view_user_page, parent, false))
+            } else {
+                EmptyUserPageHolder(inflater.inflate(R.layout.empty_view, parent, false))
+            }
         }
 
         var holder = when (viewType) {
             ViewType.REPLY.ordinal -> StatusReplyViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.reply_list_item, parent, false)
+                inflater.inflate(R.layout.reply_list_item, parent, false)
             )
             ViewType.STATUS_SIMPLE.ordinal -> StatusNoUserInfoViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.rv_user_item, parent, false)
+                inflater.inflate(R.layout.rv_user_item, parent, false)
             )
             else -> StatusViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.status_list_item, parent, false)
+                inflater.inflate(R.layout.status_list_item, parent, false)
             )
         }
 
@@ -153,12 +158,21 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         holder.comment?.setOnClickListener { actComment(it) }
         holder.share?.setOnClickListener { actShare(it) }
         holder.like?.setOnClickListener { actLike(it) }
+        holder.tvLikeDetails?.setOnClickListener { gotoUserLikesPage(it) }
         holder.favorites?.setOnClickListener { actFavorites(it) }
         return holder
     }
 
     override fun getItemCount(): Int {
-        val extraSize = if(context is UserActivity) 1 else 0
+        var extraSize = 0
+
+        if(context is UserActivity){
+            extraSize = if(data.size > 0){
+                1
+            } else {
+                2
+            }
+        }
 
         // for empty view
         if(extraSize == 0 && data.size == 0){
@@ -195,9 +209,6 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             sp.setSpan(bold, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
             tvLikeDetails.visibility = View.VISIBLE
             tvLikeDetails.text = sp
-            tvLikeDetails.setOnClickListener {
-                gotoUserLikesPage(pos)
-            }
         }
     }
 
@@ -312,8 +323,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         App.instance.toast(context.getString(R.string.not_implement_yet))
     }
 
-    private fun gotoUserLikesPage(pos: Int){
-
+    private fun gotoUserLikesPage(view: View){
+        val position = (view.parent as ViewGroup).tag as Int
+        val st = data[position]
+        val dlg = UsersDialog()
+        dlg.users = st.friendica_activities.like
+        dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_USERS)
     }
 
     private fun gotoUserPage(view: View) {
@@ -346,7 +361,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name
     open var avatar:ImageView? = view.avatar
-    var empty_description: TextView? = view.tv_empty
+    var emptyDescription: TextView? = view.tv_empty
     var content:TextView? = view.tv_content
     var datetime:TextView? = view.tv_datetime
     var media:ImageView? = view.media
@@ -355,7 +370,7 @@ open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     var like: TextView? = actGroup?.tv_like
     var share: TextView? = actGroup?.tv_share
     var favorites: TextView? = actGroup?.tv_favorites
-    var tv_like_details: TextView? = actGroup?.tv_like_details
+    var tvLikeDetails: TextView? = actGroup?.tv_like_details
     var userDescription:TextView? = view.tv_description
 }
 
@@ -363,4 +378,6 @@ class UserProfileViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusNoUserInfoViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusReplyViewHolder(view: View): BasicStatusViewHolder(view)
-class EmptyViewHolder(view: View): BasicStatusViewHolder(view)
+
+open class EmptyHolder(view: View): BasicStatusViewHolder(view)
+class EmptyUserPageHolder(view: View): EmptyHolder(view)

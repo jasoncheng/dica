@@ -1,17 +1,14 @@
 package cool.mixi.dica.activity
 
 import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_user.*
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
-import cool.mixi.dica.util.ApiService
-import cool.mixi.dica.util.IStatusDataSource
-import cool.mixi.dica.util.StatusTimeline
-import cool.mixi.dica.util.eLog
+import cool.mixi.dica.util.*
+import kotlinx.android.synthetic.main.activity_user.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -34,6 +31,7 @@ class UserActivity: BaseActivity(), IStatusDataSource {
         userId = intent.getStringExtra(Consts.EXTRA_USER_ID)
 
         if(user != null){
+            dLog(user.toString())
             initLoad()
             return
         }
@@ -44,11 +42,7 @@ class UserActivity: BaseActivity(), IStatusDataSource {
             return
         }
 
-        ApiService.create().usersShow(userId!!).enqueue(
-            CallbackUser(
-                this
-            )
-        )
+        ApiService.create().usersShow(userId!!).enqueue(CallbackUser(this))
     }
 
     class CallbackUser(activity: UserActivity): Callback<User> {
@@ -76,15 +70,15 @@ class UserActivity: BaseActivity(), IStatusDataSource {
     fun initLoad(){
         stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
         (rv_statuses_list.adapter as StatusesAdapter).ownerInfo = user
+        stl?.table?.adapter?.notifyDataSetChanged()
         stl?.loadMore(this)
     }
 
     override fun loaded(data: List<Status>) {
-        if(data == null) return
-        data.forEach {
-            stl?.add(it)
-        }
-        rv_statuses_list.adapter.notifyDataSetChanged()
+        val adapter = rv_statuses_list.adapter as StatusesAdapter
+        adapter.initLoaded = true
+        data.forEach { stl?.add(it) }
+        adapter.notifyDataSetChanged()
     }
 
     override fun sourceOld(): Call<List<Status>>? {
