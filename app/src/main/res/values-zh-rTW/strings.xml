@@ -37,4 +37,6 @@
     <string name="notifications">通知</string>
     <string name="mark_all_notifications_seen">全部標示已讀</string>
   <string name="status_not_exists">找不到這個訊息囉</string>
+    <string name="index_favorites_timeline">關注的</string>
+  <string name="status_favorites">關注</string>
 </resources>

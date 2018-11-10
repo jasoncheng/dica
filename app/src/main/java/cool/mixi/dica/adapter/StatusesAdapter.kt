@@ -39,10 +39,12 @@ import java.util.*
 class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
 
     var ownerInfo: User? = null
+    var isFavoritesFragment: Boolean = false
     private val likeDrawable = context.getDrawable(R.drawable.thumb_up_sel)
     private val unlikeDrawable = context.getDrawable(R.drawable.thumb_up)
     private val privateMessage = context.getDrawable(R.drawable.lock)
-
+    private val favoritesDrawable = context.getDrawable(R.drawable.favorites_sel)
+    private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
     enum class ViewType {
         USER_PROFILE,
         STATUS,
@@ -85,6 +87,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
         doLayoutContent(holder, st, pos)
         doLayoutLikeRelated(holder.like!!, pos)
+        doLayoutFavorites(holder.favorites!!, pos)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -130,7 +133,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         holder.comment?.setOnClickListener { actComment(it) }
         holder.share?.setOnClickListener { actShare(it) }
         holder.like?.setOnClickListener { actLike(it) }
-
+        holder.favorites?.setOnClickListener { actFavorites(it) }
         return holder
     }
 
@@ -145,7 +148,6 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
     private fun doLayoutLikeRelated(view: TextView, pos: Int){
         var status = data[pos]
-        var me = App.instance.myself?.friendica_owner!!
         val isLike = amILike(status)
         var likes = status.friendica_activities.like
         if(!isLike){
@@ -170,6 +172,15 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             tvLikeDetails.setOnClickListener {
                 gotoUserLikesPage(pos)
             }
+        }
+    }
+
+    private fun doLayoutFavorites(view: TextView, pos: Int){
+        var status = data[pos]
+        if(status.favorited){
+            view.setCompoundDrawablesWithIntrinsicBounds(favoritesDrawable, null, null, null)
+        } else {
+            view.setCompoundDrawablesWithIntrinsicBounds(unFavoritesDrawable, null, null, null)
         }
     }
 
@@ -245,6 +256,19 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         })
     }
 
+    private fun actFavorites(view: View){
+        val me = App.instance.myself?.friendica_owner!!
+        val position = (view.parent.parent as ViewGroup).tag as Int
+        val st = data[position]
+        st.favorited = !st.favorited
+        doLayoutFavorites(view as TextView, position)
+        FriendicaUtil.favorites(st.favorited, st.id)
+        if(!st.favorited && isFavoritesFragment){
+            data.removeAt(position)
+            notifyDataSetChanged()
+        }
+    }
+
     private fun actComment(view: View) {
         val position = (view.parent.parent as ViewGroup).tag as Int
         val st = data[position]
@@ -304,6 +328,7 @@ open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     var comment: TextView? = actGroup?.tv_comment
     var like: TextView? = actGroup?.tv_like
     var share: TextView? = actGroup?.tv_share
+    var favorites: TextView? = actGroup?.tv_favorites
     var tv_like_details: TextView? = actGroup?.tv_like_details
     var userDescription:TextView? = view.tv_description
 }

@@ -8,14 +8,14 @@ import android.view.ViewGroup
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.MainActivity
+import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Status
-import cool.mixi.dica.util.IStatusDataSouce
+import cool.mixi.dica.util.IStatusDataSource
 import cool.mixi.dica.util.StatusTimeline
-import cool.mixi.dica.util.dLog
 import kotlinx.android.synthetic.main.fg_timeline.*
 import retrofit2.Call
 
-abstract class TimelineFragment: Fragment(), IStatusDataSouce {
+abstract class TimelineFragment: Fragment(), IStatusDataSource {
 
     var stl: StatusTimeline? = null
     var myId: Int = App.instance.myself?.friendica_owner?.id!!
@@ -27,17 +27,17 @@ abstract class TimelineFragment: Fragment(), IStatusDataSouce {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         stl = StatusTimeline(context!!, statuses_list, srl, this).init()
+        stl?.ifRequireClear = true
+        (stl!!.table.adapter as StatusesAdapter).isFavoritesFragment =
+                this.javaClass.simpleName == TimelineFavoritesFragment::class.java.simpleName
         stl?.loadMore(null)
-    }
-
-    override fun loaded(data: List<Status>){
-        dLog("")
     }
 
     fun reloadNotification(){
         (activity as MainActivity).getNotifications()
     }
 
+    override fun loaded(data: List<Status>) {}
     abstract override fun sourceOld(): Call<List<Status>>
     abstract override fun sourceNew(): Call<List<Status>>
 }

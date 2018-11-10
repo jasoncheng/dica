@@ -79,6 +79,18 @@ interface ApiService {
     @FormUrlEncoded
     fun friendicaNotificationSeen(@Field("id") nid: Int): Call<String>
 
+    @GET("favoritesTimeline")
+    fun favoritesTimeline(@Query("since_id") since_id: String,
+                          @Query("max_id") max_id: String): Call<List<Status>>
+
+    @POST("favorites/create")
+    @FormUrlEncoded
+    fun favoritesCreate(@Field("id") id: Int): Call<Status>
+
+    @POST("favorites/destroy")
+    @FormUrlEncoded
+    fun favoritesDestroy(@Field("id") id: Int): Call<Status>
+
     companion object Factory {
 
         var cookies = HashSet<String>()

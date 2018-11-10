@@ -23,6 +23,7 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 * Support offline capacity
 * Notification
 * Like / UnLike status
+* Favorites
 
 
 ***DOWNLOAD***

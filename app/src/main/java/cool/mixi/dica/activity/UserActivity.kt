@@ -9,7 +9,7 @@ import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
 import cool.mixi.dica.util.ApiService
-import cool.mixi.dica.util.IStatusDataSouce
+import cool.mixi.dica.util.IStatusDataSource
 import cool.mixi.dica.util.StatusTimeline
 import cool.mixi.dica.util.eLog
 import retrofit2.Call
@@ -18,7 +18,7 @@ import retrofit2.Response
 import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
 
-class UserActivity: BaseActivity(), IStatusDataSouce {
+class UserActivity: BaseActivity(), IStatusDataSource {
 
     var user: User? = null
     var userId: String? = null
