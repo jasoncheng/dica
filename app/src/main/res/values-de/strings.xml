@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">DiCa</string>
+  <string name="loading">chargement</string>
+  <string name="password">"mot de passe "</string>
+  <string name="username">"Nom d'utilisateur "</string>
+  <string name="logout">"Connectez - Out "</string>
+  <string name="login">"s'identifier "</string>
+</resources>

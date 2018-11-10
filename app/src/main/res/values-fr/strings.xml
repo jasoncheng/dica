@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">DiCa</string>
+  <string name="login">Einloggen</string>
+  <string name="logout">Abmelden</string>
+  <string name="username">Nutzername</string>
+  <string name="password">Passwort</string>
+  <string name="loading">"Wird geladen "</string>
+</resources>
