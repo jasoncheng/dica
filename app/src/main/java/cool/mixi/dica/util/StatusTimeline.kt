@@ -26,9 +26,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
     private var statuses = ArrayList<Status>()
 
-    // refresh mode: if require clear data, then append
-    var ifRequireClear = false
-
     // is load more toast show
     private var noMoreDataToastShow = false
 
@@ -62,19 +59,14 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         statuses.add(status)
     }
 
-    private fun resetQuery(){
+    fun resetQuery(){
         maxId = 0
         sinceId = 0
         allLoaded = false
     }
 
     override fun onRefresh() {
-        if(ifRequireClear){
-            resetQuery()
-            loadMore(null)
-        } else {
-            loadNewest(null)
-        }
+        loadNewest(null)
     }
 
     @Synchronized open fun loadNewest(callback: IStatusDataSource?){
@@ -127,13 +119,14 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         private val insertMode = insertMode
 
         override fun onFailure(call: Call<List<Status>>, t: Throwable) {
+            eLog("fail ${t.message}")
             if(ref.get() == null){
-                dLog("fail ${t.message}")
                 return
             }
         }
 
         override fun onResponse(call: Call<List<Status>>, response: Response<List<Status>>) {
+            dLog("StatuesCallback response  ${response.errorBody()}, ${response.message()}")
             if(ref.get() == null){
                 return
             }
@@ -158,6 +151,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
                     act.allLoaded = true
                     act.table.adapter.notifyItemChanged(idx)
+                    dLog("stop here")
                     return
                 }
             }
@@ -177,11 +171,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 return
             }
 
-            // common process
-            if(act.ifRequireClear) {
-                act.statuses.clear()
-            }
-
             if(insertMode) {
                 res?.forEachIndexed continuing@ { _, it ->
                     if(act.statuses.contains(it)) { return@continuing }
@@ -193,8 +182,9 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 res?.forEachIndexed continuing@ { _, it ->
                     if(act.statuses.contains(it)) { return@continuing }
                     act.statuses.add(it)
+                    act.table.adapter.notifyItemInserted(act.table.adapter.itemCount)
                 }
-                act.table.adapter.notifyDataSetChanged()
+//                act.table.adapter.notifyDataSetChanged()
             }
         }
     }

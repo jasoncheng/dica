@@ -101,7 +101,7 @@ interface ApiService {
 
                 if(BuildConfig.DEBUG) {
                     val interceptor = HttpLoggingInterceptor()
-                    interceptor.level = HttpLoggingInterceptor.Level.BODY
+                    interceptor.level = HttpLoggingInterceptor.Level.HEADERS
                     clientBuilder.addInterceptor(interceptor)
                 }
 
@@ -117,10 +117,6 @@ interface ApiService {
                 }
 
                 val cacheInterceptor = Interceptor {
-                    it.request().headers().toMultimap().forEach { key, value ->
-                        dLog("Request Header ${key} ${value}")
-                    }
-                    dLog("Request Body ${it.request().body().toString()}")
                     val request = if(NetworkUtil.isNetworkConnected()) {
                         it.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build()
                     } else {
