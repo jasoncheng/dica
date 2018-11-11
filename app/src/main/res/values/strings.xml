@@ -39,4 +39,5 @@
   <string name="index_favorites_timeline">favorites</string>
     <string name="status_favorites">favorites</string>
     <string name="no_any_status">no data here</string>
+    <string name="status_source">" - from %1$s"</string>
 </resources>

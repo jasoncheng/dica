@@ -30,18 +30,29 @@ class FriendicaUtil {
         private val serviceUnavailable = App.instance.getString(R.string.common_error)
 
         fun stripStatusTextProxyUrl(status: Status) {
-            if(status.text == null || status.text.isEmpty()) {
+            if(status.text == null || status.text.isEmpty() || status.attachments == null) {
                 return
             }
 
+            // 1. strip proxy image
+            // 2. strip attachments image
             var urls = status.text.urls()
-            urls.forEach {
-                while(proxyImagePattern.matcher(it).find()){
-                    dLog("MatchProxyImage: ${it}")
-                    status.text = status.text.replace(it, "", true)
+            urls.forEach { url ->
+                status.attachments.let { it ->
+                    it.forEach {
+                        if(it.url == url) {
+                            status.text = status.text.replace(url, "")
+                        }
+                    }
+                }
+                while(proxyImagePattern.matcher(url).find()){
+                    dLog("MatchProxyImage: $url")
+                    status.text = status.text.replace(url, "", true)
                     break
                 }
             }
+
+            status.text = status.text.trim()
         }
 
         fun getProxyUrlPartial(originalUrl: String): String{

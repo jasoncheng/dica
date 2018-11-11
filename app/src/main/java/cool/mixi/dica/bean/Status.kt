@@ -13,7 +13,7 @@ data class Status(
     var friendica_private: Boolean,
     var external_url: String,
     var created_at: String,
-    var source: String,
+    var source: String?,
     var favorited: Boolean,
     var friendica_activities: FriendicaActivities,
     var attachments: ArrayList<Attachment>
