@@ -6,7 +6,7 @@ data class Status(
     var friendica_owner: User,
     var statusnet_html: String,
     var text: String,
-    var geo: String,
+    var geo: Geo,
     var in_reply_to_user_id: Int,
     var in_reply_to_status_id: Int,
     var in_reply_to_screen_name: String,
