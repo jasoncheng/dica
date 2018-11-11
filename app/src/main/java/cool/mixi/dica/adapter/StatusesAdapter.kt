@@ -9,6 +9,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.format.DateUtils
 import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
@@ -51,6 +52,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private val privateMessage = context.getDrawable(R.drawable.lock)
     private val favoritesDrawable = context.getDrawable(R.drawable.favorites_sel)
     private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
+    private val statusSoureColor = context.getColor(R.color.txt_status_source)
     enum class ViewType {
         USER_PROFILE,
         STATUS,
@@ -91,7 +93,10 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             lockContainer = holder.userName
 
         } else {
-            holder.datetime?.text = date.toLocaleString()
+            holder.datetime?.let {
+               it.text = date.toLocaleString()
+               doAppendSourceLayout(it, date.toLocaleString(), st)
+            }
         }
 
         // private message icon
@@ -230,12 +235,34 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         holder.userName?.tag = pos
         holder.userName?.setOnClickListener { gotoUserPage(it) }
 
+        st.source?.let { doAppendSourceLayout(holder.userName!!, st.user.screen_name, st) }
+
         holder.avatar?.setTag(R.id.avatar_tag, pos)
         holder.avatar?.setOnClickListener { gotoUserPage(it) }
         Glide.with(context.applicationContext)
             .load(st.user.profile_image_url_large)
             .apply(RequestOptions().circleCrop())
             .into(holder.avatar!!)
+    }
+
+    private fun doAppendSourceLayout(view:TextView, orgStr: String, st: Status) {
+        val it = st.source!!
+        if(it.isEmpty() || it.isBlank()) return
+
+        // for Friendica legacy version API
+        val source = it.replace(" \\(\\)".toRegex(), "").trim()
+
+        val str = context.getString(R.string.status_source).format(source)
+        val start = orgStr.length
+        val end = start + str.length
+        var sp = SpannableString("$orgStr$str")
+        var color = ForegroundColorSpan(statusSoureColor)
+        try {
+            sp.setSpan(color, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            sp.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            sp.setSpan(RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            view?.text = sp
+        }catch (e: Exception){}
     }
 
     private fun doLayoutGeoAddress(view: TextView, pos: Int){
