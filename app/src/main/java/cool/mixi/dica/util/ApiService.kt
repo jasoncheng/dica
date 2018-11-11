@@ -93,7 +93,8 @@ interface ApiService {
 
     companion object Factory {
 
-        var cookies = HashSet<String>()
+        var cookies = ArrayList<String>()
+        var sessionCookie:String? = null
 
         private val client: OkHttpClient
             get() {
@@ -109,6 +110,7 @@ interface ApiService {
                     PrefUtil.getUsername(),
                     PrefUtil.getPassword()
                 )
+
                 val basicAuthInterceptor = Interceptor {
                     var request = it.request()
                     val headers = request.headers().newBuilder().add("Authorization", authToken).build()
@@ -126,23 +128,30 @@ interface ApiService {
                     it.proceed(request)
                 }
 
-                //TODO: cannot get Set-Cookie, temporary disable
-//                val saveCookieInterceptor = Interceptor {
-//                    val res = it.proceed(it.request())
-//                    res.headers().toMultimap().forEach { key, value ->
-//                        dLog("Response Header ${key} ${value}")
-//                    }
-//
-//                    res
-//                }
-//
-//                val addCookieInterceptor = Interceptor {
-//                    val builder = it.request().newBuilder()!!
-//                    cookies.forEach { it ->
-//                        builder.addHeader("Cookie", it)
-//                    }
-//                    it.proceed(builder.build())
-//                }
+                val saveCookieInterceptor = Interceptor {
+                    val res = it.proceed(it.request())
+                    res.headers().toMultimap().forEach { (key, value) ->
+                        var thisCookie = value[0].split(";".toRegex())[0]
+                        if(key.toLowerCase() == "set-cookie" && thisCookie.contains("PHPSESSID")){
+                            sessionCookie = thisCookie
+                        }
+                    }
+
+                    res
+                }
+
+                val addCookieInterceptor = Interceptor { it ->
+                    val builder = it.request().newBuilder()!!
+                    if(sessionCookie != null){
+
+                    }
+                    sessionCookie?.let {
+                        dLog("Request Header reuse w/ Cookie Cache $it")
+                        builder.addHeader("Cookie", it)
+                    }
+
+                    it.proceed(builder.build())
+                }
 
                 val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
                 val cache = Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
@@ -150,8 +159,8 @@ interface ApiService {
 
                 return clientBuilder.cache(cache)
                     .addInterceptor(basicAuthInterceptor)
-//                    .addInterceptor(addCookieInterceptor)
-//                    .addInterceptor(saveCookieInterceptor)
+                    .addInterceptor(addCookieInterceptor)
+                    .addInterceptor(saveCookieInterceptor)
                     .addInterceptor(cacheInterceptor)
                     .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
                     .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
