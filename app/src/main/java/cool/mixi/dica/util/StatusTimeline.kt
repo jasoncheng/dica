@@ -145,6 +145,9 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
                 FriendicaUtil.stripStatusTextProxyUrl(it)
 
+                // Bind Address if possible
+                LocationUtil.instance.bindGeoAddress(it)
+
                 // any more sourceOld status ?
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
                     act.allLoaded = true

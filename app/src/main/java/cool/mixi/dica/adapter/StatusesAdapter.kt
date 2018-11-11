@@ -30,9 +30,12 @@ import cool.mixi.dica.fragment.ComposeDialogFragment
 import cool.mixi.dica.fragment.UsersDialog
 import cool.mixi.dica.util.FriendicaUtil
 import cool.mixi.dica.util.ILike
+import cool.mixi.dica.util.LocationUtil
+import cool.mixi.dica.util.glideUrl
+import kotlinx.android.synthetic.main.box_status_action.view.*
+import kotlinx.android.synthetic.main.box_status_user.view.*
 import kotlinx.android.synthetic.main.empty_view.view.*
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
-import kotlinx.android.synthetic.main.status_action_box.view.*
 import kotlinx.android.synthetic.main.status_list_item.view.*
 import java.util.*
 
@@ -84,7 +87,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         var lockContainer = holder.datetime
         if(context !is UserActivity){
             doLayoutUserBox(holder, st, pos)
-            holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time)
+            holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
             lockContainer = holder.userName
 
         } else {
@@ -99,6 +102,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
 
         doLayoutContent(holder, st, pos)
+        holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
         doLayoutLikeRelated(holder.like!!, pos)
         doLayoutFavorites(holder.favorites!!, pos)
     }
@@ -234,6 +238,22 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             .into(holder.avatar!!)
     }
 
+    private fun doLayoutGeoAddress(view: TextView, pos: Int){
+        var status = data[pos]
+        if(status.geo?.address != null){
+            var address = status.geo?.address
+            view.visibility = View.VISIBLE
+            view.text = address?.getAddressLine(0)
+            view.setOnClickListener {
+                context.startActivity(LocationUtil.mapIntent(address!!))
+            }
+        } else {
+            view.visibility = View.GONE
+            view.text = ""
+            view.setOnClickListener { null }
+        }
+    }
+
     private fun doLayoutContent(holder: BasicStatusViewHolder, st: Status, pos: Int){
         holder.actGroup?.tag = pos
         holder.content?.text = st.text
@@ -243,7 +263,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             holder.media?.visibility = View.VISIBLE
             val attachment = st.attachments[0]
             Glide.with(context.applicationContext)
-                .load(attachment.url)
+                .load(attachment.url.glideUrl())
                 .apply(requestOptions)
                 .into(holder.media!!)
         } else {
@@ -372,6 +392,7 @@ open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     var favorites: TextView? = actGroup?.tv_favorites
     var tvLikeDetails: TextView? = actGroup?.tv_like_details
     var userDescription:TextView? = view.tv_description
+    var geoAddress: TextView? = view.tv_geo_address
 }
 
 class UserProfileViewHolder(view: View): BasicStatusViewHolder(view)

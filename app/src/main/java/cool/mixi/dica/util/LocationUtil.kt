@@ -1,17 +1,23 @@
 package cool.mixi.dica.util
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationManager
+import android.net.Uri
 import android.os.Looper
 import com.google.android.gms.location.*
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import cool.mixi.dica.App
+import cool.mixi.dica.bean.Status
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.util.*
 import kotlin.collections.HashMap
+
+
 
 @SuppressLint("MissingPermission")
 
@@ -33,6 +39,11 @@ class LocationUtil {
 
         @SuppressLint("ConstantLocale")
         private val geocoder = Geocoder(App.instance.applicationContext, Locale.getDefault())
+
+        fun mapIntent(address: Address): Intent {
+            val googleMapUrl = "https://www.google.com/maps/search/?api=1&query=${address.latitude},${address.longitude}"
+            return Intent(Intent.ACTION_VIEW, Uri.parse(googleMapUrl))
+        }
     }
 
     private var mLocationRequest: LocationRequest? = null
@@ -74,10 +85,15 @@ class LocationUtil {
         }
     }
 
-    fun getAddress(callback: IGetAddress) {
-        getLocation(object: IGetLocation {
-            override fun done(location: Location?) {
-                if(location != null) getAddress(location, callback)
+    fun bindGeoAddress(status: Status) {
+        if(status.geo == null || status.geo!!.coordinates == null) return
+        var coor = status.geo!!.coordinates!!
+        val location = Location(LocationManager.GPS_PROVIDER)
+        location.latitude = coor[0]
+        location.longitude = coor[1]
+        getAddress(location, object: IGetAddress {
+            override fun done(address: Address) {
+                status.geo?.address = address
             }
         })
     }
