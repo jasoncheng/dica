@@ -5,7 +5,6 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.MainActivity
 import cool.mixi.dica.adapter.StatusesAdapter
@@ -20,7 +19,6 @@ import retrofit2.Call
 abstract class TimelineFragment: Fragment(), IStatusDataSource {
 
     var stl: StatusTimeline? = null
-    var myId: Int = App.instance.myself?.friendica_owner?.id!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fg_timeline, container, false)
@@ -56,6 +54,6 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
         }
     }
 
-    abstract override fun sourceOld(): Call<List<Status>>
-    abstract override fun sourceNew(): Call<List<Status>>
+    abstract override fun sourceOld(): Call<List<Status>>?
+    abstract override fun sourceNew(): Call<List<Status>>?
 }
