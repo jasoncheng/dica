@@ -13,7 +13,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
 
-interface IStatusDataSouce {
+interface IStatusDataSource {
     fun sourceOld(): Call<List<Status>>?
     fun sourceNew(): Call<List<Status>>?
     fun loaded(data: List<Status>)
@@ -21,13 +21,13 @@ interface IStatusDataSouce {
 
 class StatusTimeline(val context: Context, val table: RecyclerView,
                      private val swipeRefreshLayout: SwipeRefreshLayout,
-                     private val dataSouce: IStatusDataSouce
+                     private val dataSource: IStatusDataSource
 ) : SwipeRefreshLayout.OnRefreshListener {
 
     private var statuses = ArrayList<Status>()
 
     // is load more toast show
-    var noMoreDataToastShow = false
+    private var noMoreDataToastShow = false
 
     // if everything is loaded
     var allLoaded: Boolean = false
@@ -59,16 +59,22 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         statuses.add(status)
     }
 
+    fun resetQuery(){
+        maxId = 0
+        sinceId = 0
+        allLoaded = false
+    }
+
     override fun onRefresh() {
         loadNewest(null)
     }
 
-    @Synchronized open fun loadNewest(callback: IStatusDataSouce?){
+    @Synchronized open fun loadNewest(callback: IStatusDataSource?){
         iLog("loadNewest sinceId ${sinceId}")
-        dataSouce.sourceNew()?.enqueue(StatuesCallback(this, true, callback))
+        dataSource.sourceNew()?.enqueue(StatuesCallback(this, true, callback))
     }
 
-    @Synchronized open fun loadMore(callback: IStatusDataSouce?){
+    @Synchronized open fun loadMore(callback: IStatusDataSource?){
         if(allLoaded){
             if(!noMoreDataToastShow){
                 App.instance.toast(context.getString(R.string.all_data_load))
@@ -79,13 +85,13 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         }
 
         iLog("loadMore maxId ${maxId}")
-        dataSouce.sourceOld()?.enqueue(StatuesCallback(this, false, callback))
+        dataSource.sourceOld()?.enqueue(StatuesCallback(this, false, callback))
         swipeRefreshLayout.isRefreshing = true
     }
 
     class OnStatusTableScrollListener(stl: StatusTimeline): RecyclerView.OnScrollListener() {
         private val ref = SoftReference<StatusTimeline>(stl)
-        var lastVisibleItem: Int? = 0
+        private var lastVisibleItem: Int? = 0
         override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             if(ref.get() == null) {
@@ -106,14 +112,14 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         }
     }
 
-    class StatuesCallback(timeline: StatusTimeline, insertMode: Boolean, val callback: IStatusDataSouce?):
+    class StatuesCallback(timeline: StatusTimeline, insertMode: Boolean, val callback: IStatusDataSource?):
         Callback<List<Status>> {
         private val ref = SoftReference<StatusTimeline>(timeline)
         private val insertMode = insertMode
 
         override fun onFailure(call: Call<List<Status>>, t: Throwable) {
+            eLog("fail ${t.message}")
             if(ref.get() == null){
-                dLog("fail ${t.message}")
                 return
             }
         }
@@ -133,15 +139,19 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
             val res = response.body()
 
             // handle sinceId & maxId
-            res?.forEach {
+            res?.forEachIndexed { idx, it ->
                 if(it.id > act.sinceId) act.sinceId = it.id
                 if(act.maxId == 0 || it.id < act.maxId) act.maxId = it.id
 
                 FriendicaUtil.stripStatusTextProxyUrl(it)
 
+                // Bind Address if possible
+                LocationUtil.instance.bindGeoAddress(it)
+
                 // any more sourceOld status ?
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
                     act.allLoaded = true
+                    act.table.adapter.notifyItemChanged(idx)
                     return
                 }
             }
@@ -152,20 +162,25 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 return
             }
 
-            // common process
+            // no any data
+            if(act.statuses.size == 0 && res!!.isEmpty()){
+                act.table.adapter.notifyDataSetChanged()
+                return
+            }
+
             if(insertMode) {
-                res?.forEach continuing@ {
-                    if(act.statuses.contains(it)) {return@continuing}
+                res?.forEachIndexed continuing@ { _, it ->
+                    if(act.statuses.contains(it)) { return@continuing }
                     act.statuses.add(0, it)
                 }
                 act.table.adapter.notifyDataSetChanged()
                 act.table.scrollToPosition(0)
             } else {
-                res?.forEach continuing@ {
-                    if(act.statuses.contains(it)) {return@continuing}
+                res?.forEachIndexed continuing@ { _, it ->
+                    if(act.statuses.contains(it)) { return@continuing }
                     act.statuses.add(it)
+                    act.table.adapter.notifyItemInserted(act.table.adapter.itemCount)
                 }
-                act.table.adapter.notifyDataSetChanged()
             }
         }
     }

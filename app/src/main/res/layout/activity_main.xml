@@ -18,6 +18,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/home_title"
                 android:gravity="center"
+                android:includeFontPadding="false"
                 android:textAppearance="@android:style/TextAppearance.Material.Title" android:layout_marginStart="8dp"
                 app:layout_constraintStart_toStartOf="parent" android:layout_marginTop="8dp"
                 app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
@@ -35,6 +36,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_home_page_name"
                 android:textSize="12sp"
+                android:paddingBottom="2dp"
                 app:layout_constraintBottom_toBottomOf="@+id/home_title"
                 app:layout_constraintStart_toEndOf="@+id/home_title" android:layout_marginStart="8dp"
         />

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">DiCa</string>
+  <string name="loading">chargement</string>
+  <string name="password">"mot de passe "</string>
+  <string name="username">"Nom d'utilisateur "</string>
+  <string name="logout">"Connectez - Out "</string>
+  <string name="login">"s'identifier "</string>
+
+  <!-- waitting for translate -->
+  <string name="common_error">temporary unable to use (%1$s)</string>
+  <string name="all_data_load">nothing else..</string>
+  <string name="compose_submit">submit</string>
+  <string name="compose_text">text</string>
+  <string name="status_saving">status saving</string>
+  <string name="compose_fail">fail to submit status (%1$s)</string>
+  <string name="status_not_found">status not found</string>
+  <string name="permission_public">public</string>
+  <string name="permission_assign">private</string>
+  <string name="perm_deny_gallery">permission deny</string>
+  <string name="perm_deny_camera">permission deny</string>
+  <string name="fail_pick_photo">failure to pick photo (%1$s)</string>
+  <string name="photo_reset">reset</string>
+  <string name="photo_rotate">rotate</string>
+  <string name="photo_crop">crop</string>
+  <string name="perm_deny_gps">permission denied</string>
+  <string name="status_like">like</string>
+  <string name="status_share">share</string>
+  <string name="status_comment">comment</string>
+  <string name="status_reply_to">Reply To: %1$s</string>
+  <string name="no_api_support">no API support yet</string>
+  <string name="not_implement_yet">not implement yet</string>
+  <string name="user_not_found">user not found</string>
+  <string name="likes_counter">%1$s people like</string>
+  <string name="index_public_timeline">public</string>
+  <string name="index_friends_timeline">friends</string>
+  <string name="app_description">A simple unofficial client for Friendica</string>
+  <string name="index_my_timeline">my</string>
+  <string name="notifications">notifications</string>
+  <string name="mark_all_notifications_seen">mark all notifications seen</string>
+  <string name="status_not_exists">item not exists</string>
+  <string name="index_favorites_timeline">favorites</string>
+  <string name="status_favorites">favorites</string>
+  <string name="no_any_status">no data here</string>
+  <string name="status_source">" - from %1$s"</string>
+</resources>

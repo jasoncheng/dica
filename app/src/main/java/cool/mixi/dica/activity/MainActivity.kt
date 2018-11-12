@@ -124,10 +124,9 @@ class MainActivity : BaseActivity() {
         private val ref = WeakReference<MainActivity>(activity)
         override fun done(meta: Meta) {
             if(!meta.title.isNullOrEmpty()){
-                PrefUtil.setSiteName(meta.title!!)
-                if(ref.get() != null){
-                    ref.get()?.home_title?.text = meta.title
-                }
+                var title = meta.title!!.replace(" \\(home\\)".toRegex(), "")
+                PrefUtil.setSiteName(title)
+                ref.get()?.let { it.home_title.text = title }
             }
             if(!meta.icon.isNullOrEmpty()){
                 PrefUtil.setSiteIcon(meta.icon!!)

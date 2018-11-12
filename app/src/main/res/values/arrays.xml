@@ -4,5 +4,6 @@
         <item>@string/index_friends_timeline</item>
         <item>@string/index_public_timeline</item>
         <item>@string/index_my_timeline</item>
+        <item>@string/index_favorites_timeline</item>
     </string-array>
 </resources>

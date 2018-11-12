@@ -16,18 +16,33 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 ***Feature***
 
 * Enable for all [Friendica](https://friendi.ca) base website
-* Simple Public / Friends / MySelf timeline in dashboard
+* Simple Public / Friends / My / Favorite timeline in dashboard
 * Simple user page
 * Simple status page
 * Status post (photo / location tag / group permission)
 * Support offline capacity
 * Notification
-* Like / UnLike status
+* Like / UnLike
+* Favorites
 
 
+***DONATE US***
+
+> [![](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/DiCa/donate)
+
+
+- - -
 ***DOWNLOAD***
 
 > [Google Play Store](https://play.google.com/store/apps/details?id=cool.mixi.dica)
 	
+> [Google Play Store Beta Tester Program](https://play.google.com/apps/testing/cool.mixi.dica)
 
-[GITHUB](https://github.com/jasoncheng/dica)
+***LINKS***
+
+
+* [CHANGELOG](https://github.com/jasoncheng/dica/wiki/CHANGELOG)
+
+* [SOURCE](https://github.com/jasoncheng/dica)
+
+* [Domain](http://dica.mixi.cool)

@@ -9,6 +9,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.format.DateUtils
 import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
@@ -27,10 +28,15 @@ import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
 import cool.mixi.dica.fragment.ComposeDialogFragment
+import cool.mixi.dica.fragment.UsersDialog
 import cool.mixi.dica.util.FriendicaUtil
 import cool.mixi.dica.util.ILike
+import cool.mixi.dica.util.LocationUtil
+import cool.mixi.dica.util.glideUrl
+import kotlinx.android.synthetic.main.box_status_action.view.*
+import kotlinx.android.synthetic.main.box_status_user.view.*
+import kotlinx.android.synthetic.main.empty_view.view.*
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
-import kotlinx.android.synthetic.main.status_action_box.view.*
 import kotlinx.android.synthetic.main.status_list_item.view.*
 import java.util.*
 
@@ -39,15 +45,20 @@ import java.util.*
 class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
 
     var ownerInfo: User? = null
+    var isFavoritesFragment: Boolean = false
+    var initLoaded: Boolean = false
     private val likeDrawable = context.getDrawable(R.drawable.thumb_up_sel)
     private val unlikeDrawable = context.getDrawable(R.drawable.thumb_up)
     private val privateMessage = context.getDrawable(R.drawable.lock)
-
+    private val favoritesDrawable = context.getDrawable(R.drawable.favorites_sel)
+    private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
+    private val statusSoureColor = context.getColor(R.color.txt_status_source)
     enum class ViewType {
         USER_PROFILE,
         STATUS,
         STATUS_SIMPLE,
-        REPLY
+        REPLY,
+        EMPTY
     }
 
     private val requestOptions = RequestOptions()
@@ -55,6 +66,15 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         .transforms(RoundedCorners(18))!!
 
     override fun onBindViewHolder(holder: BasicStatusViewHolder, position: Int) {
+        if(holder is EmptyHolder){
+            if(initLoaded){
+                holder.emptyDescription?.visibility = View.VISIBLE
+            } else {
+                holder.emptyDescription?.visibility = View.GONE
+            }
+            return
+        }
+
         var pos = position
         if(context is UserActivity){
             if(position == 0){
@@ -69,11 +89,14 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         var lockContainer = holder.datetime
         if(context !is UserActivity){
             doLayoutUserBox(holder, st, pos)
-            holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time)
+            holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
             lockContainer = holder.userName
 
         } else {
-            holder.datetime?.text = date.toLocaleString()
+            holder.datetime?.let {
+               it.text = date.toLocaleString()
+               doAppendSourceLayout(it, date.toLocaleString(), st)
+            }
         }
 
         // private message icon
@@ -84,15 +107,21 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
 
         doLayoutContent(holder, st, pos)
+        holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
         doLayoutLikeRelated(holder.like!!, pos)
+        doLayoutFavorites(holder.favorites!!, pos)
     }
 
     override fun getItemViewType(position: Int): Int {
         if(context is UserActivity){
             if (position == 0){
                 return ViewType.USER_PROFILE.ordinal
+            } else if(data.size == 0){
+                return ViewType.EMPTY.ordinal
             }
             return ViewType.STATUS_SIMPLE.ordinal
+        } else if(data.size == 0){
+            return ViewType.EMPTY.ordinal
         }
 
         val st = data[position]
@@ -100,22 +129,30 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BasicStatusViewHolder {
-        // HeaderView
+        val inflater = LayoutInflater.from(context)
+
+        // EmptyView & UserPage HeaderView
         if(viewType == ViewType.USER_PROFILE.ordinal){
             return UserProfileViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.rv_user_item_header, parent, false)
+                inflater.inflate(R.layout.rv_user_item_header, parent, false)
             )
+        } else if(viewType == ViewType.EMPTY.ordinal) {
+            return if(context is UserActivity) {
+                EmptyHolder(inflater.inflate(R.layout.empty_view_user_page, parent, false))
+            } else {
+                EmptyUserPageHolder(inflater.inflate(R.layout.empty_view, parent, false))
+            }
         }
 
         var holder = when (viewType) {
             ViewType.REPLY.ordinal -> StatusReplyViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.reply_list_item, parent, false)
+                inflater.inflate(R.layout.reply_list_item, parent, false)
             )
             ViewType.STATUS_SIMPLE.ordinal -> StatusNoUserInfoViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.rv_user_item, parent, false)
+                inflater.inflate(R.layout.rv_user_item, parent, false)
             )
             else -> StatusViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.status_list_item, parent, false)
+                inflater.inflate(R.layout.status_list_item, parent, false)
             )
         }
 
@@ -130,12 +167,27 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         holder.comment?.setOnClickListener { actComment(it) }
         holder.share?.setOnClickListener { actShare(it) }
         holder.like?.setOnClickListener { actLike(it) }
-
+        holder.tvLikeDetails?.setOnClickListener { gotoUserLikesPage(it) }
+        holder.favorites?.setOnClickListener { actFavorites(it) }
         return holder
     }
 
     override fun getItemCount(): Int {
-        val extraSize = if(context is UserActivity) 1 else 0
+        var extraSize = 0
+
+        if(context is UserActivity){
+            extraSize = if(data.size > 0){
+                1
+            } else {
+                2
+            }
+        }
+
+        // for empty view
+        if(extraSize == 0 && data.size == 0){
+            return 1
+        }
+
         return data.size + extraSize
     }
 
@@ -145,7 +197,6 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
     private fun doLayoutLikeRelated(view: TextView, pos: Int){
         var status = data[pos]
-        var me = App.instance.myself?.friendica_owner!!
         val isLike = amILike(status)
         var likes = status.friendica_activities.like
         if(!isLike){
@@ -167,9 +218,15 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             sp.setSpan(bold, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
             tvLikeDetails.visibility = View.VISIBLE
             tvLikeDetails.text = sp
-            tvLikeDetails.setOnClickListener {
-                gotoUserLikesPage(pos)
-            }
+        }
+    }
+
+    private fun doLayoutFavorites(view: TextView, pos: Int){
+        var status = data[pos]
+        if(status.favorited){
+            view.setCompoundDrawablesWithIntrinsicBounds(favoritesDrawable, null, null, null)
+        } else {
+            view.setCompoundDrawablesWithIntrinsicBounds(unFavoritesDrawable, null, null, null)
         }
     }
 
@@ -178,12 +235,50 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         holder.userName?.tag = pos
         holder.userName?.setOnClickListener { gotoUserPage(it) }
 
+        st.source?.let { doAppendSourceLayout(holder.userName!!, st.user.screen_name, st) }
+
         holder.avatar?.setTag(R.id.avatar_tag, pos)
         holder.avatar?.setOnClickListener { gotoUserPage(it) }
         Glide.with(context.applicationContext)
             .load(st.user.profile_image_url_large)
             .apply(RequestOptions().circleCrop())
             .into(holder.avatar!!)
+    }
+
+    private fun doAppendSourceLayout(view:TextView, orgStr: String, st: Status) {
+        val it = st.source!!
+        if(it.isEmpty() || it.isBlank()) return
+
+        // for Friendica legacy version API
+        val source = it.replace(" \\(\\)".toRegex(), "").trim()
+
+        val str = context.getString(R.string.status_source).format(source)
+        val start = orgStr.length
+        val end = start + str.length
+        var sp = SpannableString("$orgStr$str")
+        var color = ForegroundColorSpan(statusSoureColor)
+        try {
+            sp.setSpan(color, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            sp.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            sp.setSpan(RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            view?.text = sp
+        }catch (e: Exception){}
+    }
+
+    private fun doLayoutGeoAddress(view: TextView, pos: Int){
+        var status = data[pos]
+        if(status.geo?.address != null){
+            var address = status.geo?.address
+            view.visibility = View.VISIBLE
+            view.text = address?.getAddressLine(0)
+            view.setOnClickListener {
+                context.startActivity(LocationUtil.mapIntent(address!!))
+            }
+        } else {
+            view.visibility = View.GONE
+            view.text = ""
+            view.setOnClickListener { null }
+        }
     }
 
     private fun doLayoutContent(holder: BasicStatusViewHolder, st: Status, pos: Int){
@@ -195,7 +290,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             holder.media?.visibility = View.VISIBLE
             val attachment = st.attachments[0]
             Glide.with(context.applicationContext)
-                .load(attachment.url)
+                .load(attachment.url.glideUrl())
                 .apply(requestOptions)
                 .into(holder.media!!)
         } else {
@@ -245,6 +340,19 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         })
     }
 
+    private fun actFavorites(view: View){
+        val me = App.instance.myself?.friendica_owner!!
+        val position = (view.parent.parent as ViewGroup).tag as Int
+        val st = data[position]
+        st.favorited = !st.favorited
+        doLayoutFavorites(view as TextView, position)
+        FriendicaUtil.favorites(st.favorited, st.id)
+        if(!st.favorited && isFavoritesFragment){
+            data.removeAt(position)
+            notifyDataSetChanged()
+        }
+    }
+
     private fun actComment(view: View) {
         val position = (view.parent.parent as ViewGroup).tag as Int
         val st = data[position]
@@ -262,8 +370,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         App.instance.toast(context.getString(R.string.not_implement_yet))
     }
 
-    private fun gotoUserLikesPage(pos: Int){
-
+    private fun gotoUserLikesPage(view: View){
+        val position = (view.parent as ViewGroup).tag as Int
+        val st = data[position]
+        val dlg = UsersDialog()
+        dlg.users = st.friendica_activities.like
+        dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_USERS)
     }
 
     private fun gotoUserPage(view: View) {
@@ -296,7 +408,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name
     open var avatar:ImageView? = view.avatar
-
+    var emptyDescription: TextView? = view.tv_empty
     var content:TextView? = view.tv_content
     var datetime:TextView? = view.tv_datetime
     var media:ImageView? = view.media
@@ -304,11 +416,16 @@ open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     var comment: TextView? = actGroup?.tv_comment
     var like: TextView? = actGroup?.tv_like
     var share: TextView? = actGroup?.tv_share
-    var tv_like_details: TextView? = actGroup?.tv_like_details
+    var favorites: TextView? = actGroup?.tv_favorites
+    var tvLikeDetails: TextView? = actGroup?.tv_like_details
     var userDescription:TextView? = view.tv_description
+    var geoAddress: TextView? = view.tv_geo_address
 }
 
 class UserProfileViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusNoUserInfoViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusViewHolder(view: View): BasicStatusViewHolder(view)
 class StatusReplyViewHolder(view: View): BasicStatusViewHolder(view)
+
+open class EmptyHolder(view: View): BasicStatusViewHolder(view)
+class EmptyUserPageHolder(view: View): EmptyHolder(view)
