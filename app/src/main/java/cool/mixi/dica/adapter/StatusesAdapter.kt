@@ -470,13 +470,15 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             )
 
             sp.setSpan(
-                spanClick,
+                MyClickSpan(),
                 mTag.start()+1,
                 mTag.end(),
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
 
+        // Style: url Crawler
+        // Style: actor crawler
 //        var imgSp = ImageSpan(WebImageSpan.getDrawable(
 //            "https://mawa.link/proxy/80/aHR0cHM6Ly9kZXNwb3JhLmRlL3VwbG9hZHMvaW1hZ2VzLzBhNzUzNzJlNGFlYjczMjkyZTljLmpwZWc=.jpeg", view!!),
 //            ImageSpan.ALIGN_BASELINE)
@@ -486,12 +488,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         view.text = sp
     }
 
-    private val spanClick = object: ClickableSpan() {
+    class MyClickSpan: ClickableSpan() {
         override fun onClick(widget: View?) {
             val sp = ((widget as TextView).text as Spanned)
             val start = sp.getSpanStart(this)
             val end = sp.getSpanEnd(this)
-            App.instance.toast(context.getString(R.string.no_api_support)+" #${sp.subSequence(start, end)}")
+            App.instance.toast(widget.context.getString(R.string.no_api_support)+" #${sp.subSequence(start, end)}")
         }
     }
 }
