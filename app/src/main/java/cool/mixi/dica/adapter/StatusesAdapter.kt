@@ -8,8 +8,8 @@ import android.support.v7.widget.RecyclerView
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.TextPaint
 import android.text.format.DateUtils
-import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
@@ -95,32 +95,36 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             pos = position - 1
         }
 
-        val st = data[pos]
-        var date = Date(st.created_at)
-        var lockContainer = holder.datetime
-        if(context !is UserActivity){
-            doLayoutUserBox(holder, st, pos)
-            holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
-            lockContainer = holder.userName
+        data.getOrNull(pos).let {
+            if(it == null) return
 
-        } else {
-            holder.datetime?.let {
-               it.text = date.toLocaleString()
-               doAppendSourceLayout(it, date.toLocaleString(), st)
+            val st = it!!
+            var date = Date(st.created_at)
+            var lockContainer = holder.datetime
+            if(context !is UserActivity){
+                doLayoutUserBox(holder, st, pos)
+                holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
+                lockContainer = holder.userName
+
+            } else {
+                holder.datetime?.let {
+                    it.text = date.toLocaleString()
+                    doAppendSourceLayout(it, date.toLocaleString(), st)
+                }
             }
-        }
 
-        // private message icon
-        if(st.friendica_private) {
-            lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
-        } else {
-            lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
-        }
+            // private message icon
+            if(st.friendica_private) {
+                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
+            } else {
+                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+            }
 
-        doLayoutContent(holder, st, pos)
-        holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
-        doLayoutLikeRelated(holder.like!!, pos)
-        doLayoutFavorites(holder.favorites!!, pos)
+            doLayoutContent(holder, st, pos)
+            holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
+            doLayoutLikeRelated(holder.like!!, pos)
+            doLayoutFavorites(holder.favorites!!, pos)
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -333,61 +337,73 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
         val me = App.instance.myself?.friendica_owner!!
         val position = (view.parent.parent as ViewGroup).tag as Int
-        val st = data[position]
-
-        var likes = st.friendica_activities.like
-        val isLike = amILike(st)
-        if(isLike){
-            likes.remove(me)
-        } else {
-            likes.add(me)
-        }
-
-        doLayoutLikeRelated(view as TextView, position)
-        FriendicaUtil.like(!isLike, st.id, object : ILike {
-            override fun done() {}
-            override fun fail() {
-                App.instance.toast(context.getString(R.string.common_error).format(""))
+        data.getOrNull(position).let {
+            if(it == null) return
+            val st = it!!
+            var likes = st.friendica_activities.like
+            val isLike = amILike(st)
+            if(isLike){
+                likes.remove(me)
+            } else {
+                likes.add(me)
             }
-        })
+
+            doLayoutLikeRelated(view as TextView, position)
+            FriendicaUtil.like(!isLike, st.id, object : ILike {
+                override fun done() {}
+                override fun fail() {
+                    App.instance.toast(context.getString(R.string.common_error).format(""))
+                }
+            })
+        }
     }
 
     private fun actFavorites(view: View){
         val me = App.instance.myself?.friendica_owner!!
         val position = (view.parent.parent as ViewGroup).tag as Int
-        val st = data[position]
-        st.favorited = !st.favorited
-        doLayoutFavorites(view as TextView, position)
-        FriendicaUtil.favorites(st.favorited, st.id)
-        if(!st.favorited && isFavoritesFragment){
-            data.removeAt(position)
-            notifyDataSetChanged()
+        data.getOrNull(position).let {
+            if(it == null) return
+
+            val st = it!!
+            st.favorited = !st.favorited
+            doLayoutFavorites(view as TextView, position)
+            FriendicaUtil.favorites(st.favorited, st.id)
+            if(!st.favorited && isFavoritesFragment){
+                data.removeAt(position)
+                notifyDataSetChanged()
+            }
         }
     }
 
     private fun actComment(view: View) {
         val position = (view.parent.parent as ViewGroup).tag as Int
-        val st = data[position]
-        var bundle = Bundle()
-        bundle.putString(Consts.EXTRA_IN_REPLY_USERNAME, st.friendica_owner.screen_name)
-        bundle.putInt(Consts.EXTRA_IN_REPLY_STATUS_ID, st.id)
-        val dlg = ComposeDialogFragment()
-        dlg.arguments = bundle
-        dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_COMPOSE)
+        data.getOrNull(position).let {
+            if(it == null) return
+
+            val st = it!!
+            var bundle = Bundle()
+            bundle.putString(Consts.EXTRA_IN_REPLY_USERNAME, st.friendica_owner.screen_name)
+            bundle.putInt(Consts.EXTRA_IN_REPLY_STATUS_ID, st.id)
+            val dlg = ComposeDialogFragment()
+            dlg.arguments = bundle
+            dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_COMPOSE)
+        }
     }
 
     private fun actShare(view: View){
-        val position = (view.parent.parent as ViewGroup).tag as Int
-        val st = data[position]
         App.instance.toast(context.getString(R.string.not_implement_yet))
     }
 
     private fun gotoUserLikesPage(view: View){
         val position = (view.parent as ViewGroup).tag as Int
-        val st = data[position]
-        val dlg = UsersDialog()
-        dlg.users = st.friendica_activities.like
-        dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_USERS)
+        data.getOrNull(position).let {
+            if(it == null) return
+
+            val st = it!!
+            val dlg = UsersDialog()
+            dlg.users = st.friendica_activities.like
+            dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_USERS)
+        }
     }
 
     private fun gotoUserPage(view: View) {
@@ -397,9 +413,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             view.tag as Int
         }
 
-        val i = Intent(context, UserActivity::class.java)
-        i.putExtra(Consts.EXTRA_USER, data[position].user)
-        context.startActivity(i)
+        data.getOrNull(position).let {
+            if(it == null) return
+            val i = Intent(context, UserActivity::class.java)
+            i.putExtra(Consts.EXTRA_USER, it!!.user)
+            context.startActivity(i)
+        }
     }
 
     private fun gotoStatusPage(view: View){
@@ -409,14 +428,19 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             view.tag as Int
         }
 
-        val st = data[position]
-        val i = Intent(context, StatusActivity::class.java)
-        i.putExtra(Consts.ID_STATUS, st.id)
-        context.startActivity(i)
+        data.getOrNull(position).let {
+            if(it == null) return
+            val i = Intent(context, StatusActivity::class.java)
+            i.putExtra(Consts.ID_STATUS, it!!.id)
+            context.startActivity(i)
+        }
     }
 
 
     private fun contentProcess(view: TextView?, status: Status){
+        if(view == null) return
+
+//        view.movementMethod = LinkMovementMethod.getInstance()
 
         // Style: Recycling Status
         if(status.text.startsWith("♲")){
@@ -429,7 +453,6 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
 
         // Style: QUOTE
-        if(view == null) return
         val m = compilerQuote.matcher(status.text)
         if(!m.matches()) {
             view.text = status.text
@@ -462,15 +485,15 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
 
-            sp.setSpan(
-                StyleSpan(Typeface.BOLD),
-                mTag.start()+1,
-                mTag.end(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+//            sp.setSpan(
+//                StyleSpan(Typeface.BOLD),
+//                mTag.start()+1,
+//                mTag.end(),
+//                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+//            )
 
             sp.setSpan(
-                MyClickSpan(),
+                MyClickSpan(tagTextColor),
                 mTag.start()+1,
                 mTag.end(),
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -484,16 +507,22 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 //            ImageSpan.ALIGN_BASELINE)
 //        val playImageSpan = ImageSpan(context, R.drawable.round_create_black_24dp)
 //        sp.setSpan(imgSp, s.length-2, s.length-1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        view.movementMethod = LinkMovementMethod.getInstance()
         view.text = sp
     }
 
-    class MyClickSpan: ClickableSpan() {
+    class MyClickSpan(private val linkColor: Int): ClickableSpan() {
         override fun onClick(widget: View?) {
             val sp = ((widget as TextView).text as Spanned)
             val start = sp.getSpanStart(this)
             val end = sp.getSpanEnd(this)
             App.instance.toast(widget.context.getString(R.string.no_api_support)+" #${sp.subSequence(start, end)}")
+        }
+
+        override fun updateDrawState(ds: TextPaint?) {
+            super.updateDrawState(ds)
+            ds?.color = linkColor
+            ds?.linkColor = linkColor
+            ds?.isUnderlineText = false
         }
     }
 }
