@@ -16,9 +16,9 @@ private val urlPattern = Pattern.compile(
             + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
     Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL)
 
-fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "-----> $log")
-fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "-----> $log")
-fun Any.dLog(log: String) = Log.d(this::class.java.simpleName, "-----> $log")
+fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "=====> $log")
+fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "=====> $log")
+fun Any.dLog(log: String) = Log.d(this::class.java.simpleName, "=====> $log")
 
 fun String.md5(): String {
     try {

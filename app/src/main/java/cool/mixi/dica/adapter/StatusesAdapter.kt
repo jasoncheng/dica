@@ -7,7 +7,10 @@ import android.os.Bundle
 import android.support.v7.widget.RecyclerView
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
 import android.text.format.DateUtils
+import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
@@ -15,6 +18,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -29,17 +33,15 @@ import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
 import cool.mixi.dica.fragment.ComposeDialogFragment
 import cool.mixi.dica.fragment.UsersDialog
-import cool.mixi.dica.util.FriendicaUtil
-import cool.mixi.dica.util.ILike
-import cool.mixi.dica.util.LocationUtil
-import cool.mixi.dica.util.glideUrl
+import cool.mixi.dica.util.*
+import cool.mixi.dica.view.MyQuoteSpan
 import kotlinx.android.synthetic.main.box_status_action.view.*
 import kotlinx.android.synthetic.main.box_status_user.view.*
 import kotlinx.android.synthetic.main.empty_view.view.*
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
 import kotlinx.android.synthetic.main.status_list_item.view.*
 import java.util.*
-
+import java.util.regex.Pattern
 
 
 class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
@@ -47,12 +49,14 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     var ownerInfo: User? = null
     var isFavoritesFragment: Boolean = false
     var initLoaded: Boolean = false
+    private val quoteSpanColor: Int = context.getColor(R.color.quote_span_border)
     private val likeDrawable = context.getDrawable(R.drawable.thumb_up_sel)
     private val unlikeDrawable = context.getDrawable(R.drawable.thumb_up)
     private val privateMessage = context.getDrawable(R.drawable.lock)
     private val favoritesDrawable = context.getDrawable(R.drawable.favorites_sel)
     private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
     private val statusSoureColor = context.getColor(R.color.txt_status_source)
+    private val tagTextColor = context.getColor(R.color.txt_tag)
     enum class ViewType {
         USER_PROFILE,
         STATUS,
@@ -64,6 +68,13 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private val requestOptions = RequestOptions()
         .fitCenter()
         .transforms(RoundedCorners(18))!!
+
+    // Handle QUOTE
+    private val compilerQuote: Pattern =  Pattern.compile("^> ([^\n]*)",
+        Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL)
+
+    private val compilerTag: Pattern = Pattern.compile("#([^ |#|\n]*)",
+        Pattern.CASE_INSENSITIVE  or Pattern.MULTILINE or Pattern.DOTALL )
 
     override fun onBindViewHolder(holder: BasicStatusViewHolder, position: Int) {
         if(holder is EmptyHolder){
@@ -84,32 +95,36 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             pos = position - 1
         }
 
-        val st = data[pos]
-        var date = Date(st.created_at)
-        var lockContainer = holder.datetime
-        if(context !is UserActivity){
-            doLayoutUserBox(holder, st, pos)
-            holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
-            lockContainer = holder.userName
+        data.getOrNull(pos).let {
+            if(it == null) return
 
-        } else {
-            holder.datetime?.let {
-               it.text = date.toLocaleString()
-               doAppendSourceLayout(it, date.toLocaleString(), st)
+            val st = it!!
+            var date = Date(st.created_at)
+            var lockContainer = holder.datetime
+            if(context !is UserActivity){
+                doLayoutUserBox(holder, st, pos)
+                holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
+                lockContainer = holder.userName
+
+            } else {
+                holder.datetime?.let {
+                    it.text = date.toLocaleString()
+                    doAppendSourceLayout(it, date.toLocaleString(), st)
+                }
             }
-        }
 
-        // private message icon
-        if(st.friendica_private) {
-            lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
-        } else {
-            lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
-        }
+            // private message icon
+            if(st.friendica_private) {
+                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
+            } else {
+                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+            }
 
-        doLayoutContent(holder, st, pos)
-        holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
-        doLayoutLikeRelated(holder.like!!, pos)
-        doLayoutFavorites(holder.favorites!!, pos)
+            doLayoutContent(holder, st, pos)
+            holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
+            doLayoutLikeRelated(holder.like!!, pos)
+            doLayoutFavorites(holder.favorites!!, pos)
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -285,6 +300,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         holder.actGroup?.tag = pos
         holder.content?.text = st.text
         holder.content?.tag = pos
+        contentProcess(holder.content, st)
         if(st.attachments != null && st.attachments.size > 0){
             holder.media?.setTag(R.id.media_image, pos)
             holder.media?.visibility = View.VISIBLE
@@ -321,61 +337,73 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
         val me = App.instance.myself?.friendica_owner!!
         val position = (view.parent.parent as ViewGroup).tag as Int
-        val st = data[position]
-
-        var likes = st.friendica_activities.like
-        val isLike = amILike(st)
-        if(isLike){
-            likes.remove(me)
-        } else {
-            likes.add(me)
-        }
-
-        doLayoutLikeRelated(view as TextView, position)
-        FriendicaUtil.like(!isLike, st.id, object : ILike {
-            override fun done() {}
-            override fun fail() {
-                App.instance.toast(context.getString(R.string.common_error).format(""))
+        data.getOrNull(position).let {
+            if(it == null) return
+            val st = it!!
+            var likes = st.friendica_activities.like
+            val isLike = amILike(st)
+            if(isLike){
+                likes.remove(me)
+            } else {
+                likes.add(me)
             }
-        })
+
+            doLayoutLikeRelated(view as TextView, position)
+            FriendicaUtil.like(!isLike, st.id, object : ILike {
+                override fun done() {}
+                override fun fail() {
+                    App.instance.toast(context.getString(R.string.common_error).format(""))
+                }
+            })
+        }
     }
 
     private fun actFavorites(view: View){
         val me = App.instance.myself?.friendica_owner!!
         val position = (view.parent.parent as ViewGroup).tag as Int
-        val st = data[position]
-        st.favorited = !st.favorited
-        doLayoutFavorites(view as TextView, position)
-        FriendicaUtil.favorites(st.favorited, st.id)
-        if(!st.favorited && isFavoritesFragment){
-            data.removeAt(position)
-            notifyDataSetChanged()
+        data.getOrNull(position).let {
+            if(it == null) return
+
+            val st = it!!
+            st.favorited = !st.favorited
+            doLayoutFavorites(view as TextView, position)
+            FriendicaUtil.favorites(st.favorited, st.id)
+            if(!st.favorited && isFavoritesFragment){
+                data.removeAt(position)
+                notifyDataSetChanged()
+            }
         }
     }
 
     private fun actComment(view: View) {
         val position = (view.parent.parent as ViewGroup).tag as Int
-        val st = data[position]
-        var bundle = Bundle()
-        bundle.putString(Consts.EXTRA_IN_REPLY_USERNAME, st.friendica_owner.screen_name)
-        bundle.putInt(Consts.EXTRA_IN_REPLY_STATUS_ID, st.id)
-        val dlg = ComposeDialogFragment()
-        dlg.arguments = bundle
-        dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_COMPOSE)
+        data.getOrNull(position).let {
+            if(it == null) return
+
+            val st = it!!
+            var bundle = Bundle()
+            bundle.putString(Consts.EXTRA_IN_REPLY_USERNAME, st.friendica_owner.screen_name)
+            bundle.putInt(Consts.EXTRA_IN_REPLY_STATUS_ID, st.id)
+            val dlg = ComposeDialogFragment()
+            dlg.arguments = bundle
+            dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_COMPOSE)
+        }
     }
 
     private fun actShare(view: View){
-        val position = (view.parent.parent as ViewGroup).tag as Int
-        val st = data[position]
         App.instance.toast(context.getString(R.string.not_implement_yet))
     }
 
     private fun gotoUserLikesPage(view: View){
         val position = (view.parent as ViewGroup).tag as Int
-        val st = data[position]
-        val dlg = UsersDialog()
-        dlg.users = st.friendica_activities.like
-        dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_USERS)
+        data.getOrNull(position).let {
+            if(it == null) return
+
+            val st = it!!
+            val dlg = UsersDialog()
+            dlg.users = st.friendica_activities.like
+            dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_USERS)
+        }
     }
 
     private fun gotoUserPage(view: View) {
@@ -385,9 +413,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             view.tag as Int
         }
 
-        val i = Intent(context, UserActivity::class.java)
-        i.putExtra(Consts.EXTRA_USER, data[position].user)
-        context.startActivity(i)
+        data.getOrNull(position).let {
+            if(it == null) return
+            val i = Intent(context, UserActivity::class.java)
+            i.putExtra(Consts.EXTRA_USER, it!!.user)
+            context.startActivity(i)
+        }
     }
 
     private fun gotoStatusPage(view: View){
@@ -397,13 +428,104 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             view.tag as Int
         }
 
-        val st = data[position]
-        val i = Intent(context, StatusActivity::class.java)
-        i.putExtra(Consts.ID_STATUS, st.id)
-        context.startActivity(i)
+        data.getOrNull(position).let {
+            if(it == null) return
+            val i = Intent(context, StatusActivity::class.java)
+            i.putExtra(Consts.ID_STATUS, it!!.id)
+            context.startActivity(i)
+        }
+    }
+
+
+    private fun contentProcess(view: TextView?, status: Status){
+        if(view == null) return
+
+//        view.movementMethod = LinkMovementMethod.getInstance()
+
+        // Style: Recycling Status
+        if(status.text.startsWith("♲")){
+            val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT)
+            params.setMargins(20, 20, 20, 20)
+            view?.layoutParams = params
+            view?.setBackgroundResource(R.drawable.recycling_status_bg)
+        } else {
+            view?.background = null
+        }
+
+        // Style: QUOTE
+        val m = compilerQuote.matcher(status.text)
+        if(!m.matches()) {
+            view.text = status.text
+        }
+
+        var s = status.text
+        var indexAr = ArrayList<IntArray>()
+        while(m.find()){
+            val str = m.group()
+            var strNew = str.replaceFirst("> ".toRegex(), "")
+            val start = s.indexOf(str)
+            indexAr.add(arrayOf(start, start+strNew.length).toIntArray())
+            s = s.replaceFirst(str, strNew, true)
+        }
+
+        var sp = SpannableString(s)
+        indexAr.forEach {
+            sp.setSpan(
+                MyQuoteSpan(quoteSpanColor, 20, 30), it[0], it[1], Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        // Style: TAG
+        val mTag = compilerTag.matcher(s)
+        while(mTag.find()){
+            dLog("Tag #${mTag.group()}.")
+            sp.setSpan(
+                ForegroundColorSpan(tagTextColor),
+                mTag.start()+1,
+                mTag.end(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+
+//            sp.setSpan(
+//                StyleSpan(Typeface.BOLD),
+//                mTag.start()+1,
+//                mTag.end(),
+//                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+//            )
+
+            sp.setSpan(
+                MyClickSpan(tagTextColor),
+                mTag.start()+1,
+                mTag.end(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        // Style: url Crawler
+        // Style: actor crawler
+//        var imgSp = ImageSpan(WebImageSpan.getDrawable(
+//            "https://mawa.link/proxy/80/aHR0cHM6Ly9kZXNwb3JhLmRlL3VwbG9hZHMvaW1hZ2VzLzBhNzUzNzJlNGFlYjczMjkyZTljLmpwZWc=.jpeg", view!!),
+//            ImageSpan.ALIGN_BASELINE)
+//        val playImageSpan = ImageSpan(context, R.drawable.round_create_black_24dp)
+//        sp.setSpan(imgSp, s.length-2, s.length-1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        view.text = sp
+    }
+
+    class MyClickSpan(private val linkColor: Int): ClickableSpan() {
+        override fun onClick(widget: View?) {
+            val sp = ((widget as TextView).text as Spanned)
+            val start = sp.getSpanStart(this)
+            val end = sp.getSpanEnd(this)
+            App.instance.toast(widget.context.getString(R.string.no_api_support)+" #${sp.subSequence(start, end)}")
+        }
+
+        override fun updateDrawState(ds: TextPaint?) {
+            super.updateDrawState(ds)
+            ds?.color = linkColor
+            ds?.linkColor = linkColor
+            ds?.isUnderlineText = false
+        }
     }
 }
-
 
 open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name

@@ -14,4 +14,6 @@
     <color name="txt_geo_address">#CCC</color>
     <color name="txt_datetime">#999</color>
     <color name="txt_status_source">#B0BEC5</color>
+    <color name="quote_span_border">#9CCC65</color>
+    <color name="txt_tag">#01579B</color>
 </resources>
