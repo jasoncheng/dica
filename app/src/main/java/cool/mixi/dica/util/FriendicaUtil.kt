@@ -8,7 +8,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.nio.charset.StandardCharsets
-import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
 
 
@@ -25,36 +24,7 @@ interface ISeenNotify {
 class FriendicaUtil {
 
     companion object {
-        private val proxyImagePattern = Pattern.compile("\\/proxy\\/([a-z0-9]{2})\\/",
-            Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL)
         private val serviceUnavailable = App.instance.getString(R.string.common_error)
-
-        fun stripStatusTextProxyUrl(status: Status) {
-            if(status.text == null || status.text.isEmpty() || status.attachments == null) {
-                return
-            }
-
-            // 1. strip proxy image
-            // 2. strip attachments image
-            var urls = status.text.urls()
-            urls.forEach { url ->
-                status.attachments.let { it ->
-                    it.forEach {
-                        if(it.url == url) {
-                            status.text = status.text.replace(url, "")
-                        }
-                    }
-                }
-                while(proxyImagePattern.matcher(url).find()){
-                    dLog("MatchProxyImage: $url")
-                    status.text = status.text.replace(url, "", true)
-                    break
-                }
-            }
-
-            status.text = status.text.trim()
-        }
-
         fun getProxyUrlPartial(originalUrl: String): String{
             var tmpUrl = TextUtils.htmlEncode(originalUrl)
             var shortpath = tmpUrl.md5()
@@ -64,9 +34,8 @@ class FriendicaUtil {
                     tmpUrl.toByteArray(),
                     android.util.Base64.URL_SAFE), StandardCharsets.UTF_8)
             longpath+="/"+base64.replace("\\+\\/".toRegex(), "-_")
-            return longpath
+            return longpath.replace("\n".toRegex(), "")
         }
-
 
         fun like(isLike: Boolean, id: Int, callback: ILike) {
             var fn= if(isLike) { ApiService.create()
@@ -118,7 +87,6 @@ class FriendicaUtil {
                 }
 
                 override fun onResponse(call: Call<String>, response: Response<String>) {
-                    dLog("Seen ${nid} ${response.body().toString()}")
                     if(response.code() != HttpsURLConnection.HTTP_OK
                         || !response.body().toString().contains("success")) {
                         callback?.fail()

@@ -143,7 +143,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 if(it.id > act.sinceId) act.sinceId = it.id
                 if(act.maxId == 0 || it.id < act.maxId) act.maxId = it.id
 
-                FriendicaUtil.stripStatusTextProxyUrl(it)
+//                FriendicaUtil.stripStatusTextProxyUrl(it)
 
                 // Bind Address if possible
                 LocationUtil.instance.bindGeoAddress(it)

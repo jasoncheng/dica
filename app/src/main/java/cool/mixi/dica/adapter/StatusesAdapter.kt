@@ -3,6 +3,7 @@ package cool.mixi.dica.adapter
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.RecyclerView
 import android.text.Spannable
@@ -10,17 +11,19 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.format.DateUtils
-import android.text.style.ClickableSpan
-import android.text.style.ForegroundColorSpan
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
+import android.text.style.*
+import android.text.util.Linkify.ALL
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DecodeFormat
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import cool.mixi.dica.App
@@ -37,11 +40,14 @@ import cool.mixi.dica.util.*
 import cool.mixi.dica.view.MyQuoteSpan
 import kotlinx.android.synthetic.main.box_status_action.view.*
 import kotlinx.android.synthetic.main.box_status_user.view.*
+import kotlinx.android.synthetic.main.box_status_website.view.*
 import kotlinx.android.synthetic.main.empty_view.view.*
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
 import kotlinx.android.synthetic.main.status_list_item.view.*
+import java.lang.ref.WeakReference
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.collections.HashMap
 
 
 class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
@@ -55,8 +61,9 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private val privateMessage = context.getDrawable(R.drawable.lock)
     private val favoritesDrawable = context.getDrawable(R.drawable.favorites_sel)
     private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
-    private val statusSoureColor = context.getColor(R.color.txt_status_source)
+    private val statusSourceColor = context.getColor(R.color.txt_status_source)
     private val tagTextColor = context.getColor(R.color.txt_tag)
+    private val  recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
     enum class ViewType {
         USER_PROFILE,
         STATUS,
@@ -67,13 +74,21 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
     private val requestOptions = RequestOptions()
         .fitCenter()
-        .transforms(RoundedCorners(18))!!
+        .format(DecodeFormat.PREFER_ARGB_8888)
+        .transforms(RoundedCorners(16))!!
 
-    // Handle QUOTE
+    private val requestOptionsGif = RequestOptions()
+        .fitCenter()
+        .skipMemoryCache(true)
+        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+
     private val compilerQuote: Pattern =  Pattern.compile("^> ([^\n]*)",
         Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL)
 
-    private val compilerTag: Pattern = Pattern.compile("#([^ |#|\n]*)",
+    private val compilerTag: Pattern = Pattern.compile("#([^ |#|:|\n]*)",
+        Pattern.CASE_INSENSITIVE  or Pattern.MULTILINE or Pattern.DOTALL )
+
+    private val compilerLargeText: Pattern = Pattern.compile("\\*([^\\*]+)\\*",
         Pattern.CASE_INSENSITIVE  or Pattern.MULTILINE or Pattern.DOTALL )
 
     override fun onBindViewHolder(holder: BasicStatusViewHolder, position: Int) {
@@ -95,32 +110,31 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             pos = position - 1
         }
 
-        data.getOrNull(pos).let {
+        data.getOrNull(pos).let { it ->
             if(it == null) return
 
-            val st = it!!
-            var date = Date(st.created_at)
+            var date = Date(it.created_at)
             var lockContainer = holder.datetime
             if(context !is UserActivity){
-                doLayoutUserBox(holder, st, pos)
+                doLayoutUserBox(holder, it, pos)
                 holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
                 lockContainer = holder.userName
 
             } else {
-                holder.datetime?.let {
-                    it.text = date.toLocaleString()
-                    doAppendSourceLayout(it, date.toLocaleString(), st)
+                holder.datetime?.let {that->
+                    that.text = date.toLocaleString()
+                    doAppendSourceLayout(that, date.toLocaleString(), it)
                 }
             }
 
             // private message icon
-            if(st.friendica_private) {
+            if(it.friendica_private) {
                 lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
             } else {
                 lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
             }
 
-            doLayoutContent(holder, st, pos)
+            doLayoutContent(holder, it, pos)
             holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
             doLayoutLikeRelated(holder.like!!, pos)
             doLayoutFavorites(holder.favorites!!, pos)
@@ -174,8 +188,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         // Control click on content
         if(context is StatusActivity){
         } else {
-            holder.content?.setOnClickListener { gotoStatusPage(it) }
-            holder.media?.setOnClickListener { gotoStatusPage(it) }
+            holder.contentBox?.setOnClickListener { gotoStatusPage(it) }
         }
 
         // Bottom Action
@@ -271,7 +284,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         val start = orgStr.length
         val end = start + str.length
         var sp = SpannableString("$orgStr$str")
-        var color = ForegroundColorSpan(statusSoureColor)
+        var color = ForegroundColorSpan(statusSourceColor)
         try {
             sp.setSpan(color, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
             sp.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
@@ -298,20 +311,10 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
     private fun doLayoutContent(holder: BasicStatusViewHolder, st: Status, pos: Int){
         holder.actGroup?.tag = pos
-        holder.content?.text = st.text
-        holder.content?.tag = pos
-        contentProcess(holder.content, st)
-        if(st.attachments != null && st.attachments.size > 0){
-            holder.media?.setTag(R.id.media_image, pos)
-            holder.media?.visibility = View.VISIBLE
-            val attachment = st.attachments[0]
-            Glide.with(context.applicationContext)
-                .load(attachment.url.glideUrl())
-                .apply(requestOptions)
-                .into(holder.media!!)
-        } else {
-            holder.media?.visibility = View.GONE
-        }
+        holder.contentBox?.tag = pos
+        holder.contentBox?.tag = pos
+        holder.contentBox?.isClickable = true
+        renderContent(holder.contentBox, st)
     }
 
     private fun doLayoutHeaderUserProfile(holder: BasicStatusViewHolder){
@@ -436,39 +439,140 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
     }
 
+    private fun renderContent(parent: ViewGroup?, status: Status){
+        if(parent == null || status.text == null) return
+        parent.removeAllViews()
 
-    private fun contentProcess(view: TextView?, status: Status){
-        if(view == null) return
-
-//        view.movementMethod = LinkMovementMethod.getInstance()
-
-        // Style: Recycling Status
-        if(status.text.startsWith("♲")){
-            val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT)
-            params.setMargins(20, 20, 20, 20)
-            view?.layoutParams = params
-            view?.setBackgroundResource(R.drawable.recycling_status_bg)
-        } else {
-            view?.background = null
+        // encode proxy photo if exists
+        var tmpPartialPhoto = HashMap<String, String>()
+        var displayedUrl = ArrayList<String>()
+        status.attachments?.forEach {
+            var partialUrl = FriendicaUtil.getProxyUrlPartial(it.url)
+            tmpPartialPhoto[partialUrl] = it.url
         }
+
+        // Style: Background
+        if(status.text.startsWith("♲")){
+            parent.background = recyclingBG
+        } else {
+            parent.background = null
+        }
+
+        // Style: Quote / TAG / Photo / Website
+        val lines = status.text.lines()
+        var isPureText = false
+        var txtAr = ArrayList<String>()
+        lines.forEach {
+            val urls = it.urls()
+            if(urls.size > 0) {
+                if(isPureText){
+                    renderText(parent, txtAr)
+                    txtAr.clear()
+                }
+                isPureText = false
+                displayedUrl.add(it)
+                renderUrl(parent, status, it)
+                return@forEach
+            }
+            isPureText = true
+            txtAr.add(it)
+        }
+        renderText(parent, txtAr)
+
+        // Style: Extra photos (show extra attachment photo, if not wrap into status.text)
+        tmpPartialPhoto.keys.forEach {
+            var photoUrl = tmpPartialPhoto[it]
+            var photoDisplayed = false
+            for(that in displayedUrl) {
+                if(that.contains(it)){
+                    photoDisplayed = true
+                    break
+                }
+            }
+
+            if(!photoDisplayed){
+                renderUrl(parent, status, photoUrl!!)
+            }
+        }
+    }
+
+    // Image or Website
+    private fun renderUrl(parent:ViewGroup, status: Status, textWithUrl: String){
+        val urls = textWithUrl.urls()
+        var restStr = textWithUrl
+        if(urls.size == 0){
+            renderText(parent, textWithUrl)
+            return
+        }
+
+        urls.forEach {
+            var end = textWithUrl.indexOf(it, 0, true)
+            if(end > 0) {
+                var outTxt = restStr.substring(0, end)
+                restStr = textWithUrl.substring(end)
+                renderText(parent, outTxt)
+            }
+
+            restStr = restStr.replace(it, "")
+            val urlLower = it.toLowerCase()
+            if(urlLower.contains("\\.(jpg|gif|jpeg|png)".toRegex()) ||
+                // unsplash.com
+                urlLower.contains("\\/photo(.*)utm_medium".toRegex()) ||
+                // friendica proxy photo
+                urlLower.contains("\\/proxy\\/".toRegex()) ) {
+                var img = getImageView()
+                parent.addView(img)
+
+                if(urlLower.contains("\\.gif".toRegex())){
+                    Glide.with(context).load(it.glideUrl()).apply(requestOptionsGif).into(img)
+                } else {
+                    Glide.with(context).load(it.glideUrl()).apply(requestOptions).into(img)
+                }
+            } else {
+                val meta = HtmlCrawler.getInstance().get(it)
+                if(meta != null){
+                    renderWebUrl(parent, meta)
+                } else {
+                    renderText(parent, it)
+                    HtmlCrawler.getInstance().run(it, MyHtmlCrawler(status, this))
+                }
+            }
+            renderUrl(parent, status, restStr)
+            return
+        }
+    }
+
+    // Pure Text (QUOTE / Recycling / TAG)
+    private fun renderText(parent:ViewGroup, txt: String){
+        var ar = ArrayList<String>()
+        ar.add(txt)
+        renderText(parent, ar)
+    }
+
+    private fun renderText(parent:ViewGroup, txtArr: ArrayList<String>){
+        if(txtArr.size == 0) return
+        var str = txtArr.joinToString("\n")
+        var txt = getTextView()
+        txt.text = getTextSpan(str)
+        parent.addView(txt)
+    }
+
+    private fun getTextSpan(str: String): SpannableString {
+        var s = str
+        var sp:SpannableString
 
         // Style: QUOTE
-        val m = compilerQuote.matcher(status.text)
-        if(!m.matches()) {
-            view.text = status.text
-        }
-
-        var s = status.text
+        val m = compilerQuote.matcher(s)
         var indexAr = ArrayList<IntArray>()
         while(m.find()){
             val str = m.group()
-            var strNew = str.replaceFirst("> ".toRegex(), "")
+            var strNew = str.replaceFirst("> ".toRegex(), "").trim()
             val start = s.indexOf(str)
-            indexAr.add(arrayOf(start, start+strNew.length).toIntArray())
-            s = s.replaceFirst(str, strNew, true)
+            val end = start+strNew.length
+            indexAr.add(arrayOf(start, end).toIntArray())
+            s = s.replace(str, strNew, true)
         }
-
-        var sp = SpannableString(s)
+        sp = SpannableString(s)
         indexAr.forEach {
             sp.setSpan(
                 MyQuoteSpan(quoteSpanColor, 20, 30), it[0], it[1], Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -477,20 +581,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         // Style: TAG
         val mTag = compilerTag.matcher(s)
         while(mTag.find()){
-            dLog("Tag #${mTag.group()}.")
             sp.setSpan(
                 ForegroundColorSpan(tagTextColor),
                 mTag.start()+1,
                 mTag.end(),
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-
-//            sp.setSpan(
-//                StyleSpan(Typeface.BOLD),
-//                mTag.start()+1,
-//                mTag.end(),
-//                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-//            )
 
             sp.setSpan(
                 MyClickSpan(tagTextColor),
@@ -500,40 +596,118 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             )
         }
 
-        // Style: url Crawler
-        // Style: actor crawler
-//        var imgSp = ImageSpan(WebImageSpan.getDrawable(
-//            "https://mawa.link/proxy/80/aHR0cHM6Ly9kZXNwb3JhLmRlL3VwbG9hZHMvaW1hZ2VzLzBhNzUzNzJlNGFlYjczMjkyZTljLmpwZWc=.jpeg", view!!),
-//            ImageSpan.ALIGN_BASELINE)
-//        val playImageSpan = ImageSpan(context, R.drawable.round_create_black_24dp)
-//        sp.setSpan(imgSp, s.length-2, s.length-1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        view.text = sp
+        // Style: Bold & Large *.....*
+        val mLarge = compilerLargeText.matcher(s)
+        var indexAr2 = ArrayList<IntArray>()
+        while(mLarge.find()){
+            val str = mLarge.group()
+            val start = s.indexOf(str)
+            val end = start+str.length
+            indexAr2.add(arrayOf(start, end).toIntArray())
+        }
+        indexAr2.forEach {
+            sp.setSpan(
+                RelativeSizeSpan(1.3f),
+                it[0],
+                it[1],
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            sp.setSpan(
+                AbsoluteSizeSpan(0),
+                it[0],
+                it[0]+1,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            sp.setSpan(
+                AbsoluteSizeSpan(0),
+                it[1]-1,
+                it[1],
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+        return sp
     }
 
-    class MyClickSpan(private val linkColor: Int): ClickableSpan() {
-        override fun onClick(widget: View?) {
-            val sp = ((widget as TextView).text as Spanned)
-            val start = sp.getSpanStart(this)
-            val end = sp.getSpanEnd(this)
-            App.instance.toast(widget.context.getString(R.string.no_api_support)+" #${sp.subSequence(start, end)}")
+    private fun renderWebUrl(parent:ViewGroup, meta: Meta) {
+        if(meta.icon.isNullOrEmpty() || meta.title.isNullOrEmpty()){
+            return renderText(parent, meta.url)
         }
 
-        override fun updateDrawState(ds: TextPaint?) {
-            super.updateDrawState(ds)
-            ds?.color = linkColor
-            ds?.linkColor = linkColor
-            ds?.isUnderlineText = false
+        val inflater = LayoutInflater.from(context)
+        val view = inflater.inflate(R.layout.box_status_website, null)
+        Glide.with(context).load(meta.icon).into(view.site_avatar)
+        if(meta.description.isNullOrEmpty()){
+            view.site_desc.text = meta.url
+        } else {
+            view.site_desc.text = meta.description
         }
+        view.site_title.text = meta.title
+        view.tag = meta.url
+        view.setOnClickListener {
+            it?.tag.let {url ->
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url as String)))
+            }
+        }
+        parent.addView(view)
+    }
+
+    private fun getImageView(): ImageView {
+        var img = ImageView(context)
+        val childParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        img.layoutParams = childParams
+        img.scaleType = ImageView.ScaleType.FIT_XY
+        img.adjustViewBounds = true
+        return img
+    }
+
+    private fun getTextView(): TextView {
+        var txt = TextView(context)
+        val childParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        txt.layoutParams = childParams
+        txt.autoLinkMask = ALL
+        txt.setTextIsSelectable(true)
+        txt.paintFlags = 0
+        txt.setOnClickListener {
+            (it.parent as ViewGroup).callOnClick()
+        }
+        return txt
+    }
+}
+
+class MyHtmlCrawler(private val st: Status, adapter: StatusesAdapter): IHtmlCrawler {
+    private val ref = WeakReference<StatusesAdapter>(adapter)
+    override fun done(meta: Meta) {
+        ref.get()?.let {
+            it.data.forEachIndexed { index, status ->
+                if(st != status) { return@forEachIndexed }
+                it.notifyItemChanged(index)
+            }
+        }
+    }
+}
+
+class MyClickSpan(private val linkColor: Int): ClickableSpan() {
+    override fun onClick(widget: View?) {
+        val sp = ((widget as TextView).text as Spanned)
+        val start = sp.getSpanStart(this)
+        val end = sp.getSpanEnd(this)
+        App.instance.toast(widget.context.getString(R.string.no_api_support)+" #${sp.subSequence(start, end)}")
+    }
+
+    override fun updateDrawState(ds: TextPaint?) {
+        super.updateDrawState(ds)
+        ds?.color = linkColor
+        ds?.linkColor = linkColor
+        ds?.isUnderlineText = false
     }
 }
 
 open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name
     open var avatar:ImageView? = view.avatar
+    var contentBox: ViewGroup? = view.content_box
     var emptyDescription: TextView? = view.tv_empty
-    var content:TextView? = view.tv_content
     var datetime:TextView? = view.tv_datetime
-    var media:ImageView? = view.media
     val actGroup:View? = view.actGroup
     var comment: TextView? = actGroup?.tv_comment
     var like: TextView? = actGroup?.tv_like
