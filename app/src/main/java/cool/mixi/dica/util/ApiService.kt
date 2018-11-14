@@ -55,6 +55,10 @@ interface ApiService {
         @Query("since_id") since_id: String,
         @Query("max_id") max_id: String): Call<List<Status>>
 
+    @POST("statuses/retweet")
+    @FormUrlEncoded
+    fun statusRetweet(@Field("id") id: Int): Call<Status>
+
     @GET("friendica/profile/show")
     fun friendicaProfileShow(@Query("profile_id") profile_id: String?): Call<Profile>
 
@@ -102,7 +106,7 @@ interface ApiService {
 
                 if(BuildConfig.DEBUG) {
                     val interceptor = HttpLoggingInterceptor()
-                    interceptor.level = HttpLoggingInterceptor.Level.HEADERS
+                    interceptor.level = HttpLoggingInterceptor.Level.BODY
                     clientBuilder.addInterceptor(interceptor)
                 }
 

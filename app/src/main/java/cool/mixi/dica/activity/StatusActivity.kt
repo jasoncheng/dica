@@ -8,6 +8,7 @@ import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.ApiService
 import cool.mixi.dica.util.IStatusDataSource
 import cool.mixi.dica.util.StatusTimeline
+import cool.mixi.dica.util.dLog
 import kotlinx.android.synthetic.main.activity_status.*
 import retrofit2.Call
 import java.util.*
@@ -27,8 +28,11 @@ class StatusActivity: BaseActivity(), IStatusDataSource {
         statusId = intent.getIntExtra(Consts.ID_STATUS, 0)
         if(statusId == 0){
             App.instance.toast(getString(R.string.status_not_found))
+            finish()
+            return
         }
 
+        dLog("StatusId: ${statusId}")
         stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
         home_srl.setOnRefreshListener {
             stl?.loadNewest(this)
