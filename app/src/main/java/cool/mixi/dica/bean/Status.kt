@@ -16,7 +16,7 @@ data class Status(
     var source: String?,
     var favorited: Boolean,
     var friendica_activities: FriendicaActivities,
-    var attachments: ArrayList<Attachment>
+    var attachments: ArrayList<Attachment>?
 ) {
     override fun equals(other: Any?): Boolean {
         if(other?.javaClass != this.javaClass)  return false

@@ -92,7 +92,7 @@ class MainActivity : BaseActivity() {
         if(!homeName.isNullOrEmpty() && homeName != getString(R.string.app_name)){
             home_title?.text = homeName
         } else {
-            HtmlCrawler.run(
+            HtmlCrawler.getInstance().run(
                 PrefUtil.getApiUrl(),
                 MyHtmlCrawler(this)
             )

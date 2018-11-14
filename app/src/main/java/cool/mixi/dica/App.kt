@@ -5,7 +5,6 @@ import android.widget.Toast
 import cool.mixi.dica.bean.Group
 import cool.mixi.dica.bean.Profile
 import cool.mixi.dica.util.ApiService
-import cool.mixi.dica.util.dLog
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -36,7 +35,6 @@ class App: Application() {
                     return
                 }
                 mygroup = response.body()!!
-                dLog(mygroup.toString())
             }
         })
     }

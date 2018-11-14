@@ -9,7 +9,6 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.regex.Pattern
 
-
 private val urlPattern = Pattern.compile(
     "(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
             + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
@@ -19,7 +18,6 @@ private val urlPattern = Pattern.compile(
 fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "=====> $log")
 fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "=====> $log")
 fun Any.dLog(log: String) = Log.d(this::class.java.simpleName, "=====> $log")
-
 fun String.md5(): String {
     try {
         val instance: MessageDigest = MessageDigest.getInstance("MD5")
@@ -43,7 +41,6 @@ fun String.md5(): String {
 }
 
 fun String.glideUrl(): GlideUrl {
-    dLog(this)
     val headersBuilder = LazyHeaders.Builder()
     headersBuilder.addHeader("user-agent", App.instance.getString(R.string.app_name))
     headersBuilder.addHeader("accept", "*/*")
