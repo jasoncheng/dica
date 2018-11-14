@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.text.Spannable
 import android.text.SpannableString
@@ -193,7 +194,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
         // Bottom Action
         holder.comment?.setOnClickListener { actComment(it) }
-        holder.share?.setOnClickListener { actShare(it) }
+        holder.retweet?.setOnClickListener { actRetweet(it) }
         holder.like?.setOnClickListener { actLike(it) }
         holder.tvLikeDetails?.setOnClickListener { gotoUserLikesPage(it) }
         holder.favorites?.setOnClickListener { actFavorites(it) }
@@ -393,8 +394,28 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
     }
 
-    private fun actShare(view: View){
-        App.instance.toast(context.getString(R.string.not_implement_yet))
+    private fun actRetweet(view: View){
+        val position = (view.parent.parent as ViewGroup).tag as Int
+        var dlg : AlertDialog?
+        val errorMsg = context.getString(R.string.retweet_fail)
+        data.getOrNull(position).let {
+            if(it == null) return
+            var view =  LayoutInflater.from(context).inflate(R.layout.loading_dialog, null)
+            view.findViewById<TextView>(R.id.tv_loading).text = context.getString(R.string.retweeting)
+            val builder = AlertDialog.Builder(context)
+            builder.setCancelable(true).setView(view)
+            dlg = builder.show()
+            FriendicaUtil.retweet(it.id, object: IRetweet {
+                override fun done() {
+                    dlg?.dismiss()
+                }
+
+                override fun fail(reason: String) {
+                    dlg?.dismiss()
+                    App.instance.toast(errorMsg.format(reason))
+                }
+            })
+        }
     }
 
     private fun gotoUserLikesPage(view: View){
@@ -711,7 +732,7 @@ open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     val actGroup:View? = view.actGroup
     var comment: TextView? = actGroup?.tv_comment
     var like: TextView? = actGroup?.tv_like
-    var share: TextView? = actGroup?.tv_share
+    var retweet: TextView? = actGroup?.tv_retweet
     var favorites: TextView? = actGroup?.tv_favorites
     var tvLikeDetails: TextView? = actGroup?.tv_like_details
     var userDescription:TextView? = view.tv_description

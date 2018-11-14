@@ -43,4 +43,7 @@
   <string name="status_favorites">favorites</string>
   <string name="no_any_status">no data here</string>
   <string name="status_source">" - from %1$s"</string>
+  <string name="status_retweet">rewteet</string>
+  <string name="retweeting">retweeting</string>
+  <string name="retweet_fail">retweet fail (%1$s)</string>
 </resources>

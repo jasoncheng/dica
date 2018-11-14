@@ -21,6 +21,11 @@ interface ISeenNotify {
     fun fail()
 }
 
+interface IRetweet {
+    fun done()
+    fun fail(reason: String)
+}
+
 class FriendicaUtil {
 
     companion object {
@@ -90,6 +95,25 @@ class FriendicaUtil {
                     if(response.code() != HttpsURLConnection.HTTP_OK
                         || !response.body().toString().contains("success")) {
                         callback?.fail()
+                        return
+                    }
+                    callback?.done()
+                }
+
+            })
+        }
+
+        fun retweet(nid: Int, callback: IRetweet?) {
+            ApiService.create().statusRetweet(nid).enqueue(object : Callback<Status>{
+                override fun onFailure(call: Call<Status>, t: Throwable) {
+                    eLog("retweet ${nid} ${t.message}")
+                    callback?.fail("${t.message}")
+                }
+
+                override fun onResponse(call: Call<Status>, response: Response<Status>) {
+                    if(response.code() != HttpsURLConnection.HTTP_OK) {
+                        dLog(response.message())
+                        callback?.fail(response.code().toString())
                         return
                     }
                     callback?.done()
