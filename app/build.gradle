@@ -12,11 +12,33 @@ android {
         applicationId 'cool.mixi.dica'
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 18111301
-        versionName "0.0.4"
+        versionCode 18111501
+        versionName "0.0.5"
+    }
+    signingConfigs {
+        jason {
+            keyAlias 'androidreleasekey'
+            keyPassword '123456'
+            storeFile file('./release.keystore')
+            storePassword '654321'
+        }
     }
     buildTypes {
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.jason
+            zipAlignEnabled true
+            debuggable false
+            shrinkResources true
+            minifyEnabled true
+            lintOptions {
+                disable 'MissingTranslation'
+                checkReleaseBuilds false
+                abortOnError false
+            }
+        }
         debug {
+            signingConfig signingConfigs.jason
         }
     }
     productFlavors {
