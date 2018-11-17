@@ -46,4 +46,5 @@
   <string name="status_retweet">rewteet</string>
   <string name="retweeting">retweeting</string>
   <string name="retweet_fail">retweet fail (%1$s)</string>
+  <string name="fetch_remote_user">fetching remote user data..</string>
 </resources>

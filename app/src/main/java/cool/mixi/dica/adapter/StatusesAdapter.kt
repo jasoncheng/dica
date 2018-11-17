@@ -2,6 +2,7 @@ package cool.mixi.dica.adapter
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
@@ -33,6 +34,7 @@ import cool.mixi.dica.activity.BaseActivity
 import cool.mixi.dica.activity.StatusActivity
 import cool.mixi.dica.activity.UserActivity
 import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Meta
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
 import cool.mixi.dica.fragment.ComposeDialogFragment
@@ -44,7 +46,9 @@ import kotlinx.android.synthetic.main.box_status_user.view.*
 import kotlinx.android.synthetic.main.box_status_website.view.*
 import kotlinx.android.synthetic.main.empty_view.view.*
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
+import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_sitename
 import kotlinx.android.synthetic.main.status_list_item.view.*
+import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
 import java.util.*
 import java.util.regex.Pattern
@@ -56,6 +60,10 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     var ownerInfo: User? = null
     var isFavoritesFragment: Boolean = false
     var initLoaded: Boolean = false
+
+    // if this is internal / extrenal Network
+    var isOffSiteSN = false
+
     private val quoteSpanColor: Int = context.getColor(R.color.quote_span_border)
     private val likeDrawable = context.getDrawable(R.drawable.thumb_up_sel)
     private val unlikeDrawable = context.getDrawable(R.drawable.thumb_up)
@@ -92,6 +100,8 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private val compilerLargeText: Pattern = Pattern.compile("\\*([^\\*]+)\\*",
         Pattern.CASE_INSENSITIVE  or Pattern.MULTILINE or Pattern.DOTALL )
 
+    private var refAdatper: SoftReference<StatusesAdapter> = SoftReference(this)
+
     override fun onBindViewHolder(holder: BasicStatusViewHolder, position: Int) {
         if(holder is EmptyHolder){
             if(initLoaded){
@@ -114,19 +124,25 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         data.getOrNull(pos).let { it ->
             if(it == null) return
 
-            var date = Date(it.created_at)
-            var lockContainer = holder.datetime
-            if(context !is UserActivity){
-                doLayoutUserBox(holder, it, pos)
-                holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
-                lockContainer = holder.userName
 
-            } else {
-                holder.datetime?.let {that->
-                    that.text = date.toLocaleString()
-                    doAppendSourceLayout(that, date.toLocaleString(), it)
+            var lockContainer = holder.datetime
+            try {
+                var date = Date(it.created_at)
+                if(context !is UserActivity){
+                    doLayoutUserBox(holder, it, pos)
+                    holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
+                    lockContainer = holder.userName
+                } else {
+                    holder.datetime?.let {that->
+                        that.text = date.toLocaleString()
+                        doAppendSourceLayout(that, date.toLocaleString(), it)
+                    }
                 }
+            }catch (e: java.lang.Exception) {
+                eLog(" ${it.created_at}")
+                eLog("${e.message}")
             }
+
 
             // private message icon
             if(it.friendica_private) {
@@ -192,12 +208,19 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             holder.contentBox?.setOnClickListener { gotoStatusPage(it) }
         }
 
-        // Bottom Action
-        holder.comment?.setOnClickListener { actComment(it) }
+        // Bottom Action & visibility
         holder.retweet?.setOnClickListener { actRetweet(it) }
-        holder.like?.setOnClickListener { actLike(it) }
-        holder.tvLikeDetails?.setOnClickListener { gotoUserLikesPage(it) }
-        holder.favorites?.setOnClickListener { actFavorites(it) }
+        if(isOffSiteSN){
+            holder.comment?.visibility = View.GONE
+            holder.like?.visibility = View.GONE
+            holder.tvLikeDetails?.visibility = View.GONE
+            holder.favorites?.visibility = View.GONE
+        } else {
+            holder.comment?.setOnClickListener { actComment(it) }
+            holder.like?.setOnClickListener { actLike(it) }
+            holder.tvLikeDetails?.setOnClickListener { gotoUserLikesPage(it) }
+            holder.favorites?.setOnClickListener { actFavorites(it) }
+        }
         return holder
     }
 
@@ -327,6 +350,16 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             holder.userDescription?.visibility = View.GONE
         }
 
+        if(isOffSiteSN){
+            holder.siteName?.visibility = View.VISIBLE
+            holder.siteName?.text = ownerInfo?.getDomain()
+            holder.siteName?.setOnClickListener {
+                ownerInfo?.url.let {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it!!)))
+                }
+            }
+        }
+
         Glide.with(context.applicationContext)
             .load(ownerInfo?.profile_image_url_large)
             .apply(RequestOptions().circleCrop())
@@ -374,7 +407,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             FriendicaUtil.favorites(st.favorited, st.id)
             if(!st.favorited && isFavoritesFragment){
                 data.removeAt(position)
-                notifyDataSetChanged()
+                notifyItemRemoved(position)
             }
         }
     }
@@ -405,6 +438,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             val builder = AlertDialog.Builder(context)
             builder.setCancelable(true).setView(view)
             dlg = builder.show()
+
+
+            if(isOffSiteSN){
+
+            }
+
             FriendicaUtil.retweet(it.id, object: IRetweet {
                 override fun done() {
                     dlg?.dismiss()
@@ -445,6 +484,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
     }
 
+    fun gotoUserPage(email: String) {
+        val i = Intent(context, UserActivity::class.java)
+        i.putExtra(Consts.EXTRA_USER_EMAIL, email)
+        context.startActivity(i)
+    }
+
     private fun gotoStatusPage(view: View){
         var position: Int = if(view is ImageView){
             view.getTag(R.id.media_image) as Int
@@ -480,21 +525,37 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
 
         // Style: Quote / TAG / Photo / Website
-        val lines = status.text.lines()
+        val lines = status.text.trim().lines()
         var isPureText = false
         var txtAr = ArrayList<String>()
-        lines.forEach {
+
+        dLog("${status.id}, ${status.external_url}: content is ${status.text}")
+
+        lines.forEachIndexed { index, it ->
+            dLog("$index, $it")
             val urls = it.urls()
             if(urls.size > 0) {
+                // if only one line and contains url
+                val urlFirst = urls[0]
+                dLog("find url $urlFirst")
+                var urlStart = it.indexOf(urlFirst, 0)
+                if(urlStart > 0){
+                    txtAr.add(it.substring(0, urlStart))
+                    isPureText = true
+                }
+
                 if(isPureText){
                     renderText(parent, txtAr)
                     txtAr.clear()
                 }
+
+                var finalUrl = urlFirst.replace("\\*$".toRegex(), "")
                 isPureText = false
-                displayedUrl.add(it)
-                renderUrl(parent, status, it)
-                return@forEach
+                displayedUrl.add(finalUrl)
+                renderUrl(parent, status, it.substring(urlStart))
+                return@forEachIndexed
             }
+
             isPureText = true
             txtAr.add(it)
         }
@@ -529,9 +590,12 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         urls.forEach {
             var end = textWithUrl.indexOf(it, 0, true)
             if(end > 0) {
+                dLog("==========> renderUrl restStr [$it]")
                 var outTxt = restStr.substring(0, end)
+                dLog("==========> renderUrl restStr [$outTxt]")
                 restStr = textWithUrl.substring(end)
-                renderText(parent, outTxt)
+                dLog("==========> renderUrl restStr [$restStr]")
+                renderText(parent, outTxt.trim())
             }
 
             restStr = restStr.replace(it, "")
@@ -555,7 +619,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
                     renderWebUrl(parent, meta)
                 } else {
                     renderText(parent, it)
-                    HtmlCrawler.getInstance().run(it, MyHtmlCrawler(status, this))
+                    HtmlCrawler.getInstance().run(it, MyHtmlCrawler(status, refAdatper))
                 }
             }
             renderUrl(parent, status, restStr)
@@ -564,14 +628,24 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 
     // Pure Text (QUOTE / Recycling / TAG)
-    private fun renderText(parent:ViewGroup, txt: String){
-        var ar = ArrayList<String>()
+    private fun renderText(parent: ViewGroup, txt: String){
+        txt.trim().isNullOrEmpty().let {
+            if(it) return
+        }
+
+        val ar = ArrayList<String>()
         ar.add(txt)
         renderText(parent, ar)
     }
 
     private fun renderText(parent:ViewGroup, txtArr: ArrayList<String>){
         if(txtArr.size == 0) return
+        if(txtArr.size == 1){
+            txtArr[0].trim().isNullOrEmpty().let {
+                if(it) return
+                if(txtArr[0] == "\n") return
+            }
+        }
         var str = txtArr.joinToString("\n")
         var txt = getTextView()
         txt.text = getTextSpan(str)
@@ -590,8 +664,10 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             var strNew = str.replaceFirst("> ".toRegex(), "").trim()
             val start = s.indexOf(str)
             val end = start+strNew.length
-            indexAr.add(arrayOf(start, end).toIntArray())
-            s = s.replace(str, strNew, true)
+            if(start > 0 && end <= s.length) {
+                indexAr.add(arrayOf(start, end).toIntArray())
+                s = s.replace(str, strNew, true)
+            }
         }
         sp = SpannableString(s)
         indexAr.forEach {
@@ -610,9 +686,29 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             )
 
             sp.setSpan(
-                MyClickSpan(tagTextColor),
+                TagClickSpan(tagTextColor),
                 mTag.start()+1,
                 mTag.end(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        // Style: Mentions
+        val mMentions = s.emails()
+        for(it in mMentions){
+            var start = s.indexOf(it, 0, true)
+            var end = start+it.length
+            sp.setSpan(
+                ForegroundColorSpan(tagTextColor),
+                start,
+                end,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+
+            sp.setSpan(
+                OffSiteUserClickSpan(tagTextColor, this),
+                start,
+                end,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
@@ -628,7 +724,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
         indexAr2.forEach {
             sp.setSpan(
-                RelativeSizeSpan(1.3f),
+                RelativeSizeSpan(1.2f),
                 it[0],
                 it[1],
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -656,6 +752,10 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
         val inflater = LayoutInflater.from(context)
         val view = inflater.inflate(R.layout.box_status_website, null)
+        val childParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        childParams.setMargins(0, 20, 0, 20)
+        view.layoutParams = childParams
+
         Glide.with(context).load(meta.icon).into(view.site_avatar)
         if(meta.description.isNullOrEmpty()){
             view.site_desc.text = meta.url
@@ -678,6 +778,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         img.layoutParams = childParams
         img.scaleType = ImageView.ScaleType.FIT_XY
         img.adjustViewBounds = true
+        childParams.setMargins(0, 20, 0, 20)
         return img
     }
 
@@ -686,19 +787,24 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         val childParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         txt.layoutParams = childParams
         txt.autoLinkMask = ALL
+        txt.setPadding(10, 10, 10, 10)
         txt.setTextIsSelectable(true)
         txt.paintFlags = 0
+        txt.includeFontPadding = false
         txt.setOnClickListener {
             (it.parent as ViewGroup).callOnClick()
         }
+
+        // DEBUG
+        txt.setBackgroundColor(Color.GRAY)
+        childParams.setMargins(0, 20, 0, 20)
         return txt
     }
 }
 
-class MyHtmlCrawler(private val st: Status, adapter: StatusesAdapter): IHtmlCrawler {
-    private val ref = WeakReference<StatusesAdapter>(adapter)
+class MyHtmlCrawler(private val st: Status, val adapter: SoftReference<StatusesAdapter>?): IHtmlCrawler {
     override fun done(meta: Meta) {
-        ref.get()?.let {
+        adapter?.get()?.let {
             it.data.forEachIndexed { index, status ->
                 if(st != status) { return@forEachIndexed }
                 it.notifyItemChanged(index)
@@ -707,7 +813,7 @@ class MyHtmlCrawler(private val st: Status, adapter: StatusesAdapter): IHtmlCraw
     }
 }
 
-class MyClickSpan(private val linkColor: Int): ClickableSpan() {
+class TagClickSpan(private val linkColor: Int): ClickableSpan() {
     override fun onClick(widget: View?) {
         val sp = ((widget as TextView).text as Spanned)
         val start = sp.getSpanStart(this)
@@ -723,11 +829,31 @@ class MyClickSpan(private val linkColor: Int): ClickableSpan() {
     }
 }
 
+class OffSiteUserClickSpan(private val linkColor: Int, adapter: StatusesAdapter): ClickableSpan() {
+    private val ref = WeakReference<StatusesAdapter>(adapter)
+    override fun onClick(widget: View?) {
+        val sp = ((widget as TextView).text as Spanned)
+        val start = sp.getSpanStart(this)
+        val end = sp.getSpanEnd(this)
+        var email = sp.subSequence(start, end).toString()
+        App.instance.toast(email)
+        ref.get()?.gotoUserPage(email)
+    }
+
+    override fun updateDrawState(ds: TextPaint?) {
+        super.updateDrawState(ds)
+        ds?.color = linkColor
+        ds?.linkColor = linkColor
+        ds?.isUnderlineText = false
+    }
+}
+
 open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name
     open var avatar:ImageView? = view.avatar
     var contentBox: ViewGroup? = view.content_box
     var emptyDescription: TextView? = view.tv_empty
+    var siteName: TextView? = view.tv_sitename
     var datetime:TextView? = view.tv_datetime
     val actGroup:View? = view.actGroup
     var comment: TextView? = actGroup?.tv_comment

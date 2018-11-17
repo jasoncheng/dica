@@ -26,6 +26,8 @@ object Consts {
     val EXTRA_PHOTO_URI = "photoUri"
     val EXTRA_USER = "user"
     val EXTRA_USER_ID = "userId"
+    val EXTRA_USER_EMAIL = "email"
+    val EXTRA_USER_URL = "url"
     val EXTRA_NOTIFICATIONS = "notifications"
     val EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
     val EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"

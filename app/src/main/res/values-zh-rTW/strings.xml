@@ -44,4 +44,5 @@
   <string name="status_retweet">轉推</string>
   <string name="retweeting">轉推中</string>
     <string name="retweet_fail">轉推失敗 (%1$s)</string>
+  <string name="fetch_remote_user">獲取站外用戶資料</string>
 </resources>

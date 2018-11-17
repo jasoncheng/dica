@@ -6,12 +6,17 @@ import cool.mixi.dica.BuildConfig
 import cool.mixi.dica.bean.*
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
+import org.simpleframework.xml.convert.AnnotationStrategy
+import org.simpleframework.xml.core.Persister
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import retrofit2.http.*
+import retrofit2.http.Headers
 import java.io.File
+import java.net.URL
 import java.util.concurrent.TimeUnit
 
 interface ApiService {
@@ -95,21 +100,24 @@ interface ApiService {
     @FormUrlEncoded
     fun favoritesDestroy(@Field("id") id: Int): Call<Status>
 
+    @GET(".well-known/webfinger")
+    fun webFinger(
+        @Query(value = "resource", encoded = true) email: String
+    ): Call<WebFinger>
+
+    @Headers("Accept: application/atom+xml")
+    @GET("{path}")
+    fun apProfile(
+        @Path(value = "path", encoded = true) path: String
+    ): Call<AP>
+
     companion object Factory {
 
-        var cookies = ArrayList<String>()
-        var sessionCookie:String? = null
+        var cookies = HashMap<String, String>()
+        private val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
 
         private val client: OkHttpClient
             get() {
-                val clientBuilder = OkHttpClient.Builder()
-
-                if(BuildConfig.DEBUG) {
-                    val interceptor = HttpLoggingInterceptor()
-                    interceptor.level = HttpLoggingInterceptor.Level.BODY
-                    clientBuilder.addInterceptor(interceptor)
-                }
-
                 val authToken = Credentials.basic(
                     PrefUtil.getUsername(),
                     PrefUtil.getPassword()
@@ -122,54 +130,66 @@ interface ApiService {
                     it.proceed(request)
                 }
 
-                val cacheInterceptor = Interceptor {
-                    val request = if(NetworkUtil.isNetworkConnected()) {
-                        it.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build()
-                    } else {
-                        it.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build()
-                    }
-
-                    it.proceed(request)
-                }
-
-                val saveCookieInterceptor = Interceptor {
-                    val res = it.proceed(it.request())
-                    res.headers().toMultimap().forEach { (key, value) ->
-                        var thisCookie = value[0].split(";".toRegex())[0]
-                        if(key.toLowerCase() == "set-cookie" && thisCookie.contains("PHPSESSID")){
-                            sessionCookie = thisCookie
-                        }
-                    }
-
-                    res
-                }
-
-                val addCookieInterceptor = Interceptor { it ->
-                    val builder = it.request().newBuilder()!!
-                    if(sessionCookie != null){
-
-                    }
-                    sessionCookie?.let {
-                        dLog("Request Header reuse w/ Cookie Cache $it")
-                        builder.addHeader("Cookie", it)
-                    }
-
-                    it.proceed(builder.build())
-                }
-
-                val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
-                val cache = Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
-
-
-                return clientBuilder.cache(cache)
-                    .addInterceptor(basicAuthInterceptor)
-                    .addInterceptor(addCookieInterceptor)
-                    .addInterceptor(saveCookieInterceptor)
-                    .addInterceptor(cacheInterceptor)
-                    .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                    .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
-                    .build()
+                return getBuilder().addInterceptor(basicAuthInterceptor).build()
             }
+
+        private val cacheInterceptor = Interceptor {
+            val request = if(NetworkUtil.isNetworkConnected()) {
+                it.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build()
+            } else {
+                it.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build()
+            }
+
+            it.proceed(request)
+        }
+
+
+        private val saveCookieInterceptor = Interceptor {
+            val host = it.request().url().host()
+            val res = it.proceed(it.request())
+            res.headers().toMultimap().forEach { (key, value) ->
+                val thisCookie = value[0].split(";".toRegex())[0]
+                if(key.toLowerCase() == "set-cookie" &&
+                    (thisCookie.contains("PHPSESSID") || thisCookie.contains("session".toRegex()))){
+                    dLog("Set-Cookie $thisCookie")
+                    cookies[host] = thisCookie
+                }
+            }
+
+            res
+        }
+
+        private val addCookieInterceptor = Interceptor { it ->
+            val host = it.request().url().host()
+            val builder = it.request().newBuilder()!!
+            cookies[host]?.let {
+                dLog("Request Header reuse w/ Cookie Cache $host $it")
+                builder.addHeader("Cookie", it)
+            }
+            it.proceed(builder.build())
+        }
+
+        private fun getCache(): Cache {
+            return Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
+        }
+
+        private fun getBuilder(): OkHttpClient.Builder {
+            val clientBuilder = OkHttpClient.Builder()
+            if(BuildConfig.DEBUG) {
+                val interceptor = HttpLoggingInterceptor()
+                interceptor.level = HttpLoggingInterceptor.Level.HEADERS
+                clientBuilder.addInterceptor(interceptor)
+            }
+
+            clientBuilder
+                .cache(getCache())
+                .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
+                .addInterceptor(addCookieInterceptor)
+                .addInterceptor(saveCookieInterceptor)
+                .addInterceptor(cacheInterceptor)
+            return clientBuilder
+        }
 
         fun create(): ApiService {
             val gson = GsonBuilder().serializeNulls().setLenient().create()
@@ -177,6 +197,35 @@ interface ApiService {
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .baseUrl("${PrefUtil.getApiUrl()}/api/")
+                .client(client)
+                .build()
+            return retrofit.create(ApiService::class.java)
+        }
+
+        fun create(email: String): ApiService {
+            val client = getBuilder().build()
+            val url = "https://${email.emailGetDomain()}/"
+            dLog("WebFinger $url")
+            val gson = GsonBuilder().serializeNulls().setLenient().create()
+            val retrofit = Retrofit.Builder()
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .baseUrl(url)
+                .client(client)
+                .build()
+            return retrofit.create(ApiService::class.java)
+        }
+
+        fun createAP(url: String): ApiService {
+            val tmp = URL(url)
+            val client = getBuilder().build()
+            val target = "${tmp.protocol}://${tmp.host}/"
+            dLog("createAP $target")
+            val retrofit = Retrofit.Builder()
+                .addConverterFactory(SimpleXmlConverterFactory.createNonStrict(
+                    Persister(AnnotationStrategy())
+                ))
+                .baseUrl(target)
                 .client(client)
                 .build()
             return retrofit.create(ApiService::class.java)
