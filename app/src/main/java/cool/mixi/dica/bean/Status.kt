@@ -1,6 +1,7 @@
 package cool.mixi.dica.bean
 
 import cool.mixi.dica.util.dicaHTMLFilter
+import cool.mixi.dica.util.getBaseUri
 
 data class Status(
     var id: Int = 0,
@@ -41,7 +42,7 @@ data class Status(
         sb.append("\n${this.statusnet_html
             .replace("\\[".toRegex(), "(")
             .replace("\\]".toRegex(), ")")
-            .dicaHTMLFilter(true)}\n")
+            .dicaHTMLFilter(true, external_url.getBaseUri())}\n")
         sb.append("[/share]")
         return sb.toString()
     }

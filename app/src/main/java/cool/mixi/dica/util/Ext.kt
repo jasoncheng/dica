@@ -17,15 +17,6 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.regex.Pattern
 
-private val urlPattern = Pattern.compile(
-    "(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
-            + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
-            + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
-    Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL)
-
-private val emailPattern = Pattern.compile("([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+)",
-    Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL)
-
 fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "=====> $log")
 fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "=====> $log")
 fun Any.dLog(log: String) = Log.d(this::class.java.simpleName, "=====> $log")
@@ -72,13 +63,25 @@ fun String.possibleNetworkAcctFromUrl(): String {
     return "${this.substring(this.lastIndexOf("/")+1)}@${uri.host}"
 }
 
+fun String.getBaseUri(): String {
+    try {
+        var uri = URL(this)
+        return "${uri.protocol}://${uri.host}"
+    } catch (e: Exception) {
+        return ""
+    }
+}
+
 // TODO: my god.....ugly.....too ugly; need to do refactor
-fun String.dicaHTMLFilter(toBBCode: Boolean): String {
+fun String.dicaHTMLFilter(toBBCode: Boolean, baseUri: String): String {
     dLog("dicaHTMLFilter $toBBCode, $this")
     var sb = StringBuffer()
     var linkExists = ArrayList<String>()
     var textExists = ArrayList<String>()
-    var ele = Jsoup.parse(Parser.unescapeEntities(this, true)).body().allElements
+    var ele = Jsoup.parse(
+        Parser.unescapeEntities(this, true),
+        baseUri
+    ).body().allElements
     for(e in ele){
         for(e1 in e.childNodes()){
             if(e1 is TextNode){
@@ -97,7 +100,7 @@ fun String.dicaHTMLFilter(toBBCode: Boolean): String {
 
             var tag = e1.tagName()
             if(tag == "a"){
-                val link = e1.attr("href")
+                var link = e1.attr("href")
                 if(link.contains("/tags/") || link.contains("search?tag")){
                     if(toBBCode){
                         sb.append(" ${e1.text()} ")
@@ -106,7 +109,13 @@ fun String.dicaHTMLFilter(toBBCode: Boolean): String {
                     }
                     continue
                 }
+
                 if(linkExists.contains(link)){ continue }
+
+                // relative URL to absolute URL
+                if(link.startsWith("/")){
+                    link = "$baseUri$link"
+                }
 
                 if(toBBCode){
                     sb.append(" [url=$link]${e1.text()}[/url] ")
@@ -115,6 +124,7 @@ fun String.dicaHTMLFilter(toBBCode: Boolean): String {
                 }
 
                 linkExists.add(link)
+
             } else if(tag == "img") {
                 var link = e1.attr("src")
                 // do something on link, that adapter render, can treat as image
@@ -124,6 +134,11 @@ fun String.dicaHTMLFilter(toBBCode: Boolean): String {
                     link += "&ext=.jpg"
                 }
                 if(linkExists.contains(link)){ continue }
+
+                // relative URL to absolute URL
+                if(link.startsWith("/")){
+                    link = "$baseUri$link"
+                }
 
                 if(toBBCode){
                     sb.append(" [img=$link][/img] ")
@@ -168,29 +183,12 @@ fun String.dicaRenderData(): String {
     }
     val final = ar.joinToString("\n")
     ar.clear()
-//    Log.d("REG", "S~~~~~~~~~~~~~~~~~~~")
-//    Log.d("REGOLD", "$this")
-//    Log.d("REG", "~~~~~~~~~~~~~~~~~~~")
-//    Log.d("REGNEW", "$final")
-//    Log.d("REG", "E~~~~~~~~~~~~~~~~~~~")
-//    Log.d("REG", "")
     return final
-}
-
-fun String.urls(): ArrayList<String> {
-    var urls = ArrayList<String>()
-    val matcher = urlPattern.matcher(this)
-    while (matcher.find()) {
-        val matchStart = matcher.start(1)
-        val matchEnd = matcher.end()
-        urls.add(this.substring(matchStart, matchEnd))
-    }
-    return urls
 }
 
 fun String.emails(): ArrayList<String> {
     var emails = ArrayList<String>()
-    val matcher = emailPattern.matcher(this)
+    val matcher = Patterns.EMAIL_ADDRESS.matcher(this)
     while (matcher.find()) {
         emails.add(matcher.group())
     }

@@ -75,7 +75,7 @@ data class APEntry (
         status.source = statusNetNoticeInfo.source
         status.external_url = id
         status.statusnet_html = content
-        status.text = content.dicaHTMLFilter(false).dicaRenderData()
+        status.text = content.dicaHTMLFilter(false, id.getBaseUri()).dicaRenderData()
         status.attachments = link.toAttachments()
         status.apEntry = this
         return status
@@ -101,7 +101,7 @@ data class APAuthor(
         user.description = summary
         user.profile_image_url_large = link.getAvatar()
         user.description.isNotEmpty().let {
-            user.description = user.description.dicaHTMLFilter(false)
+            user.description = user.description.dicaHTMLFilter(false, user.url.getBaseUri())
         }
         return user
     }
