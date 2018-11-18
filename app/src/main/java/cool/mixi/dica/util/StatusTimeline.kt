@@ -150,6 +150,9 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 // Bind Address if possible
                 LocationUtil.instance.bindGeoAddress(it)
 
+                // TODO: Test
+                it.text = it.text.dicaRenderData()
+
                 // any more sourceOld status ?
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
                     act.allLoaded = true

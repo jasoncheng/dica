@@ -1,6 +1,7 @@
 package cool.mixi.dica.util
 
 import android.util.Log
+import android.util.Patterns
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import cool.mixi.dica.App
@@ -71,13 +72,13 @@ fun String.possibleNetworkAcctFromUrl(): String {
     return "${this.substring(this.lastIndexOf("/")+1)}@${uri.host}"
 }
 
-// TODO: ugly.....too too ugly; need to do refactor
-fun String.dicaHTMLFilter(): String {
+// TODO: my god.....ugly.....too ugly; need to do refactor
+fun String.dicaHTMLFilter(toBBCode: Boolean): String {
+    dLog("dicaHTMLFilter $toBBCode, $this")
     var sb = StringBuffer()
     var linkExists = ArrayList<String>()
     var textExists = ArrayList<String>()
-    var ele = Jsoup.parse(
-        Parser.unescapeEntities(this, true)).body().allElements
+    var ele = Jsoup.parse(Parser.unescapeEntities(this, true)).body().allElements
     for(e in ele){
         for(e1 in e.childNodes()){
             if(e1 is TextNode){
@@ -98,11 +99,21 @@ fun String.dicaHTMLFilter(): String {
             if(tag == "a"){
                 val link = e1.attr("href")
                 if(link.contains("/tags/") || link.contains("search?tag")){
-                    sb.append(e1.text())
+                    if(toBBCode){
+                        sb.append(" ${e1.text()} ")
+                    } else {
+                        sb.append(e1.text())
+                    }
                     continue
                 }
                 if(linkExists.contains(link)){ continue }
-                sb.append(" $link ")
+
+                if(toBBCode){
+                    sb.append(" [url=$link]${e1.text()}[/url] ")
+                } else {
+                    sb.append(" $link ")
+                }
+
                 linkExists.add(link)
             } else if(tag == "img") {
                 var link = e1.attr("src")
@@ -113,10 +124,19 @@ fun String.dicaHTMLFilter(): String {
                     link += "&ext=.jpg"
                 }
                 if(linkExists.contains(link)){ continue }
-                sb.append(" $link ")
+
+                if(toBBCode){
+                    sb.append(" [img=$link][/img] ")
+                } else {
+                    sb.append(" $link ")
+                }
                 linkExists.add(link)
             } else if(tag == "strong" || tag == "b" || tag == "h3" || tag == "h2" || tag == "h1") {
-                sb.append("*${e1.text()}*")
+                if(toBBCode){
+                    sb.append("[b]${e1.text()}[/b]")
+                } else {
+                    sb.append("*${e1.text()}*")
+                }
             } else if(tag == "br" || tag == "hr") {
                 sb.append("\n")
             }
@@ -125,6 +145,36 @@ fun String.dicaHTMLFilter(): String {
     linkExists.clear()
     textExists.clear()
     return sb.toString()
+}
+
+// If URL or Image, newline
+fun String.dicaRenderData(): String {
+    val ar = ArrayList<String>()
+    this.lines().forEach {
+        var tmp = it
+        var matcher = Patterns.WEB_URL.matcher(it)
+        while (matcher.find()){
+            val url = matcher.group()
+            var newUrl = url.trim()
+
+            if(!url.startsWith("http")) continue
+            if(it == url) continue
+
+            if(matcher.start() > 0) newUrl = "\n$newUrl"
+            if(matcher.end() < it.length) newUrl = "$newUrl\n"
+            tmp = tmp.replace(url, newUrl)
+        }
+        ar.add(tmp)
+    }
+    val final = ar.joinToString("\n")
+    ar.clear()
+//    Log.d("REG", "S~~~~~~~~~~~~~~~~~~~")
+//    Log.d("REGOLD", "$this")
+//    Log.d("REG", "~~~~~~~~~~~~~~~~~~~")
+//    Log.d("REGNEW", "$final")
+//    Log.d("REG", "E~~~~~~~~~~~~~~~~~~~")
+//    Log.d("REG", "")
+    return final
 }
 
 fun String.urls(): ArrayList<String> {

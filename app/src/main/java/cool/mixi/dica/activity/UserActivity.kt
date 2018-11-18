@@ -65,17 +65,18 @@ class UserActivity: BaseActivity(), IStatusDataSource {
 
     private fun getUserInfoFromEmail(email: String = "jasoncheng@mastodon.social"){
         home_srl.isRefreshing = true
+        App.instance.toast(strFetchingRemoteUser)
         val atomUrl = App.instance.getWebFinger(email)
         if(atomUrl != null){
             val uri = URL(atomUrl)
-            ApiService.createAP(atomUrl).apProfile(uri.path).enqueue(CallbackUserProfile(this))
+            ApiService.createAP(atomUrl).apProfile(uri.path).enqueue(CallbackUserStream(this))
             return
         }
 
         ApiService.create(email).webFinger("acct:$email").enqueue(WebFingerCallback(email, this))
     }
 
-    class WebFingerCallback(val email: String, activity: UserActivity): Callback<WebFinger> {
+    class WebFingerCallback(private val email: String, activity: UserActivity): Callback<WebFinger> {
         private val ref = WeakReference<UserActivity>(activity)
         override fun onFailure(call: Call<WebFinger>, t: Throwable) {
             ref.get()?.let { App.instance.toast(it.userNotFoundStr!!) }
@@ -86,15 +87,19 @@ class UserActivity: BaseActivity(), IStatusDataSource {
             val finger = response.body()
             finger?.getATOMXMLUrl()?.let {
                 val uri = URL(it)
-                ApiService.createAP(it).apProfile(uri.path).enqueue(CallbackUserProfile(ref.get()!!))
+                ApiService.createAP(it).apProfile(uri.path).enqueue(CallbackUserStream(ref.get()!!))
                 App.instance.setWebFinger(email, it)
                 return
             }
-            ref.get()?.let { App.instance.toast(it.serviceNotAvailable!!) }
+
+            ref.get()?.let {
+                App.instance.toast(it.serviceNotAvailable.format(response.code().toString()))
+                it.finish()
+            }
         }
     }
 
-    class CallbackUserProfile(activity: UserActivity): Callback<AP> {
+    class CallbackUserStream(activity: UserActivity): Callback<AP> {
         private val ref = WeakReference<UserActivity>(activity)
         override fun onFailure(call: Call<AP>, t: Throwable) {
             ref.get()?.let { App.instance.toast(it.serviceNotAvailable?.format(t.message)) }
@@ -122,10 +127,12 @@ class UserActivity: BaseActivity(), IStatusDataSource {
             adapter.ownerInfo = activity.user
             adapter.isOffSiteSN = true
             res?.entry?.forEach {
-                activity.stl?.add(it.toStatus())
+                val status = it.toStatus()
+                status.avatar = res.link.getAvatar()
+                activity.stl?.add(status)
             }
-
             adapter.notifyDataSetChanged()
+            adapter.notifyItemChanged(0)
         }
 
     }
@@ -163,7 +170,6 @@ class UserActivity: BaseActivity(), IStatusDataSource {
         data.forEach { stl?.add(it) }
         if(stl?.count() == 0){
             dLog("no data to load, start fetch webFinger")
-            App.instance.toast(strFetchingRemoteUser)
             user?.statusnet_profile_url?.possibleNetworkAcctFromUrl().let {
                 getUserInfoFromEmail(it!!)
             }

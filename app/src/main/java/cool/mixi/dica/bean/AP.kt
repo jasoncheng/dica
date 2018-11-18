@@ -1,8 +1,6 @@
 package cool.mixi.dica.bean
 
-import cool.mixi.dica.util.dicaHTMLFilter
-import cool.mixi.dica.util.getAvatar
-import cool.mixi.dica.util.toAttachments
+import cool.mixi.dica.util.*
 import org.simpleframework.xml.*
 import java.text.SimpleDateFormat
 
@@ -17,6 +15,7 @@ data class AP (
     @field:ElementList(inline = true, required = false) var entry: List<APEntry> = ArrayList()
 ){
     fun toUser(): User {
+        dLog(author.toString())
         var u = author.toUser()
         if(u.description.isNullOrEmpty() && !subtitle.isNullOrEmpty()){
             u.description = subtitle
@@ -27,6 +26,7 @@ data class AP (
                 u.profile_image_url_large = it
             }
         }
+        dLog("${u.toString()}")
         return u
     }
 }
@@ -74,8 +74,10 @@ data class APEntry (
 
         status.source = statusNetNoticeInfo.source
         status.external_url = id
-        status.text = content.dicaHTMLFilter()
+        status.statusnet_html = content
+        status.text = content.dicaHTMLFilter(false).dicaRenderData()
         status.attachments = link.toAttachments()
+        status.apEntry = this
         return status
     }
 }
@@ -83,23 +85,23 @@ data class APEntry (
 @Root(name = "author", strict = false)
 data class APAuthor(
     @field:Element(required = false) var id: String = "",
-    @field:Element var name: String = "",
+    @field:Element(required = false) var name: String = "",
     @field:Element(required = false, name = "poco:preferredUsername") var preferredUsername: String = "",
     @field:Element(required = false, name = "poco:displayName") var displayName: String = "",
-    @field:Element var uri: String = "",
+    @field:Element(required = false) var uri: String = "",
     @field:Element(required = false) var email: String = "",
     @field:Element(required = false) var summary: String = "",
     @field:ElementList(required = false, inline = true) var link: List<APLink> = ArrayList()
 ){
     fun toUser(): User{
         var user = User()
-        user.url = id
+        user.url = if(id.isNullOrEmpty()) { uri } else { id }
         user.screen_name = name
-        user.statusnet_profile_url = id
+        user.statusnet_profile_url = user.url
         user.description = summary
         user.profile_image_url_large = link.getAvatar()
         user.description.isNotEmpty().let {
-            user.description = user.description.dicaHTMLFilter()
+            user.description = user.description.dicaHTMLFilter(false)
         }
         return user
     }

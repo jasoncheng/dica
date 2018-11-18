@@ -1,5 +1,7 @@
 package cool.mixi.dica.bean
 
+import cool.mixi.dica.util.dicaHTMLFilter
+
 data class Status(
     var id: Int = 0,
     var user: User = User(),
@@ -16,12 +18,31 @@ data class Status(
     var source: String? = "",
     var favorited: Boolean = false,
     var friendica_activities: FriendicaActivities = FriendicaActivities(),
-    var attachments: ArrayList<Attachment>? = ArrayList()
+    var attachments: ArrayList<Attachment>? = ArrayList(),
+    var apEntry: APEntry? = APEntry(),
+    var avatar:String = ""
 ) {
     override fun equals(other: Any?): Boolean {
         if(other?.javaClass != this.javaClass)  return false
 
         other as Status
         return other.id == this.id
+    }
+
+    fun toFriendicaShareText(): String {
+        var sb = StringBuffer()
+        sb.append("[share ")
+        sb.append("author='${this.apEntry?.author?.name}' ")
+        sb.append("avatar='${this.avatar}' ")
+        sb.append("posted='${this.created_at}' ")
+        sb.append("profile='${this.apEntry?.author?.uri}' ")
+        sb.append("link='${this.apEntry?.id}' ")
+        sb.append("] ")
+        sb.append("\n${this.statusnet_html
+            .replace("\\[".toRegex(), "(")
+            .replace("\\]".toRegex(), ")")
+            .dicaHTMLFilter(true)}\n")
+        sb.append("[/share]")
+        return sb.toString()
     }
 }

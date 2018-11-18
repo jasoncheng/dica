@@ -2,7 +2,6 @@ package cool.mixi.dica.adapter
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
@@ -48,10 +47,14 @@ import kotlinx.android.synthetic.main.empty_view.view.*
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_sitename
 import kotlinx.android.synthetic.main.status_list_item.view.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.lang.ref.SoftReference
-import java.lang.ref.WeakReference
 import java.util.*
 import java.util.regex.Pattern
+import javax.net.ssl.HttpsURLConnection
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
@@ -61,7 +64,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     var isFavoritesFragment: Boolean = false
     var initLoaded: Boolean = false
 
-    // if this is internal / extrenal Network
+    // if this is internal / external Network
     var isOffSiteSN = false
 
     private val quoteSpanColor: Int = context.getColor(R.color.quote_span_border)
@@ -72,7 +75,11 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
     private val statusSourceColor = context.getColor(R.color.txt_status_source)
     private val tagTextColor = context.getColor(R.color.txt_tag)
-    private val  recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
+    private val emailTextColor = context.getColor(R.color.txt_email)
+    private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
+    private val strSuccessRetweet: String = context.getString(R.string.retweet_success)
+    private val strRetweetFail = context.getString(R.string.retweet_fail)
+
     enum class ViewType {
         USER_PROFILE,
         STATUS,
@@ -100,7 +107,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private val compilerLargeText: Pattern = Pattern.compile("\\*([^\\*]+)\\*",
         Pattern.CASE_INSENSITIVE  or Pattern.MULTILINE or Pattern.DOTALL )
 
-    private var refAdatper: SoftReference<StatusesAdapter> = SoftReference(this)
+    private var refAdapter: SoftReference<StatusesAdapter> = SoftReference(this)
 
     override fun onBindViewHolder(holder: BasicStatusViewHolder, position: Int) {
         if(holder is EmptyHolder){
@@ -138,10 +145,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
                         doAppendSourceLayout(that, date.toLocaleString(), it)
                     }
                 }
-            }catch (e: java.lang.Exception) {
-                eLog(" ${it.created_at}")
-                eLog("${e.message}")
-            }
+            }catch (e: java.lang.Exception) {}
 
 
             // private message icon
@@ -430,7 +434,6 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private fun actRetweet(view: View){
         val position = (view.parent.parent as ViewGroup).tag as Int
         var dlg : AlertDialog?
-        val errorMsg = context.getString(R.string.retweet_fail)
         data.getOrNull(position).let {
             if(it == null) return
             var view =  LayoutInflater.from(context).inflate(R.layout.loading_dialog, null)
@@ -441,19 +444,49 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
 
 
             if(isOffSiteSN){
-
+                dLog("offSite retweet")
+                val text = it.toFriendicaShareText()
+                dLog("${it.toFriendicaShareText()}")
+                ApiService.create()
+                    .statusUpdate(context.getString(R.string.app_name), text, 0, "", "", ArrayList())
+                    .enqueue(StatusUpdateCallback(dlg, refAdapter))
+                return
             }
 
             FriendicaUtil.retweet(it.id, object: IRetweet {
                 override fun done() {
                     dlg?.dismiss()
+                    App.instance.toast(strSuccessRetweet)
                 }
 
                 override fun fail(reason: String) {
                     dlg?.dismiss()
-                    App.instance.toast(errorMsg.format(reason))
+                    App.instance.toast(strRetweetFail.format(reason))
                 }
             })
+        }
+    }
+
+    private class StatusUpdateCallback(val dialog: AlertDialog?, val adapter: SoftReference<StatusesAdapter>): Callback<String> {
+        override fun onFailure(call: Call<String>, t: Throwable) {
+            dialog?.dismiss()
+            adapter.get()?.let {
+                App.instance.toast(it.strRetweetFail!!.format("${t.message}"))
+            }
+        }
+
+        override fun onResponse(call: Call<String>, response: Response<String>) {
+            dialog?.dismiss()
+            if(response.code() != HttpsURLConnection.HTTP_OK) {
+                adapter.get()?.let {
+                    App.instance.toast(it.strRetweetFail.format("${response.code()}"))
+                }
+                return
+            }
+
+            adapter.get()?.let {
+                App.instance.toast(it.strSuccessRetweet)
+            }
         }
     }
 
@@ -529,35 +562,19 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         var isPureText = false
         var txtAr = ArrayList<String>()
 
-        dLog("${status.id}, ${status.external_url}: content is ${status.text}")
-
         lines.forEachIndexed { index, it ->
-            dLog("$index, $it")
-            val urls = it.urls()
-            if(urls.size > 0) {
-                // if only one line and contains url
-                val urlFirst = urls[0]
-                dLog("find url $urlFirst")
-                var urlStart = it.indexOf(urlFirst, 0)
-                if(urlStart > 0){
-                    txtAr.add(it.substring(0, urlStart))
-                    isPureText = true
-                }
-
+            if(it.startsWith("http", true)){
                 if(isPureText){
                     renderText(parent, txtAr)
                     txtAr.clear()
                 }
-
-                var finalUrl = urlFirst.replace("\\*$".toRegex(), "")
                 isPureText = false
-                displayedUrl.add(finalUrl)
-                renderUrl(parent, status, it.substring(urlStart))
-                return@forEachIndexed
+                displayedUrl.add(it)
+                renderUrl(parent, status, it)
+            } else {
+                isPureText = true
+                txtAr.add(it)
             }
-
-            isPureText = true
-            txtAr.add(it)
         }
         renderText(parent, txtAr)
 
@@ -579,51 +596,29 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     }
 
     // Image or Website
-    private fun renderUrl(parent:ViewGroup, status: Status, textWithUrl: String){
-        val urls = textWithUrl.urls()
-        var restStr = textWithUrl
-        if(urls.size == 0){
-            renderText(parent, textWithUrl)
-            return
-        }
+    private fun renderUrl(parent:ViewGroup, status: Status, url: String){
+        val urlLower = url.toLowerCase()
+        if(urlLower.contains("\\.(jpg|gif|jpeg|png)".toRegex()) ||
+            // unsplash.com
+            urlLower.contains("\\/photo(.*)utm_medium".toRegex()) ||
+            // friendica proxy photo
+            urlLower.contains("\\/proxy\\/".toRegex()) ) {
+            var img = getImageView()
+            parent.addView(img)
 
-        urls.forEach {
-            var end = textWithUrl.indexOf(it, 0, true)
-            if(end > 0) {
-                dLog("==========> renderUrl restStr [$it]")
-                var outTxt = restStr.substring(0, end)
-                dLog("==========> renderUrl restStr [$outTxt]")
-                restStr = textWithUrl.substring(end)
-                dLog("==========> renderUrl restStr [$restStr]")
-                renderText(parent, outTxt.trim())
-            }
-
-            restStr = restStr.replace(it, "")
-            val urlLower = it.toLowerCase()
-            if(urlLower.contains("\\.(jpg|gif|jpeg|png)".toRegex()) ||
-                // unsplash.com
-                urlLower.contains("\\/photo(.*)utm_medium".toRegex()) ||
-                // friendica proxy photo
-                urlLower.contains("\\/proxy\\/".toRegex()) ) {
-                var img = getImageView()
-                parent.addView(img)
-
-                if(urlLower.contains("\\.gif".toRegex())){
-                    Glide.with(context).load(it.glideUrl()).apply(requestOptionsGif).into(img)
-                } else {
-                    Glide.with(context).load(it.glideUrl()).apply(requestOptions).into(img)
-                }
+            if(urlLower.contains("\\.gif".toRegex())){
+                Glide.with(context.applicationContext).load(url.glideUrl()).apply(requestOptionsGif).into(img)
             } else {
-                val meta = HtmlCrawler.getInstance().get(it)
-                if(meta != null){
-                    renderWebUrl(parent, meta)
-                } else {
-                    renderText(parent, it)
-                    HtmlCrawler.getInstance().run(it, MyHtmlCrawler(status, refAdatper))
-                }
+                Glide.with(context.applicationContext).load(url.glideUrl()).apply(requestOptions).into(img)
             }
-            renderUrl(parent, status, restStr)
-            return
+        } else {
+            val meta = HtmlCrawler.getInstance().get(url)
+            if(meta != null){
+                renderWebUrl(parent, meta)
+            } else {
+                renderText(parent, url)
+                HtmlCrawler.getInstance().run(url, MyHtmlCrawler(status, refAdapter))
+            }
         }
     }
 
@@ -698,19 +693,9 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         for(it in mMentions){
             var start = s.indexOf(it, 0, true)
             var end = start+it.length
-            sp.setSpan(
-                ForegroundColorSpan(tagTextColor),
-                start,
-                end,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-
-            sp.setSpan(
-                OffSiteUserClickSpan(tagTextColor, this),
-                start,
-                end,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            sp.setSpan(RelativeSizeSpan(1.2f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            sp.setSpan(OffSiteUserClickSpan(emailTextColor, refAdapter), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+            sp.setSpan(NoUnderLinSpan(it), start, end, 0)
         }
 
         // Style: Bold & Large *.....*
@@ -756,7 +741,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         childParams.setMargins(0, 20, 0, 20)
         view.layoutParams = childParams
 
-        Glide.with(context).load(meta.icon).into(view.site_avatar)
+        Glide.with(context.applicationContext).load(meta.icon).into(view.site_avatar)
         if(meta.description.isNullOrEmpty()){
             view.site_desc.text = meta.url
         } else {
@@ -794,10 +779,6 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         txt.setOnClickListener {
             (it.parent as ViewGroup).callOnClick()
         }
-
-        // DEBUG
-        txt.setBackgroundColor(Color.GRAY)
-        childParams.setMargins(0, 20, 0, 20)
         return txt
     }
 }
@@ -829,15 +810,20 @@ class TagClickSpan(private val linkColor: Int): ClickableSpan() {
     }
 }
 
-class OffSiteUserClickSpan(private val linkColor: Int, adapter: StatusesAdapter): ClickableSpan() {
-    private val ref = WeakReference<StatusesAdapter>(adapter)
+class NoUnderLinSpan(val url: String): URLSpan(url) {
+    override fun updateDrawState(ds: TextPaint?) {
+        super.updateDrawState(ds)
+        ds?.isUnderlineText = false
+    }
+}
+
+class OffSiteUserClickSpan(private val linkColor: Int, val adapter: SoftReference<StatusesAdapter>?): ClickableSpan() {
     override fun onClick(widget: View?) {
         val sp = ((widget as TextView).text as Spanned)
         val start = sp.getSpanStart(this)
         val end = sp.getSpanEnd(this)
         var email = sp.subSequence(start, end).toString()
-        App.instance.toast(email)
-        ref.get()?.gotoUserPage(email)
+        adapter?.get()?.gotoUserPage(email)
     }
 
     override fun updateDrawState(ds: TextPaint?) {

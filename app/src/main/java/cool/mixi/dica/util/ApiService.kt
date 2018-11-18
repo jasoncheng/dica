@@ -29,7 +29,7 @@ interface ApiService {
         @Field("in_reply_to_status_id") in_reply_to_status_id: Int,
         @Field("lat") lat: String,
         @Field("long") long: String,
-        @Field("group_allow[]") group_allow: ArrayList<Int>?): Call<Status>
+        @Field("group_allow[]") group_allow: ArrayList<Int>?): Call<String>
 
     @POST("statuses/update_with_media")
     @Multipart
@@ -40,7 +40,7 @@ interface ApiService {
         @Part("lat") lat: RequestBody,
         @Part("lat") long: RequestBody,
         @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
-        @Part image: MultipartBody.Part): Call<Status>
+        @Part image: MultipartBody.Part): Call<String>
 
     @GET("statuses/show?include_entities=true")
     fun statusShow(@Query("id") id: Int,
