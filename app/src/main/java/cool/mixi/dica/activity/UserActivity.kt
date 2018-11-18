@@ -79,7 +79,10 @@ class UserActivity: BaseActivity(), IStatusDataSource {
     class WebFingerCallback(private val email: String, activity: UserActivity): Callback<WebFinger> {
         private val ref = WeakReference<UserActivity>(activity)
         override fun onFailure(call: Call<WebFinger>, t: Throwable) {
-            ref.get()?.let { App.instance.toast(it.userNotFoundStr!!) }
+            ref.get()?.let {
+                App.instance.toast(it.userNotFoundStr!!)
+                it.home_srl.isRefreshing = false
+            }
             eLog("${t.message}")
         }
 
@@ -102,13 +105,19 @@ class UserActivity: BaseActivity(), IStatusDataSource {
     class CallbackUserStream(activity: UserActivity): Callback<AP> {
         private val ref = WeakReference<UserActivity>(activity)
         override fun onFailure(call: Call<AP>, t: Throwable) {
-            ref.get()?.let { App.instance.toast(it.serviceNotAvailable?.format(t.message)) }
+            ref.get()?.let {
+                it.home_srl.isRefreshing = false
+                App.instance.toast(it.serviceNotAvailable?.format(t.message))
+            }
             eLog("${t.message}")
         }
 
         override fun onResponse(call: Call<AP>, response: Response<AP>) {
             if(ref.get() == null || response.code() != HttpsURLConnection.HTTP_OK) {
-                ref.get()?.let { App.instance.toast(it.serviceNotAvailable?.format(response.errorBody())) }
+                ref.get()?.let {
+                    it.home_srl.isRefreshing = false
+                    App.instance.toast(it.serviceNotAvailable?.format(response.errorBody()))
+                }
                 return
             }
 
