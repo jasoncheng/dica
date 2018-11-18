@@ -340,7 +340,6 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private fun doLayoutContent(holder: BasicStatusViewHolder, st: Status, pos: Int){
         holder.actGroup?.tag = pos
         holder.contentBox?.tag = pos
-        holder.contentBox?.tag = pos
         holder.contentBox?.isClickable = true
         renderContent(holder.contentBox, st)
     }

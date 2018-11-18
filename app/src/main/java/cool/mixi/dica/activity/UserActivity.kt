@@ -132,7 +132,6 @@ class UserActivity: BaseActivity(), IStatusDataSource {
                 activity.stl?.add(status)
             }
             adapter.notifyDataSetChanged()
-            adapter.notifyItemChanged(0)
         }
 
     }

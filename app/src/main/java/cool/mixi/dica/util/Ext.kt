@@ -15,7 +15,6 @@ import org.jsoup.parser.Parser
 import java.net.URL
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.util.regex.Pattern
 
 fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "=====> $log")
 fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "=====> $log")
@@ -74,7 +73,6 @@ fun String.getBaseUri(): String {
 
 // TODO: my god.....ugly.....too ugly; need to do refactor
 fun String.dicaHTMLFilter(toBBCode: Boolean, baseUri: String): String {
-    dLog("dicaHTMLFilter $toBBCode, $this")
     var sb = StringBuffer()
     var linkExists = ArrayList<String>()
     var textExists = ArrayList<String>()
@@ -101,21 +99,19 @@ fun String.dicaHTMLFilter(toBBCode: Boolean, baseUri: String): String {
             var tag = e1.tagName()
             if(tag == "a"){
                 var link = e1.attr("href")
-                if(link.contains("/tags/") || link.contains("search?tag")){
-                    if(toBBCode){
-                        sb.append(" ${e1.text()} ")
-                    } else {
-                        sb.append(e1.text())
-                    }
+                if(link.contains("/tags/", true) || link.contains("search?tag", true)){
+                    if(e1.text() == link){ continue }
+                    sb.append(" ${e1.text()} ")
                     continue
                 }
-
-                if(linkExists.contains(link)){ continue }
 
                 // relative URL to absolute URL
                 if(link.startsWith("/")){
                     link = "$baseUri$link"
                 }
+
+                if(linkExists.contains(link)){ continue }
+
 
                 if(toBBCode){
                     sb.append(" [url=$link]${e1.text()}[/url] ")
@@ -127,18 +123,18 @@ fun String.dicaHTMLFilter(toBBCode: Boolean, baseUri: String): String {
 
             } else if(tag == "img") {
                 var link = e1.attr("src")
-                // do something on link, that adapter render, can treat as image
-                if(!link.contains("?")){
-                    link += "?ext=.jpg"
-                } else if(link.contains("&")) {
-                    link += "&ext=.jpg"
+                link += if(link.contains("?", true)){
+                    "&ext=.jpg"
+                } else {
+                    "?ext=.jpg"
                 }
-                if(linkExists.contains(link)){ continue }
 
                 // relative URL to absolute URL
                 if(link.startsWith("/")){
                     link = "$baseUri$link"
                 }
+
+                if(linkExists.contains(link)){ continue }
 
                 if(toBBCode){
                     sb.append(" [img=$link][/img] ")
