@@ -10,8 +10,7 @@
     <string name="compose_submit">submit</string>
     <string name="compose_text">text</string>
     <string name="status_saving">status saving</string>
-    <string name="compose_fail">fail to submit status (%1$s)</string>
-    <string name="status_not_found">status not found</string>
+  <string name="status_not_found">status not found</string>
     <string name="permission_public">public</string>
     <string name="permission_assign">private</string>
     <string name="perm_deny_gallery">permission deny</string>
@@ -43,4 +42,8 @@
     <string name="status_retweet">retweet</string>
     <string name="retweeting">retweeting</string>
     <string name="retweet_fail">retweet fail (%1$s)</string>
+    <string name="fetch_remote_user">fetching remote user data..</string>
+    <string name="post_success">success publish</string>
+    <string name="post_failure">failure on publish (%1$s)</string>
+  <string name="retweet_success">successful retweet</string>
 </resources>

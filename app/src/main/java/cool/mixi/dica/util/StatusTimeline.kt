@@ -59,6 +59,10 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         statuses.add(status)
     }
 
+    fun count(): Int {
+        return statuses.size
+    }
+
     fun resetQuery(){
         maxId = 0
         sinceId = 0
@@ -112,7 +116,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         }
     }
 
-    class StatuesCallback(timeline: StatusTimeline, insertMode: Boolean, val callback: IStatusDataSource?):
+    class StatuesCallback(timeline: StatusTimeline, insertMode: Boolean, private val callback: IStatusDataSource?):
         Callback<List<Status>> {
         private val ref = SoftReference<StatusTimeline>(timeline)
         private val insertMode = insertMode
@@ -143,10 +147,11 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 if(it.id > act.sinceId) act.sinceId = it.id
                 if(act.maxId == 0 || it.id < act.maxId) act.maxId = it.id
 
-//                FriendicaUtil.stripStatusTextProxyUrl(it)
-
                 // Bind Address if possible
                 LocationUtil.instance.bindGeoAddress(it)
+
+                // TODO: Test
+                it.text = it.text.dicaRenderData()
 
                 // any more sourceOld status ?
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
@@ -174,7 +179,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                     act.statuses.add(0, it)
                 }
                 act.table.adapter.notifyDataSetChanged()
-                act.table.scrollToPosition(0)
             } else {
                 res?.forEachIndexed continuing@ { _, it ->
                     if(act.statuses.contains(it)) { return@continuing }
