@@ -1,5 +1,5 @@
 package cool.mixi.dica.bean
 
 data class FriendicaActivities(
-    var like: ArrayList<User>
+    var like: ArrayList<User> = ArrayList()
 )

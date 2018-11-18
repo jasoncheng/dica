@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+                                             android:layout_marginTop="6dp"
+                                             android:layout_marginBottom="6dp"
+                                             android:layout_marginLeft="2dp"
+                                             android:layout_marginRight="2dp"
+                                             android:background="@drawable/status_website_bg"
+                                             android:padding="4dp"
+                                             android:layout_height="wrap_content">
+
+  <ImageView
+          android:layout_width="60dp"
+          android:layout_height="60dp" tools:srcCompat="@tools:sample/avatars"
+          app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
+          android:id="@+id/site_avatar"/>
+  <TextView
+          android:text="TextView"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content" app:layout_constraintTop_toTopOf="@+id/site_avatar"
+          android:id="@+id/site_title"
+          android:maxLines="2"
+          app:layout_constraintStart_toEndOf="@+id/site_avatar" android:layout_marginStart="8dp"
+          app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:layout_marginTop="8dp"/>
+  <TextView
+          android:text="TextView"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:maxLines="4"
+          android:includeFontPadding="false"
+          android:id="@+id/site_desc" app:layout_constraintTop_toBottomOf="@+id/site_title"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toEndOf="@+id/site_avatar" android:layout_marginStart="8dp"
+          android:textSize="12sp" android:layout_marginTop="4dp"/>
+</android.support.constraint.ConstraintLayout>

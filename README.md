@@ -16,14 +16,15 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 ***Feature***
 
 * Enable for all [Friendica](https://friendi.ca) base website
-* Simple Public / Friends / My / Favorite timeline in dashboard
-* Simple user page
-* Simple status page
+* Support display network public stream: Friendica / Diaspora* / Mastodon
+* Dashboard [Public / Friends / My / Favorite timeline]
+* Simple user page / status page
 * Status post (photo / location tag / group permission)
 * Support offline capacity
 * Notification
 * Like / UnLike
 * Favorites
+* Retweet
 
 
 ***DONATE US***

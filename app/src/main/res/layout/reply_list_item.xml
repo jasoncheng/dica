@@ -17,26 +17,9 @@
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
             <include layout="@layout/box_status_user" />
-            <TextView
-                    android:text="TextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="4dp"
-                    android:id="@+id/tv_content"
-                    android:textIsSelectable="true"
-                    android:autoLink="all" android:textSize="13sp">
-
-            </TextView>
-
-            <ImageView android:layout_width="match_parent"
-                       android:layout_marginLeft="6dp"
-                       android:layout_marginRight="6dp"
-                       android:layout_height="wrap_content"
-                       android:id="@+id/media"
-                       android:scaleType="fitXY"
-                       android:adjustViewBounds="true"/>
-
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                          android:padding="8dp"
+                          android:id="@+id/content_box" android:orientation="vertical"/>
             <include layout="@layout/box_status_action" android:id="@+id/actGroup" />
         </LinearLayout>
     </LinearLayout>

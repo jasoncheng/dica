@@ -12,11 +12,33 @@ android {
         applicationId 'cool.mixi.dica'
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 18111104
-        versionName "0.0.4"
+        versionCode 18111901
+        versionName "0.0.6"
+    }
+    signingConfigs {
+        jason {
+            keyAlias 'androidreleasekey'
+            keyPassword '123456'
+            storeFile file('./release.keystore')
+            storePassword '123456'
+        }
     }
     buildTypes {
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.jason
+            zipAlignEnabled true
+            debuggable false
+            shrinkResources true
+            minifyEnabled true
+            lintOptions {
+                disable 'MissingTranslation'
+                checkReleaseBuilds false
+                abortOnError false
+            }
+        }
         debug {
+            signingConfig signingConfigs.jason
         }
     }
     productFlavors {
@@ -32,15 +54,17 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
+
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-simplexml:2.3.0'
+
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
     implementation 'com.github.bumptech.glide:glide:4.8.0'
-    kapt 'com.github.bumptech.glide:compiler:4.8.0'
     implementation 'com.github.tajchert:nammu:1.2.0'
     implementation 'com.github.jkwiecien:EasyImage:2.1.0'
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.7.0'
-    implementation 'org.jsoup:jsoup:1.10.2'
+    implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'org.jetbrains.anko:anko-commons:0.10.4'
 }

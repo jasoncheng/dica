@@ -69,7 +69,7 @@ class LocationUtil {
     fun getAddress(location: Location, callback: IGetAddress) {
         val key = getAddressKey(location)
         if(cached.containsKey(key)){
-            dLog("getAddress from cache ${key}")
+            dLog("cached getAddress ${key}")
             callback.done(cached[key]!!)
             return
         }
@@ -79,7 +79,7 @@ class LocationUtil {
                 location.latitude, location.longitude, 1).first()
             cached[key] = address
             uiThread {
-                dLog("getAddress ${address.getAddressLine(0)}")
+                dLog("fetch getAddress ${address.getAddressLine(0)}")
                 callback.done(address)
             }
         }

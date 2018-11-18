@@ -12,6 +12,7 @@ import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.adapter.IndexPageAdapter
 import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Meta
 import cool.mixi.dica.bean.Notification
 import cool.mixi.dica.bean.Profile
 import cool.mixi.dica.fragment.ComposeDialogFragment
@@ -92,7 +93,7 @@ class MainActivity : BaseActivity() {
         if(!homeName.isNullOrEmpty() && homeName != getString(R.string.app_name)){
             home_title?.text = homeName
         } else {
-            HtmlCrawler.run(
+            HtmlCrawler.getInstance().run(
                 PrefUtil.getApiUrl(),
                 MyHtmlCrawler(this)
             )

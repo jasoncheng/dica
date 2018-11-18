@@ -11,8 +11,7 @@
     <string name="compose_submit">分享</string>
     <string name="compose_text">內容</string>
     <string name="status_saving">努力傳送中</string>
-    <string name="compose_fail">暫時無法發佈喔 (%1$s)</string>
-    <string name="status_not_found">找不到喔</string>
+  <string name="status_not_found">找不到喔</string>
     <string name="permission_public">公開</string>
     <string name="permission_assign">指定</string>
     <string name="perm_deny_gallery">你沒有授權喔</string>
@@ -41,4 +40,11 @@
   <string name="status_favorites">關注</string>
   <string name="no_any_status">喔喔...目前沒資料喔</string>
   <string name="status_source">" - 透過 %1$s"</string>
+  <string name="status_retweet">轉推</string>
+  <string name="retweeting">轉推中</string>
+    <string name="retweet_fail">轉推失敗 (%1$s)</string>
+  <string name="fetch_remote_user">獲取站外用戶資料</string>
+  <string name="post_success">發表成功</string>
+  <string name="post_failure">發佈失敗 (%1$s)</string>
+  <string name="retweet_success">轉推成功</string>
 </resources>

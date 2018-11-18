@@ -14,7 +14,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.gson.Gson
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.BaseActivity
@@ -46,8 +46,6 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     var in_reply_status_id: Int? = 0
     var in_reply_screenname: String? = ""
-
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         roomView = inflater?.inflate(R.layout.dlg_compose, container)
@@ -219,23 +217,38 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
     }
 
-    class StatusUpdateCallback(fragment: ComposeDialogFragment): Callback<Status> {
+    class StatusUpdateCallback(fragment: ComposeDialogFragment): Callback<String> {
         private val ref = WeakReference<ComposeDialogFragment>(fragment)
-        private val strMsg = ref.get()?.getString(R.string.compose_fail)
-        override fun onFailure(call: Call<Status>, t: Throwable) {
+        private val strMsgErr = ref.get()?.getString(R.string.post_failure)
+        private val strMsg = ref.get()?.getString(R.string.post_success)
+        override fun onFailure(call: Call<String>, t: Throwable) {
             (ref.get()?.activity as BaseActivity).loaded()
-            App.instance.toast(strMsg?.format(t.message)!!)
+            App.instance.toast(strMsgErr?.format(t.message)!!)
             eLog("==========>"+t.message!!)
         }
 
-        override fun onResponse(call: Call<Status>, response: Response<Status>) {
+        override fun onResponse(call: Call<String>, response: Response<String>) {
             (ref.get()?.activity as BaseActivity).loaded()
-            dLog(response.message())
-            dLog(response.body().toString())
+
+            val res = response.body().toString()
+            dLog("$res, ${response.errorBody()}, ${response.message()}")
+
             if(response.code() != HttpsURLConnection.HTTP_OK) {
-                App.instance.toast(strMsg?.format(response.message())!!)
-            } else {
+                App.instance.toast("${strMsgErr?.format(res)}")
+                return
+            }
+
+            var msgToShow: String?
+            msgToShow = try {
+                Gson().fromJson(res, Status::class.java)
                 ref.get()?.composeDone()
+                strMsg
+            }catch (e: java.lang.Exception){
+                strMsgErr?.format(res)
+            }
+
+            msgToShow?.let {
+                App.instance.toast(msgToShow)
             }
         }
 
