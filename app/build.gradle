@@ -67,4 +67,6 @@ dependencies {
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.7.0'
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'org.jetbrains.anko:anko-commons:0.10.4'
+
+    implementation 'com.github.chrisbanes:PhotoView:2.1.3'
 }

@@ -20,6 +20,7 @@ class UserActivity: BaseActivity(), IStatusDataSource {
     var userId: String? = null
     var userEmail: String? = null
     var userUrl: String? = null
+    var isOffSiteSN = false
     var userNotFoundStr = ""
     var serviceNotAvailable = ""
     var strFetchingRemoteUser = ""
@@ -134,6 +135,7 @@ class UserActivity: BaseActivity(), IStatusDataSource {
             // Author + Status
             activity.user = res?.toUser()
             adapter.ownerInfo = activity.user
+            activity.isOffSiteSN = true
             adapter.isOffSiteSN = true
             res?.entry?.forEach {
                 val status = it.toStatus()

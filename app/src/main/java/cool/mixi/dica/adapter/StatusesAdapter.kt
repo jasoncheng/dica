@@ -37,6 +37,7 @@ import cool.mixi.dica.bean.Meta
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
 import cool.mixi.dica.fragment.ComposeDialogFragment
+import cool.mixi.dica.fragment.PhotoViewerFragment
 import cool.mixi.dica.fragment.UsersDialog
 import cool.mixi.dica.util.*
 import cool.mixi.dica.view.MyQuoteSpan
@@ -47,6 +48,7 @@ import kotlinx.android.synthetic.main.empty_view.view.*
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_description
 import kotlinx.android.synthetic.main.rv_user_item_header.view.tv_sitename
 import kotlinx.android.synthetic.main.status_list_item.view.*
+import org.jetbrains.anko.forEachChild
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -594,6 +596,37 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
         }
     }
 
+    private fun mediaPhotoClk(view: View) {
+        if(context !is UserActivity && context !is StatusActivity) {
+            ((view.parent as ViewGroup).callOnClick())
+            return
+        }
+
+        if(context is UserActivity && !context.isOffSiteSN){
+            return
+        }
+
+        val targetUrl = view.getTag(R.id.media_image)
+        var targetIndex = 0
+        var index = 0
+        val arr = ArrayList<String>()
+        (view.parent as ViewGroup).forEachChild {
+            if(it is ImageView){
+                val thisUrl = it.getTag(R.id.media_image) as String
+                arr.add(thisUrl)
+                if(thisUrl == targetUrl) { targetIndex = index }
+                index+=1
+            }
+        }
+
+        var b = Bundle()
+        b.putSerializable(Consts.EXTRA_PHOTOS, arr)
+        b.putInt(Consts.EXTRA_PHOTO_INDEX, targetIndex)
+        val fg = PhotoViewerFragment()
+        fg.arguments = b
+        fg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_PHOTO_VIEWER)
+    }
+
     // Image or Website
     private fun renderUrl(parent:ViewGroup, status: Status, url: String){
         val urlLower = url.toLowerCase()
@@ -603,6 +636,8 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             // friendica proxy photo
             urlLower.contains("\\/proxy\\/".toRegex()) ) {
             var img = getImageView()
+            img.setOnClickListener { mediaPhotoClk(it) }
+            img.setTag(R.id.media_image, url)
             parent.addView(img)
 
             if(urlLower.contains("\\.gif".toRegex())){

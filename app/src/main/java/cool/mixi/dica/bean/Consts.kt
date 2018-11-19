@@ -20,6 +20,7 @@ object Consts {
     val FG_COMPOSE = "compose"
     val FG_PHOTO_CROP = "crop"
     val FG_USERS = "users"
+    val FG_PHOTO_VIEWER = "photoViewer"
 
     val SDCARD_FOLDER_OUT = "out"
 
@@ -28,6 +29,8 @@ object Consts {
     val EXTRA_USER_ID = "userId"
     val EXTRA_USER_EMAIL = "email"
     val EXTRA_USER_URL = "url"
+    val EXTRA_PHOTOS = "photos"
+    val EXTRA_PHOTO_INDEX = "photoIndex"
     val EXTRA_NOTIFICATIONS = "notifications"
     val EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
     val EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
