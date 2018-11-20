@@ -6,6 +6,7 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.PopupMenu
 import android.support.v7.widget.RecyclerView
 import android.text.Spannable
 import android.text.SpannableString
@@ -60,7 +61,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class StatusesAdapter(val data:ArrayList<Status>, private val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
+class StatusesAdapter(val data:ArrayList<Status>, val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
 
     var ownerInfo: User? = null
     var isFavoritesFragment: Boolean = false
@@ -227,6 +228,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
             holder.tvLikeDetails?.setOnClickListener { gotoUserLikesPage(it) }
             holder.favorites?.setOnClickListener { actFavorites(it) }
         }
+        holder.statusMenu?.setOnClickListener { actStatusMenu(it) }
         return holder
     }
 
@@ -342,6 +344,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
     private fun doLayoutContent(holder: BasicStatusViewHolder, st: Status, pos: Int){
         holder.actGroup?.tag = pos
         holder.contentBox?.tag = pos
+        holder.itemView.tag = pos
         holder.contentBox?.isClickable = true
         renderContent(holder.contentBox, st)
     }
@@ -397,6 +400,52 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
                     App.instance.toast(context.getString(R.string.common_error).format(""))
                 }
             })
+        }
+    }
+
+    private fun menuDoDelete(id: Int, position: Int){
+        AlertDialog.Builder(context)
+            .setMessage(R.string.confirm_delete_status)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val activity = context as BaseActivity
+                activity.loading(context.getString(R.string.processing))
+                ApiService.create().statusDestroy(id).enqueue(StatusDestroyCallback(refAdapter, position))
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, _->
+                dialog.dismiss()
+            }.show()
+    }
+
+    private fun menuDoOpenLink(url: String){
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        }catch (e: Exception){}
+    }
+
+    private fun actStatusMenu(view: View){
+        val me = App.instance.myself?.friendica_owner!!
+        var position = (view.parent.parent as ViewGroup).tag as? Int
+        if(position == null){
+            position = (view.parent.parent.parent.parent as ViewGroup).tag as? Int
+        }
+
+        data.getOrNull(position!!).let {
+            if(it == null) return
+
+            var pop = PopupMenu(context, view)
+            var inflater = pop.menuInflater
+            inflater.inflate(R.menu.status_menu, pop.menu)
+            if(it.user != me) {
+                pop.menu.removeItem(R.id.menu_delete)
+            }
+            pop.setOnMenuItemClickListener { that ->
+                when(that.itemId) {
+                    R.id.menu_delete -> menuDoDelete(it.id, position)
+                    R.id.menu_open_link -> menuDoOpenLink(it.external_url)
+                }
+                true
+            }
+            pop.show()
         }
     }
 
@@ -590,7 +639,7 @@ class StatusesAdapter(val data:ArrayList<Status>, private val context: Context):
                 }
             }
 
-            if(!photoDisplayed){
+            if(!photoDisplayed && !displayedUrl.contains(photoUrl)){
                 renderUrl(parent, status, photoUrl!!)
             }
         }
@@ -828,6 +877,31 @@ class MyHtmlCrawler(private val st: Status, val adapter: SoftReference<StatusesA
     }
 }
 
+class StatusDestroyCallback(val adapter: SoftReference<StatusesAdapter>?, private val position: Int): Callback<String> {
+    private var errorMsg:String? = "${adapter?.get()?.context?.getString(R.string.common_error)}"
+    override fun onFailure(call: Call<String>, t: Throwable) {
+        App.instance.toast(errorMsg!!.format(t.message))
+    }
+
+    override fun onResponse(call: Call<String>, response: Response<String>) {
+        if(response.code() != HttpsURLConnection.HTTP_OK){
+            App.instance.toast(errorMsg!!.format(response.code().toString()))
+            return
+        }
+
+        var activity = adapter?.get()?.context as? BaseActivity
+        activity?.loaded()
+        adapter?.get()?.let {
+            if(it == null) return
+            it.data.getOrNull(position).let { that ->
+                if(that == null) return
+                it.data.remove(that)
+                it.notifyItemRemoved(position)
+            }
+        }
+    }
+}
+
 class TagClickSpan(private val linkColor: Int): ClickableSpan() {
     override fun onClick(widget: View?) {
         val sp = ((widget as TextView).text as Spanned)
@@ -871,6 +945,7 @@ class OffSiteUserClickSpan(private val linkColor: Int, val adapter: SoftReferenc
 open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name
     open var avatar:ImageView? = view.avatar
+    var statusMenu: ImageView? = view.more_options
     var contentBox: ViewGroup? = view.content_box
     var emptyDescription: TextView? = view.tv_empty
     var siteName: TextView? = view.tv_sitename
