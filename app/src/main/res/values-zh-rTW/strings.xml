@@ -47,4 +47,8 @@
   <string name="post_success">發表成功</string>
   <string name="post_failure">發佈失敗 (%1$s)</string>
   <string name="retweet_success">轉推成功</string>
+  <string name="menu_open_link">另開連結</string>
+  <string name="menu_delete">刪除貼文</string>
+  <string name="confirm_delete_status">確認刪除嗎?</string>
+  <string name="processing">處理中....</string>
 </resources>

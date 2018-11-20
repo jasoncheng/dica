@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import cool.mixi.dica.App
 import cool.mixi.dica.R
+import cool.mixi.dica.activity.StatusActivity
 import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Status
 import retrofit2.Call
@@ -24,7 +25,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                      private val dataSource: IStatusDataSource
 ) : SwipeRefreshLayout.OnRefreshListener {
 
-    private var statuses = ArrayList<Status>()
+    var statuses = ArrayList<Status>()
 
     // is load more toast show
     private var noMoreDataToastShow = false
@@ -80,7 +81,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
     @Synchronized open fun loadMore(callback: IStatusDataSource?){
         if(allLoaded){
-            if(!noMoreDataToastShow){
+            if(!noMoreDataToastShow && context !is StatusActivity){
                 App.instance.toast(context.getString(R.string.all_data_load))
                 noMoreDataToastShow = true
             }
