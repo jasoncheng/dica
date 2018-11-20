@@ -25,7 +25,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                      private val dataSource: IStatusDataSource
 ) : SwipeRefreshLayout.OnRefreshListener {
 
-    private var statuses = ArrayList<Status>()
+    var statuses = ArrayList<Status>()
 
     // is load more toast show
     private var noMoreDataToastShow = false

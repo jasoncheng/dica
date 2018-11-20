@@ -46,4 +46,8 @@
     <string name="post_success">success publish</string>
     <string name="post_failure">failure on publish (%1$s)</string>
   <string name="retweet_success">successful retweet</string>
+  <string name="menu_open_link">Open Link</string>
+  <string name="menu_delete">Delete Globally</string>
+  <string name="confirm_delete_status">Confirm Delete Status ?</string>
+  <string name="processing">processing.....</string>
 </resources>

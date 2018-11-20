@@ -47,12 +47,15 @@ fun String.emailGetDomain(): String{
 
 fun String.glideUrl(): GlideUrl {
     val headersBuilder = LazyHeaders.Builder()
-    val host = URL(this).host
+    val host = URL(this).host.toLowerCase()
     headersBuilder.addHeader("user-agent", App.instance.getString(R.string.app_name))
     headersBuilder.addHeader("accept", "*/*")
-    headersBuilder.addHeader("Pragma", "no-cache")
-    headersBuilder.addHeader("cache-control", "no-cache")
-    ApiService.cookies[host]?.let {headersBuilder.addHeader("Cookie", it) }
+//    headersBuilder.addHeader("Pragma", "no-cache")
+//    headersBuilder.addHeader("cache-control", "no-cache")
+    ApiService.cookies[host]?.let {
+        dLog("setCooke w/ image loading $host - $this - $it")
+        headersBuilder.addHeader("Cookie", it)
+    }
     return GlideUrl(this, headersBuilder.build())
 }
 

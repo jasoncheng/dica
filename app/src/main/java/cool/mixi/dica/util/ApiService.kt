@@ -60,6 +60,12 @@ interface ApiService {
         @Query("since_id") since_id: String,
         @Query("max_id") max_id: String): Call<List<Status>>
 
+    @POST("statuses/destroy")
+    @FormUrlEncoded
+    fun statusDestroy(
+        @Field("id") status_id: Int
+    ): Call<String>
+
     @POST("statuses/retweet")
     @FormUrlEncoded
     fun statusRetweet(@Field("id") id: Int): Call<Status>
@@ -152,7 +158,7 @@ interface ApiService {
                 if(key.toLowerCase() == "set-cookie" &&
                     (thisCookie.contains("PHPSESSID") || thisCookie.contains("session".toRegex()))){
                     dLog("Set-Cookie $thisCookie")
-                    cookies[host] = thisCookie
+                    cookies[host.toLowerCase()] = thisCookie
                 }
             }
 
