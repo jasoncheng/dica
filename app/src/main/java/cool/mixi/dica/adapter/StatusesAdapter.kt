@@ -330,7 +330,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         if(status.geo?.address != null){
             var address = status.geo?.address
             view.visibility = View.VISIBLE
-            view.text = address?.getAddressLine(0)
+            view.text = "${address?.getAddressLine(0)} "
             view.setOnClickListener {
                 context.startActivity(LocationUtil.mapIntent(address!!))
             }
