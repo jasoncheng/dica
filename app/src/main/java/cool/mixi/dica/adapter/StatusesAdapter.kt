@@ -368,6 +368,8 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
                     context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it!!)))
                 }
             }
+        } else {
+            holder.siteName?.visibility = View.GONE
         }
 
         Glide.with(context.applicationContext)
