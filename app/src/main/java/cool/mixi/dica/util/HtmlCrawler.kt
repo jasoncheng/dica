@@ -64,10 +64,7 @@ open class HtmlCrawler {
             } catch (e: Exception) {}
 
             uiThread {
-                meta.title?.let {
-                    dLog("cache size: ${cached.size}, caching ${meta.url}, $url, ${doc?.location()}")
-                    callback.done(meta)
-                }
+                meta.title?.let { callback.done(meta) }
             }
         }
     }

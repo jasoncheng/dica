@@ -18,7 +18,6 @@ class TimelineMyFragment: TimelineFragment() {
 
     override fun sourceNew(): Call<List<Status>>? {
         if(myId == null){ return null }
-        reloadNotification()
         return ApiService.create().statusUserTimeline(myId!!, "${stl?.sinceId}", "")
     }
 }
