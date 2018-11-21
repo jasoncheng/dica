@@ -79,7 +79,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     }
 
     @Synchronized open fun loadNewest(callback: IStatusDataSource?){
-        iLog("loadNewest sinceId ${sinceId}")
+        iLog("${dataSource.javaClass.simpleName} loadNewest sinceId ${sinceId}")
         dataSource.sourceNew()?.enqueue(StatuesCallback(this, true, callback))
     }
 
@@ -93,7 +93,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
             return
         }
 
-        iLog("loadMore maxId ${maxId}")
+        iLog("${dataSource.javaClass.simpleName} loadMore maxId ${maxId}")
         dataSource.sourceOld()?.enqueue(StatuesCallback(this, false, callback))
         swipeRefreshLayout.isRefreshing = true
     }
@@ -141,8 +141,9 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
         override fun onFailure(call: Call<List<Status>>, t: Throwable) {
             eLog("fail ${t.message}")
-            if(ref.get() == null){
-                return
+            ref.get()?.let {
+                App.instance.toast(it.context.getString(R.string.common_error).format(t.message))
+                it.swipeRefreshLayout.isRefreshing = false
             }
         }
 

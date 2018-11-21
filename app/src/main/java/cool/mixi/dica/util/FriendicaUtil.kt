@@ -66,18 +66,20 @@ class FriendicaUtil {
         fun favorites(isFavorites: Boolean, id: Int) {
             var fn= if(isFavorites) {
                 ApiService.create().favoritesCreate(id)
-            } else { ApiService.create().favoritesDestroy(id) }
+            } else {
+                ApiService.create().favoritesDestroy(id)
+            }
 
             fn.enqueue(object: Callback<Status> {
                 override fun onResponse(call: Call<Status>, response: Response<Status>) {
                     if(response.code() != HttpsURLConnection.HTTP_OK){
-                        eLog("favorites ${response.body()} ${response.errorBody()}")
-                        App.instance.toast(serviceUnavailable.format(response.body()))
+                        eLog("favorites $id ${response.body()} ${response.code()} ${response.message()}")
+                        App.instance.toast(serviceUnavailable.format("id $id code ${response.code()}"))
                     }
                 }
 
                 override fun onFailure(call: Call<Status>, t: Throwable) {
-                    eLog("favorites ${t?.message}")
+                    eLog("favorites $id ${t?.message}")
                     App.instance.toast(serviceUnavailable.format(t.message))
                 }
 

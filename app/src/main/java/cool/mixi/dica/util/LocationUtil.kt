@@ -73,7 +73,7 @@ class LocationUtil {
     fun getAddress(location: Location, callback: IGetAddress) {
         val key = getAddressKey(location)
         if(cached.containsKey(key)){
-            dLog("cached getAddress ${key}")
+//            dLog("cached getAddress ${key}")
             callback.done(cached[key]!!)
             return
         }
@@ -106,8 +106,7 @@ class LocationUtil {
     fun getLocation(cb: IGetLocation){
         getLastLocation(object : IGetLocation {
             override fun done(location: Location?) {
-                if(location != null) {
-                    dLog("getLastLocation ${location.latitude}, ${location.longitude}")
+                location?.let {
                     cb.done(location)
                 }
             }
@@ -115,8 +114,7 @@ class LocationUtil {
 
         startLocationUpdates(object : IGetLocation{
             override fun done(location: Location?) {
-                if(location != null) {
-                    dLog("getGPSLocation ${location.latitude}, ${location.longitude}")
+                location?.let {
                     cb.done(location)
                 }
             }
