@@ -54,6 +54,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
@@ -82,6 +83,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
     private val strSuccessRetweet: String = context.getString(R.string.retweet_success)
     private val strRetweetFail = context.getString(R.string.retweet_fail)
+    private val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm")
 
     enum class ViewType {
         USER_PROFILE,
@@ -144,8 +146,8 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
                     lockContainer = holder.userName
                 } else {
                     holder.datetime?.let {that->
-                        that.text = date.toLocaleString()
-                        doAppendSourceLayout(that, date.toLocaleString(), it)
+                        that.text = sdf.format(date)
+                        doAppendSourceLayout(that, that.text.toString(), it)
                     }
                 }
             }catch (e: java.lang.Exception) {}
