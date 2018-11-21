@@ -403,13 +403,13 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         }
     }
 
-    private fun menuDoDelete(id: Int, position: Int){
+    private fun menuDoDelete(st: Status){
         AlertDialog.Builder(context)
             .setMessage(R.string.confirm_delete_status)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val activity = context as BaseActivity
                 activity.loading(context.getString(R.string.processing))
-                ApiService.create().statusDestroy(id).enqueue(StatusDestroyCallback(refAdapter, position))
+                ApiService.create().statusDestroy(st.id).enqueue(StatusDestroyCallback(refAdapter, st))
             }
             .setNegativeButton(android.R.string.cancel) { dialog, _->
                 dialog.dismiss()
@@ -440,7 +440,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             }
             pop.setOnMenuItemClickListener { that ->
                 when(that.itemId) {
-                    R.id.menu_delete -> menuDoDelete(it.id, position)
+                    R.id.menu_delete -> menuDoDelete(it)
                     R.id.menu_open_link -> menuDoOpenLink(it.external_url)
                 }
                 true
@@ -877,7 +877,7 @@ class MyHtmlCrawler(private val st: Status, val adapter: SoftReference<StatusesA
     }
 }
 
-class StatusDestroyCallback(val adapter: SoftReference<StatusesAdapter>?, private val position: Int): Callback<String> {
+class StatusDestroyCallback(val adapter: SoftReference<StatusesAdapter>?, private val st: Status): Callback<String> {
     private var errorMsg:String? = "${adapter?.get()?.context?.getString(R.string.common_error)}"
     override fun onFailure(call: Call<String>, t: Throwable) {
         App.instance.toast(errorMsg!!.format(t.message))
@@ -893,10 +893,22 @@ class StatusDestroyCallback(val adapter: SoftReference<StatusesAdapter>?, privat
         activity?.loaded()
         adapter?.get()?.let {
             if(it == null) return
-            it.data.getOrNull(position).let { that ->
-                if(that == null) return
+            var targetStatus:Status? = null
+            var targetIndex = -1
+            adapter?.get()?.data?.forEachIndexed { index, status ->
+                if(status == st){
+                    targetIndex = index
+                    targetStatus = status
+                }
+            }
+
+            //TODO: for user page have profile at index 0
+            if(activity is UserActivity){
+                targetIndex+=1
+            }
+            targetStatus?.let { that ->
                 it.data.remove(that)
-                it.notifyItemRemoved(position)
+                it.notifyItemRemoved(targetIndex)
             }
         }
     }
