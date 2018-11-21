@@ -266,6 +266,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
 
         if(mediaFile == null){
+            dLog("======> statusUpdate $lat, $long")
             ApiService.create().statusUpdate(source!!, text, in_reply_status_id!!, lat, long, App.instance.selectedGroup).enqueue(
                 StatusUpdateCallback(this)
             )
@@ -284,6 +285,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         App.instance.selectedGroup.forEach {
             map["group_allow[]"] = RequestBody.create(MediaType.parse("text/plain"),it.toString())
         }
+        dLog("======> statusUpdate $lat, $long")
         ApiService.create().statusUpdate(sourceBody, status, statusIdBody, latBody, longBody, map, body).enqueue(
             StatusUpdateCallback(this)
         )

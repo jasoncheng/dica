@@ -38,7 +38,7 @@ interface ApiService {
         @Part("status") status: RequestBody,
         @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
         @Part("lat") lat: RequestBody,
-        @Part("lat") long: RequestBody,
+        @Part("long") long: RequestBody,
         @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part image: MultipartBody.Part): Call<String>
 

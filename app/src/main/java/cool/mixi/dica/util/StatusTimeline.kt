@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.StatusActivity
+import cool.mixi.dica.activity.UserActivity
 import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Status
 import retrofit2.Call
@@ -25,6 +26,8 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                      private val dataSource: IStatusDataSource
 ) : SwipeRefreshLayout.OnRefreshListener {
 
+    var selfRef: SoftReference<StatusTimeline>? = null
+
     var statuses = ArrayList<Status>()
 
     // is load more toast show
@@ -40,9 +43,10 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     var maxId = 0
 
     fun init(): StatusTimeline {
+        selfRef = SoftReference(this)
         table.layoutManager = LinearLayoutManager(context)
         table.adapter = StatusesAdapter(statuses, context)
-        table.setOnScrollListener(OnStatusTableScrollListener(this))
+        table.setOnScrollListener(OnStatusTableScrollListener(selfRef))
         swipeRefreshLayout.setOnRefreshListener(this)
         swipeRefreshLayout.isRefreshing = true
         return this
@@ -94,19 +98,19 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         swipeRefreshLayout.isRefreshing = true
     }
 
-    class OnStatusTableScrollListener(stl: StatusTimeline): RecyclerView.OnScrollListener() {
-        private val ref = SoftReference<StatusTimeline>(stl)
+    class OnStatusTableScrollListener(private val ref: SoftReference<StatusTimeline>?): RecyclerView.OnScrollListener() {
         private var lastVisibleItem: Int? = 0
         override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if(ref.get() == null) {
+            ref?.get()?.let {
                 recyclerView?.removeOnScrollListener(this)
-                return
             }
 
             if(newState == RecyclerView.SCROLL_STATE_IDLE &&
                 lastVisibleItem!! + 1 == recyclerView?.adapter?.itemCount) {
-                ref.get()!!.loadMore(null)
+                ref?.get()?.let {
+                    it.loadMore(null)
+                }
             }
         }
 
@@ -114,6 +118,19 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
             super.onScrolled(recyclerView, dx, dy)
             val layoutManager = recyclerView?.layoutManager as LinearLayoutManager
             lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+        }
+    }
+
+    class MyBindStatusGeoCallback(private val statusTimeline: SoftReference<StatusTimeline>?): IBindStatusGeo {
+        override fun done(status: Status) {
+            val adapter = statusTimeline?.get()?.table?.adapter as StatusesAdapter
+            try {
+                var pos = adapter.data.indexOf(status)
+                if(statusTimeline.get()?.context is UserActivity){
+                    pos+=1
+                }
+                adapter.notifyItemChanged(pos)
+            }catch (e: Exception){}
         }
     }
 
@@ -149,7 +166,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 if(act.maxId == 0 || it.id < act.maxId) act.maxId = it.id
 
                 // Bind Address if possible
-                LocationUtil.instance.bindGeoAddress(it)
+                LocationUtil.instance.bindGeoAddress(it, MyBindStatusGeoCallback(act?.selfRef))
 
                 // TODO: Test
                 it.text = it.text.dicaRenderData()

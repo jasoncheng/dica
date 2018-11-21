@@ -48,7 +48,6 @@
             android:id="@+id/tv_geo_address"
             android:drawableRight="@drawable/round_add_location_small"
             android:textSize="12sp"
-            android:visibility="gone"
             android:textAlignment="viewStart"
             android:textColor="@color/txt_geo_address"
             android:textStyle="italic"/>

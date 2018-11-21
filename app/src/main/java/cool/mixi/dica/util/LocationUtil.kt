@@ -25,6 +25,10 @@ interface IGetAddress {
     fun done(address: Address)
 }
 
+interface IBindStatusGeo {
+    fun done(status: Status)
+}
+
 interface IGetLocation {
     fun done(location: Location?)
 }
@@ -85,7 +89,7 @@ class LocationUtil {
         }
     }
 
-    fun bindGeoAddress(status: Status) {
+    fun bindGeoAddress(status: Status, callback: IBindStatusGeo) {
         if(status.geo == null || status.geo!!.coordinates == null) return
         var coor = status.geo!!.coordinates!!
         val location = Location(LocationManager.GPS_PROVIDER)
@@ -94,6 +98,7 @@ class LocationUtil {
         getAddress(location, object: IGetAddress {
             override fun done(address: Address) {
                 status.geo?.address = address
+                callback?.done(status)
             }
         })
     }
