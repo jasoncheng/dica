@@ -703,7 +703,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             if(meta != null){
                 renderWebUrl(parent, meta)
             } else {
-                renderText(parent, url)
+//                renderText(parent, url)
                 HtmlCrawler.getInstance().run(url, MyHtmlCrawler(status, refAdapter))
             }
         }
@@ -775,14 +775,16 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             )
         }
 
-        // Style: Mentions
-        val mMentions = s.emails()
-        for(it in mMentions){
-            var start = s.indexOf(it, 0, true)
-            var end = start+it.length
-            sp.setSpan(RelativeSizeSpan(1.2f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            sp.setSpan(OffSiteUserClickSpan(emailTextColor, refAdapter), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            sp.setSpan(NoUnderLinSpan(it), start, end, 0)
+        // Style: Mentions (It could be come from url, if so, ignore it!)
+        if(s.lines().size > 1 || !s.startsWith("http")){
+            val mMentions = s.emails()
+            for(it in mMentions){
+                var start = s.indexOf(it, 0, true)
+                var end = start+it.length
+                sp.setSpan(RelativeSizeSpan(1.2f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sp.setSpan(OffSiteUserClickSpan(emailTextColor, refAdapter), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                sp.setSpan(NoUnderLinSpan(it), start, end, 0)
+            }
         }
 
         // Style: Bold & Large *.....*

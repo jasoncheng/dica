@@ -1,6 +1,7 @@
 package cool.mixi.dica.util
 
 import android.content.Context
+import android.os.Handler
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -14,6 +15,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
+import java.lang.ref.WeakReference
 
 interface IStatusDataSource {
     fun sourceOld(): Call<List<Status>>?
@@ -42,7 +44,11 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     // for load sourceOld status
     var maxId = 0
 
+    // Handler
+    var mHandler: Handler? = null
+    var moreRunnable: MoreRunnable? = null
     fun init(): StatusTimeline {
+        mHandler = Handler()
         selfRef = SoftReference(this)
         table.layoutManager = LinearLayoutManager(context)
         table.adapter = StatusesAdapter(statuses, context)
@@ -78,12 +84,25 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         loadNewest(null)
     }
 
-    @Synchronized open fun loadNewest(callback: IStatusDataSource?){
-        iLog("${dataSource.javaClass.simpleName} loadNewest sinceId ${sinceId}")
+    fun loadNewest(callback: IStatusDataSource?){
+        iLog("${dataSource.javaClass.simpleName} loadNewest sinceId $sinceId")
         dataSource.sourceNew()?.enqueue(StatuesCallback(this, true, callback))
     }
 
-    @Synchronized open fun loadMore(callback: IStatusDataSource?){
+    class MoreRunnable(private val ref: SoftReference<StatusTimeline>, val callback: WeakReference<IStatusDataSource>?): Runnable {
+        override fun run() {
+            ref.get()?.let {
+                iLog("${it.dataSource.javaClass.simpleName} loadMore maxId ${it.maxId}")
+                if(callback == null) {
+                    it.dataSource.sourceOld()?.enqueue(StatuesCallback(it, false, null))
+                } else {
+                    it.dataSource.sourceOld()?.enqueue(StatuesCallback(it, false, callback.get()))
+                }
+            }
+        }
+    }
+
+    fun loadMore(callback: IStatusDataSource?){
         if(allLoaded){
             if(!noMoreDataToastShow && context !is StatusActivity){
                 App.instance.toast(context.getString(R.string.all_data_load))
@@ -93,9 +112,18 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
             return
         }
 
-        iLog("${dataSource.javaClass.simpleName} loadMore maxId ${maxId}")
-        dataSource.sourceOld()?.enqueue(StatuesCallback(this, false, callback))
+        if(moreRunnable == null){
+            val cb: WeakReference<IStatusDataSource>? = if(callback != null){
+                WeakReference(callback)
+            } else {
+                null
+            }
+            moreRunnable = MoreRunnable(selfRef!!, cb)
+        }
+
         swipeRefreshLayout.isRefreshing = true
+        mHandler?.removeCallbacks(moreRunnable)
+        mHandler?.postDelayed(moreRunnable, 3000)
     }
 
     class OnStatusTableScrollListener(private val ref: SoftReference<StatusTimeline>?): RecyclerView.OnScrollListener() {
