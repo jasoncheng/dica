@@ -1,18 +1,21 @@
 package cool.mixi.dica.util
 
 import android.content.Context
+import android.os.Handler
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.StatusActivity
+import cool.mixi.dica.activity.UserActivity
 import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Status
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
+import java.lang.ref.WeakReference
 
 interface IStatusDataSource {
     fun sourceOld(): Call<List<Status>>?
@@ -24,6 +27,8 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                      private val swipeRefreshLayout: SwipeRefreshLayout,
                      private val dataSource: IStatusDataSource
 ) : SwipeRefreshLayout.OnRefreshListener {
+
+    var selfRef: SoftReference<StatusTimeline>? = null
 
     var statuses = ArrayList<Status>()
 
@@ -39,10 +44,15 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     // for load sourceOld status
     var maxId = 0
 
+    // Handler
+    var mHandler: Handler? = null
+    var moreRunnable: MoreRunnable? = null
     fun init(): StatusTimeline {
+        mHandler = Handler()
+        selfRef = SoftReference(this)
         table.layoutManager = LinearLayoutManager(context)
         table.adapter = StatusesAdapter(statuses, context)
-        table.setOnScrollListener(OnStatusTableScrollListener(this))
+        table.setOnScrollListener(OnStatusTableScrollListener(selfRef))
         swipeRefreshLayout.setOnRefreshListener(this)
         swipeRefreshLayout.isRefreshing = true
         return this
@@ -74,12 +84,25 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         loadNewest(null)
     }
 
-    @Synchronized open fun loadNewest(callback: IStatusDataSource?){
-        iLog("loadNewest sinceId ${sinceId}")
+    fun loadNewest(callback: IStatusDataSource?){
+        iLog("${dataSource.javaClass.simpleName} loadNewest sinceId $sinceId")
         dataSource.sourceNew()?.enqueue(StatuesCallback(this, true, callback))
     }
 
-    @Synchronized open fun loadMore(callback: IStatusDataSource?){
+    class MoreRunnable(private val ref: SoftReference<StatusTimeline>, val callback: WeakReference<IStatusDataSource>?): Runnable {
+        override fun run() {
+            ref.get()?.let {
+                iLog("${it.dataSource.javaClass.simpleName} loadMore maxId ${it.maxId}")
+                if(callback == null) {
+                    it.dataSource.sourceOld()?.enqueue(StatuesCallback(it, false, null))
+                } else {
+                    it.dataSource.sourceOld()?.enqueue(StatuesCallback(it, false, callback.get()))
+                }
+            }
+        }
+    }
+
+    fun loadMore(callback: IStatusDataSource?){
         if(allLoaded){
             if(!noMoreDataToastShow && context !is StatusActivity){
                 App.instance.toast(context.getString(R.string.all_data_load))
@@ -89,24 +112,33 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
             return
         }
 
-        iLog("loadMore maxId ${maxId}")
-        dataSource.sourceOld()?.enqueue(StatuesCallback(this, false, callback))
+        if(moreRunnable == null){
+            val cb: WeakReference<IStatusDataSource>? = if(callback != null){
+                WeakReference(callback)
+            } else {
+                null
+            }
+            moreRunnable = MoreRunnable(selfRef!!, cb)
+        }
+
         swipeRefreshLayout.isRefreshing = true
+        mHandler?.removeCallbacks(moreRunnable)
+        mHandler?.postDelayed(moreRunnable, 3000)
     }
 
-    class OnStatusTableScrollListener(stl: StatusTimeline): RecyclerView.OnScrollListener() {
-        private val ref = SoftReference<StatusTimeline>(stl)
+    class OnStatusTableScrollListener(private val ref: SoftReference<StatusTimeline>?): RecyclerView.OnScrollListener() {
         private var lastVisibleItem: Int? = 0
         override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if(ref.get() == null) {
+            ref?.get()?.let {
                 recyclerView?.removeOnScrollListener(this)
-                return
             }
 
             if(newState == RecyclerView.SCROLL_STATE_IDLE &&
                 lastVisibleItem!! + 1 == recyclerView?.adapter?.itemCount) {
-                ref.get()!!.loadMore(null)
+                ref?.get()?.let {
+                    it.loadMore(null)
+                }
             }
         }
 
@@ -117,6 +149,19 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         }
     }
 
+    class MyBindStatusGeoCallback(private val statusTimeline: SoftReference<StatusTimeline>?): IBindStatusGeo {
+        override fun done(status: Status) {
+            val adapter = statusTimeline?.get()?.table?.adapter as StatusesAdapter
+            try {
+                var pos = adapter.data.indexOf(status)
+                if(statusTimeline.get()?.context is UserActivity){
+                    pos+=1
+                }
+                adapter.notifyItemChanged(pos)
+            }catch (e: Exception){}
+        }
+    }
+
     class StatuesCallback(timeline: StatusTimeline, insertMode: Boolean, private val callback: IStatusDataSource?):
         Callback<List<Status>> {
         private val ref = SoftReference<StatusTimeline>(timeline)
@@ -124,8 +169,9 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
         override fun onFailure(call: Call<List<Status>>, t: Throwable) {
             eLog("fail ${t.message}")
-            if(ref.get() == null){
-                return
+            ref.get()?.let {
+                App.instance.toast(it.context.getString(R.string.common_error).format(t.message))
+                it.swipeRefreshLayout.isRefreshing = false
             }
         }
 
@@ -149,7 +195,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 if(act.maxId == 0 || it.id < act.maxId) act.maxId = it.id
 
                 // Bind Address if possible
-                LocationUtil.instance.bindGeoAddress(it)
+                LocationUtil.instance.bindGeoAddress(it, MyBindStatusGeoCallback(act?.selfRef))
 
                 // TODO: Test
                 it.text = it.text.dicaRenderData()

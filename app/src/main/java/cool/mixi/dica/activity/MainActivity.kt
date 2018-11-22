@@ -2,6 +2,7 @@ package cool.mixi.dica.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.view.ViewCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.PopupMenu
@@ -22,15 +23,21 @@ import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
 
 class MainActivity : BaseActivity() {
 
     var notifications: ArrayList<Notification> = ArrayList()
+    private val mHandler = Handler()
+    private var mNotificationRunnable: NotificationRunnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Notification
+        mNotificationRunnable = NotificationRunnable(this)
 
         // if user not login yet
         if(App.instance.myself == null){
@@ -224,8 +231,22 @@ class MainActivity : BaseActivity() {
         return c
     }
 
+
+    // for Notification
+    class NotificationRunnable(val activity: MainActivity): Runnable {
+        private val ref = SoftReference(activity)
+        override fun run() {
+            ref.get()?.let {
+                dLog("friendicaNotifications fetching")
+                ApiService.create().friendicaNotifications().enqueue(MyNotificationCallback(it))
+            }
+        }
+    }
+
     fun getNotifications(){
-        dLog("getNotifications")
-        ApiService.create().friendicaNotifications().enqueue(MyNotificationCallback(this))
+        mHandler.removeCallbacks(mNotificationRunnable)
+        mNotificationRunnable?.let {
+            mHandler.postDelayed(it, 5000)
+        }
     }
 }

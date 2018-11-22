@@ -53,7 +53,7 @@ fun String.glideUrl(): GlideUrl {
 //    headersBuilder.addHeader("Pragma", "no-cache")
 //    headersBuilder.addHeader("cache-control", "no-cache")
     ApiService.cookies[host]?.let {
-        dLog("setCooke w/ image loading $host - $this - $it")
+//        dLog("setCooke w/ image loading $host - $this - $it")
         headersBuilder.addHeader("Cookie", it)
     }
     return GlideUrl(this, headersBuilder.build())

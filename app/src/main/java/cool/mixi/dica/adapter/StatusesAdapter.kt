@@ -54,6 +54,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
@@ -82,6 +83,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
     private val strSuccessRetweet: String = context.getString(R.string.retweet_success)
     private val strRetweetFail = context.getString(R.string.retweet_fail)
+    private val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm")
 
     enum class ViewType {
         USER_PROFILE,
@@ -144,8 +146,8 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
                     lockContainer = holder.userName
                 } else {
                     holder.datetime?.let {that->
-                        that.text = date.toLocaleString()
-                        doAppendSourceLayout(that, date.toLocaleString(), it)
+                        that.text = sdf.format(date)
+                        doAppendSourceLayout(that, that.text.toString(), it)
                     }
                 }
             }catch (e: java.lang.Exception) {}
@@ -330,7 +332,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         if(status.geo?.address != null){
             var address = status.geo?.address
             view.visibility = View.VISIBLE
-            view.text = address?.getAddressLine(0)
+            view.text = "${address?.getAddressLine(0)} "
             view.setOnClickListener {
                 context.startActivity(LocationUtil.mapIntent(address!!))
             }
@@ -366,6 +368,8 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
                     context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it!!)))
                 }
             }
+        } else {
+            holder.siteName?.visibility = View.GONE
         }
 
         Glide.with(context.applicationContext)
@@ -403,13 +407,13 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         }
     }
 
-    private fun menuDoDelete(id: Int, position: Int){
+    private fun menuDoDelete(st: Status){
         AlertDialog.Builder(context)
             .setMessage(R.string.confirm_delete_status)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val activity = context as BaseActivity
                 activity.loading(context.getString(R.string.processing))
-                ApiService.create().statusDestroy(id).enqueue(StatusDestroyCallback(refAdapter, position))
+                ApiService.create().statusDestroy(st.id).enqueue(StatusDestroyCallback(refAdapter, st))
             }
             .setNegativeButton(android.R.string.cancel) { dialog, _->
                 dialog.dismiss()
@@ -440,7 +444,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             }
             pop.setOnMenuItemClickListener { that ->
                 when(that.itemId) {
-                    R.id.menu_delete -> menuDoDelete(it.id, position)
+                    R.id.menu_delete -> menuDoDelete(it)
                     R.id.menu_open_link -> menuDoOpenLink(it.external_url)
                 }
                 true
@@ -699,7 +703,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             if(meta != null){
                 renderWebUrl(parent, meta)
             } else {
-                renderText(parent, url)
+//                renderText(parent, url)
                 HtmlCrawler.getInstance().run(url, MyHtmlCrawler(status, refAdapter))
             }
         }
@@ -771,14 +775,16 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             )
         }
 
-        // Style: Mentions
-        val mMentions = s.emails()
-        for(it in mMentions){
-            var start = s.indexOf(it, 0, true)
-            var end = start+it.length
-            sp.setSpan(RelativeSizeSpan(1.2f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            sp.setSpan(OffSiteUserClickSpan(emailTextColor, refAdapter), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-            sp.setSpan(NoUnderLinSpan(it), start, end, 0)
+        // Style: Mentions (It could be come from url, if so, ignore it!)
+        if(s.lines().size > 1 || !s.startsWith("http")){
+            val mMentions = s.emails()
+            for(it in mMentions){
+                var start = s.indexOf(it, 0, true)
+                var end = start+it.length
+                sp.setSpan(RelativeSizeSpan(1.2f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sp.setSpan(OffSiteUserClickSpan(emailTextColor, refAdapter), start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                sp.setSpan(NoUnderLinSpan(it), start, end, 0)
+            }
         }
 
         // Style: Bold & Large *.....*
@@ -877,7 +883,7 @@ class MyHtmlCrawler(private val st: Status, val adapter: SoftReference<StatusesA
     }
 }
 
-class StatusDestroyCallback(val adapter: SoftReference<StatusesAdapter>?, private val position: Int): Callback<String> {
+class StatusDestroyCallback(val adapter: SoftReference<StatusesAdapter>?, private val st: Status): Callback<String> {
     private var errorMsg:String? = "${adapter?.get()?.context?.getString(R.string.common_error)}"
     override fun onFailure(call: Call<String>, t: Throwable) {
         App.instance.toast(errorMsg!!.format(t.message))
@@ -893,10 +899,22 @@ class StatusDestroyCallback(val adapter: SoftReference<StatusesAdapter>?, privat
         activity?.loaded()
         adapter?.get()?.let {
             if(it == null) return
-            it.data.getOrNull(position).let { that ->
-                if(that == null) return
+            var targetStatus:Status? = null
+            var targetIndex = -1
+            adapter?.get()?.data?.forEachIndexed { index, status ->
+                if(status == st){
+                    targetIndex = index
+                    targetStatus = status
+                }
+            }
+
+            //TODO: for user page have profile at index 0
+            if(activity is UserActivity){
+                targetIndex+=1
+            }
+            targetStatus?.let { that ->
                 it.data.remove(that)
-                it.notifyItemRemoved(position)
+                it.notifyItemRemoved(targetIndex)
             }
         }
     }

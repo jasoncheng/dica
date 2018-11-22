@@ -3,8 +3,8 @@ package cool.mixi.dica.bean
 object Consts {
 
     val COMPRESS_PHOTO_QUALITY = 70
-    val API_CONNECT_TIMEOUT = 30.toLong()
-    val API_READ_TIMEOUT = 30.toLong()
+    val API_CONNECT_TIMEOUT = 60.toLong()
+    val API_READ_TIMEOUT = 60.toLong()
     val CACHE_SIZE_IN_MB = 10
 
 

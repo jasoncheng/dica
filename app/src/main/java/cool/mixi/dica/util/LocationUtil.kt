@@ -25,6 +25,10 @@ interface IGetAddress {
     fun done(address: Address)
 }
 
+interface IBindStatusGeo {
+    fun done(status: Status)
+}
+
 interface IGetLocation {
     fun done(location: Location?)
 }
@@ -69,7 +73,7 @@ class LocationUtil {
     fun getAddress(location: Location, callback: IGetAddress) {
         val key = getAddressKey(location)
         if(cached.containsKey(key)){
-            dLog("cached getAddress ${key}")
+//            dLog("cached getAddress ${key}")
             callback.done(cached[key]!!)
             return
         }
@@ -85,7 +89,7 @@ class LocationUtil {
         }
     }
 
-    fun bindGeoAddress(status: Status) {
+    fun bindGeoAddress(status: Status, callback: IBindStatusGeo) {
         if(status.geo == null || status.geo!!.coordinates == null) return
         var coor = status.geo!!.coordinates!!
         val location = Location(LocationManager.GPS_PROVIDER)
@@ -94,6 +98,7 @@ class LocationUtil {
         getAddress(location, object: IGetAddress {
             override fun done(address: Address) {
                 status.geo?.address = address
+                callback?.done(status)
             }
         })
     }
@@ -101,8 +106,7 @@ class LocationUtil {
     fun getLocation(cb: IGetLocation){
         getLastLocation(object : IGetLocation {
             override fun done(location: Location?) {
-                if(location != null) {
-                    dLog("getLastLocation ${location.latitude}, ${location.longitude}")
+                location?.let {
                     cb.done(location)
                 }
             }
@@ -110,8 +114,7 @@ class LocationUtil {
 
         startLocationUpdates(object : IGetLocation{
             override fun done(location: Location?) {
-                if(location != null) {
-                    dLog("getGPSLocation ${location.latitude}, ${location.longitude}")
+                location?.let {
                     cb.done(location)
                 }
             }

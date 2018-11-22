@@ -11,7 +11,6 @@ import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.IStatusDataSource
 import cool.mixi.dica.util.StatusTimeline
-import cool.mixi.dica.util.dLog
 import cool.mixi.dica.util.eLog
 import kotlinx.android.synthetic.main.fg_timeline.*
 import retrofit2.Call
@@ -19,8 +18,22 @@ import retrofit2.Call
 abstract class TimelineFragment: Fragment(), IStatusDataSource {
 
     var stl: StatusTimeline? = null
+    private var isInitLoad = false
+    private var ifVisible = false
+
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+        ifVisible = isVisibleToUser
+        ifVisible.let {
+            if(ifVisible && !isInitLoad) {
+                stl?.loadNewest(this)
+                isInitLoad = true
+            }
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        isInitLoad = false
         return inflater.inflate(R.layout.fg_timeline, container, false)
     }
 
@@ -31,11 +44,15 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
                 this.javaClass.simpleName == TimelineFavoritesFragment::class.java.simpleName
 
         srl.setOnRefreshListener {
+            reloadNotification()
             stl?.resetQuery()
             stl?.loadNewest(this)
         }
 
-        stl?.loadNewest(this)
+        if(ifVisible && !isInitLoad){
+            stl?.loadNewest(this)
+            isInitLoad = true
+        }
     }
 
     fun reloadNotification(){
@@ -43,12 +60,11 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
     }
 
     override fun loaded(data: List<Status>) {
-        dLog("data size ${data.size}")
         stl?.clear()
         stl?.addAll(data)
         try {
-            (statuses_list.adapter as StatusesAdapter).initLoaded = true
             statuses_list.adapter.notifyDataSetChanged()
+            (statuses_list.adapter as StatusesAdapter).initLoaded = true
         }catch(e: Exception){
             eLog("${e.message}")
         }
