@@ -356,7 +356,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
                 try {
                     val parent = it.parent as ViewGroup
                     parent.content_box.visibility = View.VISIBLE
-                    parent.removeView(it)
+                    it.visibility = View.GONE
                 }catch (e: Exception){}
             }
             holder.contentBox?.visibility = View.GONE
@@ -515,9 +515,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
 
 
             if(isOffSiteSN){
-                dLog("offSite retweet")
                 val text = it.toFriendicaShareText()
-                dLog("${it.toFriendicaShareText()}")
                 ApiService.create()
                     .statusUpdate(context.getString(R.string.app_name), text, 0, "", "", ArrayList())
                     .enqueue(StatusUpdateCallback(dlg, refAdapter))
