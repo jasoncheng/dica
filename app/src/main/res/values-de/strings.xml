@@ -6,8 +6,6 @@
   <string name="username">"Benutzername"</string>
   <string name="logout">"Abmelden"</string>
   <string name="login">"Einloggen"</string>
-
-  <!-- waitting for translate -->
   <string name="common_error">Kann (%1$s) vorübergehend nicht nutzen</string>
   <string name="all_data_load">Nichts weiter..</string>
   <string name="compose_submit">Abschicken</string>
