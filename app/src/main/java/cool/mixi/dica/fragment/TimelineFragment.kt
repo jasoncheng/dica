@@ -2,6 +2,7 @@ package cool.mixi.dica.fragment
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,9 +10,7 @@ import cool.mixi.dica.R
 import cool.mixi.dica.activity.MainActivity
 import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Status
-import cool.mixi.dica.util.IStatusDataSource
-import cool.mixi.dica.util.StatusTimeline
-import cool.mixi.dica.util.eLog
+import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.fg_timeline.*
 import retrofit2.Call
 
@@ -34,6 +33,7 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         isInitLoad = false
+        PrefUtil.setTimelineSinceId(this.javaClass.simpleName, 0)
         return inflater.inflate(R.layout.fg_timeline, container, false)
     }
 
@@ -59,12 +59,38 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
         (activity as MainActivity).getNotifications()
     }
 
+    private fun saveSinceId(){
+        stl?.sinceId?.let {
+            PrefUtil.setTimelineSinceId(this.javaClass.simpleName, it)
+        }
+    }
     override fun loaded(data: List<Status>) {
         stl?.clear()
         stl?.addAll(data)
         try {
-            statuses_list.adapter.notifyDataSetChanged()
+            statuses_list.adapter.notifyItemRangeChanged(0, data.size)
             (statuses_list.adapter as StatusesAdapter).initLoaded = true
+           // SinceId & find position and scroll to
+            val lastSinceId = PrefUtil.getTimelineSinceId(this.javaClass.simpleName)
+            val currentSinceId = stl?.sinceId ?: 0
+            if(currentSinceId <= lastSinceId){
+                saveSinceId()
+                return
+            }
+            var pos = data.size - 1
+            data.forEachIndexed { index, status ->
+                if(status.id == lastSinceId){
+                    pos = index
+                }
+            }
+
+            saveSinceId()
+            if(pos > 0){
+                dLog("=========> last sinceId is $lastSinceId, scroll to position $pos")
+                val msg = getString(R.string.new_status_since).format("$pos")
+                (statuses_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+                (activity as MainActivity).showSnackBar(msg)
+            }
         }catch(e: Exception){
             eLog("${e.message}")
         }

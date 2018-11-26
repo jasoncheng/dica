@@ -471,7 +471,6 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     }
 
     private fun actFavorites(view: View){
-        val me = App.instance.myself?.friendica_owner!!
         val position = (view.parent.parent as ViewGroup).tag as Int
         data.getOrNull(position).let {
             if(it == null) return
