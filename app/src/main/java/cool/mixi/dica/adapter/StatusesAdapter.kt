@@ -348,6 +348,23 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         holder.contentBox?.tag = pos
         holder.itemView.tag = pos
         holder.contentBox?.isClickable = true
+
+        // NSFW
+        if(st.enableNSFW){
+            holder.notSafeForWork?.visibility = View.VISIBLE
+            holder.notSafeForWork?.setOnClickListener {
+                try {
+                    val parent = it.parent as ViewGroup
+                    parent.content_box.visibility = View.VISIBLE
+                    it.visibility = View.GONE
+                }catch (e: Exception){}
+            }
+            holder.contentBox?.visibility = View.GONE
+        } else {
+            holder.notSafeForWork?.visibility = View.GONE
+            holder.contentBox?.visibility = View.VISIBLE
+        }
+
         renderContent(holder.contentBox, st)
     }
 
@@ -498,9 +515,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
 
 
             if(isOffSiteSN){
-                dLog("offSite retweet")
                 val text = it.toFriendicaShareText()
-                dLog("${it.toFriendicaShareText()}")
                 ApiService.create()
                     .statusUpdate(context.getString(R.string.app_name), text, 0, "", "", ArrayList())
                     .enqueue(StatusUpdateCallback(dlg, refAdapter))
@@ -703,7 +718,6 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             if(meta != null){
                 renderWebUrl(parent, meta)
             } else {
-//                renderText(parent, url)
                 HtmlCrawler.getInstance().run(url, MyHtmlCrawler(status, refAdapter))
             }
         }
@@ -965,6 +979,7 @@ open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
     open var avatar:ImageView? = view.avatar
     var statusMenu: ImageView? = view.more_options
     var contentBox: ViewGroup? = view.content_box
+    var notSafeForWork: TextView? = view.tv_nsfw
     var emptyDescription: TextView? = view.tv_empty
     var siteName: TextView? = view.tv_sitename
     var datetime:TextView? = view.tv_datetime

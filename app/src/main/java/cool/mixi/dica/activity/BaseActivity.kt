@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.TextView
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.fragment.ComposeDialogFragment
 import cool.mixi.dica.util.StatusTimeline
 
 open class BaseActivity: AppCompatActivity() {
@@ -35,6 +36,12 @@ open class BaseActivity: AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        supportFragmentManager.findFragmentByTag(Consts.FG_COMPOSE).onActivityResult(requestCode, resultCode, data)
+        getComposeDialog()?.let {
+            it.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    fun getComposeDialog(): ComposeDialogFragment? {
+        return supportFragmentManager.findFragmentByTag(Consts.FG_COMPOSE) as ComposeDialogFragment
     }
 }

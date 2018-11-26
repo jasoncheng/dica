@@ -1,8 +1,11 @@
 package cool.mixi.dica.activity
 
 import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.provider.MediaStore
 import android.support.v4.view.ViewCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.PopupMenu
@@ -25,6 +28,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
+import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
 
 class MainActivity : BaseActivity() {
@@ -105,11 +109,49 @@ class MainActivity : BaseActivity() {
                 MyHtmlCrawler(this)
             )
         }
+
+        // Intent Process
+        processIntent()
     }
 
     override fun onStart() {
         super.onStart()
         getNotifications()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        processIntent()
+    }
+
+    private fun processIntent(){
+        if(intent == null || intent.action != Intent.ACTION_SEND){ return }
+        val dlg = ComposeDialogFragment()
+        if("text/plain".equals(intent.type)){
+            dlg.sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
+        } else if(intent.type.contains("(image|video)\\/".toRegex())){
+            val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+            var path:String = imageUri.path.toLowerCase()
+            val pattern = Pattern.compile("\\.(jpg|jpeg|gif|bmp|mp4)\$", Pattern.CASE_INSENSITIVE)
+            if(! pattern.matcher(path).matches()){
+                path = getRealPathFromURI(imageUri)
+            }
+            dlg.sharedFile = path
+        }
+        dlg.show(supportFragmentManager, Consts.FG_COMPOSE)
+    }
+
+    private fun getRealPathFromURI(contentUri: Uri): String {
+        var cursor: Cursor? = null
+        try {
+            val tmp = arrayOf(MediaStore.Images.Media.DATA)
+            cursor = contentResolver.query(contentUri, tmp, null, null, null)
+            val columnIndex = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            cursor.moveToFirst()
+            return cursor.getString(columnIndex)
+        } finally {
+            cursor?.close()
+        }
     }
 
     fun initViewPager(){

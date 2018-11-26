@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -46,12 +47,16 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     var in_reply_status_id: Int? = 0
     var in_reply_screenname: String? = ""
+    var editText: EditText? = null
+    var sharedText: String? = null
+    var sharedFile: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         roomView = inflater?.inflate(R.layout.dlg_compose, container)
         dialog.setTitle("")
 
 
+        editText = roomView?.et_text
         roomView?.et_text?.setText(PrefUtil.getLastStatus())
         roomView?.bt_submit?.setOnClickListener {
             composeSubmit()
@@ -110,14 +115,23 @@ class ComposeDialogFragment: BaseDialogFragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == Consts.REQ_PHOTO_PATH) {
-            try {
-                mediaFile = File(data?.getStringExtra(Consts.EXTRA_PHOTO_URI))
-                addPhotoPreview(mediaFile!!)
-            }catch (e: java.lang.Exception){}
+            data?.getStringExtra(Consts.EXTRA_PHOTO_URI)?.let {
+                addPhotoPreview(File(it))
+            }
             return
         }
 
         EasyImage.handleActivityResult(requestCode, resultCode, data, activity, imageSelectedCallback)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        sharedFile?.let {
+            addPhotoPreview(File(it))
+        }
+        sharedText?.let { str ->
+            editText?.let { it.setText(str) }
+        }
     }
 
     private fun setMyLocation() {
@@ -199,6 +213,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
     }
 
     private fun addPhotoPreview(imageFile: File){
+        mediaFile = imageFile
         val box = roomView?.photo_box as ViewGroup
         var imgView = ImageView(this.context)
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -209,7 +224,12 @@ class ComposeDialogFragment: BaseDialogFragment() {
         box.removeAllViews()
         box.addView(imgView)
         box.visibility = View.VISIBLE
-        Glide.with(context!!).load(imageFile).into(imgView!!)
+        dLog("mediaPath: ${imageFile.absoluteFile}")
+        if(imageFile.absoluteFile.endsWith("mp4")) {
+            Glide.with(context!!).asBitmap().load(imageFile).into(imgView!!)
+        } else {
+            Glide.with(context!!).load(imageFile).into(imgView!!)
+        }
         imgView.setOnClickListener {
             (it.parent as ViewGroup).removeView(it)
             mediaFile = null
@@ -224,7 +244,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         override fun onFailure(call: Call<String>, t: Throwable) {
             (ref.get()?.activity as BaseActivity).loaded()
             App.instance.toast(strMsgErr?.format(t.message)!!)
-            eLog("==========>"+t.message!!)
+            eLog("${t.message!!}")
         }
 
         override fun onResponse(call: Call<String>, response: Response<String>) {
