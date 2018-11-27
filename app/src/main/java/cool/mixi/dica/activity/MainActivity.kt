@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
+import android.support.design.widget.Snackbar
 import android.support.v4.view.ViewCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.PopupMenu
@@ -36,6 +37,7 @@ class MainActivity : BaseActivity() {
     var notifications: ArrayList<Notification> = ArrayList()
     private val mHandler = Handler()
     private var mNotificationRunnable: NotificationRunnable? = null
+    private var snackBar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -165,6 +167,7 @@ class MainActivity : BaseActivity() {
             }
 
             override fun onPageSelected(position: Int) {
+                hideSnackBar()
                 tv_home_page_name.text = names[position]
             }
         })
@@ -273,6 +276,17 @@ class MainActivity : BaseActivity() {
         return c
     }
 
+
+    // Top SnackBar
+    fun showSnackBar(msg: String){
+        snackBar = Snackbar.make(vp_index, msg, Snackbar.LENGTH_LONG)
+        snackBar?.view?.setBackgroundColor(getColor(R.color.snack_bar_bg))
+        snackBar?.show()
+    }
+
+    fun hideSnackBar(){
+        snackBar?.dismiss()
+    }
 
     // for Notification
     class NotificationRunnable(val activity: MainActivity): Runnable {

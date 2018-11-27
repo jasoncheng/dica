@@ -9,7 +9,7 @@ import cool.mixi.dica.bean.Consts
 class PrefUtil {
 
     companion object {
-        fun default(): SharedPreferences =
+        private fun default(): SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(App.instance.applicationContext)
 
         fun resetAll() {
@@ -69,8 +69,16 @@ class PrefUtil {
             default().edit().putString("favicon", text).commit()
         }
 
-        fun getSiteIcon(): String {
-            return default().getString("favicon", "")
+        fun setTimelineSinceId(fragmentName: String, sinceId: Int){
+            val currentSinceId = getTimelineSinceId(fragmentName)
+            if(sinceId <= currentSinceId) return
+
+            dLog("save sinceId $fragmentName, $sinceId")
+            default().edit().putInt(fragmentName, sinceId).commit()
+        }
+
+        fun getTimelineSinceId(fragmentName: String): Int {
+            return default().getInt(fragmentName, 0)
         }
     }
 }

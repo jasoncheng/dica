@@ -45,8 +45,8 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     var maxId = 0
 
     // Handler
-    var mHandler: Handler? = null
-    var moreRunnable: MoreRunnable? = null
+    private var mHandler: Handler? = null
+    private var moreRunnable: MoreRunnable? = null
     fun init(): StatusTimeline {
         mHandler = Handler()
         selfRef = SoftReference(this)
@@ -85,7 +85,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     }
 
     fun loadNewest(callback: IStatusDataSource?){
-        iLog("${dataSource.javaClass.simpleName} loadNewest sinceId $sinceId")
         dataSource.sourceNew()?.enqueue(StatuesCallback(this, true, callback))
     }
 
@@ -210,6 +209,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                     return
                 }
             }
+
 
             // handle data by itself
             if(callback != null){
