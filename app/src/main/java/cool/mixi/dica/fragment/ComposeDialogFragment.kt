@@ -285,9 +285,15 @@ class ComposeDialogFragment: BaseDialogFragment() {
             long = "${lastAddress?.longitude}"
         }
 
+        val targetGroup = if(roomView?.main_radiogroup?.isSelected!!){
+            ArrayList()
+        } else {
+            App.instance.selectedGroup
+        }
+
         if(mediaFile == null){
             dLog("======> statusUpdate $lat, $long")
-            ApiService.create().statusUpdate(source!!, text, in_reply_status_id!!, lat, long, App.instance.selectedGroup).enqueue(
+            ApiService.create().statusUpdate(source!!, text, in_reply_status_id!!, lat, long, targetGroup).enqueue(
                 StatusUpdateCallback(this)
             )
             return
@@ -296,16 +302,14 @@ class ComposeDialogFragment: BaseDialogFragment() {
         val requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), mediaFile)
         val body = MultipartBody.Part.createFormData("media", mediaFile?.name, requestFile)
         val status = RequestBody.create(MediaType.parse("multipart/form-data"), text)
-
         val statusIdBody = RequestBody.create(MediaType.parse("multipart/form-data"), "$in_reply_status_id")
         val sourceBody = RequestBody.create(MediaType.parse("multipart/form-data"), source)
         val latBody = RequestBody.create(MediaType.parse("multipart/form-data"), lat)
         val longBody = RequestBody.create(MediaType.parse("multipart/form-data"), long)
         var map = LinkedHashMap<String, RequestBody>()
-        App.instance.selectedGroup.forEach {
-            map["group_allow[]"] = RequestBody.create(MediaType.parse("text/plain"),it.toString())
+        targetGroup.forEach {
+            map["group_allow[]"] = RequestBody.create(MediaType.parse("text/plain"), it.toString())
         }
-        dLog("======> statusUpdate $lat, $long")
         ApiService.create().statusUpdate(sourceBody, status, statusIdBody, latBody, longBody, map, body).enqueue(
             StatusUpdateCallback(this)
         )

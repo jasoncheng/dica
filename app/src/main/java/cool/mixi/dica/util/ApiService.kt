@@ -183,7 +183,7 @@ interface ApiService {
             val clientBuilder = OkHttpClient.Builder()
             if(BuildConfig.DEBUG) {
                 val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.HEADERS
+                interceptor.level = HttpLoggingInterceptor.Level.BODY
                 clientBuilder.addInterceptor(interceptor)
             }
 

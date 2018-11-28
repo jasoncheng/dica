@@ -18,6 +18,7 @@ class PrefUtil {
             setPassword("")
             setSiteIcon("")
             setSiteName("")
+            clearSinceId()
         }
 
         fun didSetUserCredential(): Boolean {
@@ -79,6 +80,14 @@ class PrefUtil {
 
         fun getTimelineSinceId(fragmentName: String): Int {
             return default().getInt(fragmentName, 0)
+        }
+
+        //TODO: ugly here
+        private fun clearSinceId(){
+            default().edit().putInt("TimelineFavoritesFragment", 0).apply()
+            default().edit().putInt("TimelineFriendsFragment", 0).apply()
+            default().edit().putInt("TimelineMyFragment", 0).apply()
+            default().edit().putInt("TimelinePublicFragment", 0).apply()
         }
     }
 }

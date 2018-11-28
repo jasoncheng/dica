@@ -33,7 +33,7 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         isInitLoad = false
-        PrefUtil.setTimelineSinceId(this.javaClass.simpleName, 0)
+//        PrefUtil.setTimelineSinceId(this.javaClass.simpleName, 0)
         return inflater.inflate(R.layout.fg_timeline, container, false)
     }
 
@@ -72,24 +72,36 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
             (statuses_list.adapter as StatusesAdapter).initLoaded = true
            // SinceId & find position and scroll to
             val lastSinceId = PrefUtil.getTimelineSinceId(this.javaClass.simpleName)
+            dLog("lastSinceId $lastSinceId, ${stl?.sinceId} ${stl?.maxId}- ${this.javaClass.simpleName}")
             val currentSinceId = stl?.sinceId ?: 0
-            if(currentSinceId <= lastSinceId){
-                saveSinceId()
+            if(currentSinceId == 0 ||  currentSinceId <= lastSinceId){
                 return
             }
+
             var pos = data.size - 1
+            var ifItemFound = false
             data.forEachIndexed { index, status ->
                 if(status.id == lastSinceId){
                     pos = index
+                    ifItemFound = true
+                    dLog("item found at $pos")
                 }
             }
 
             saveSinceId()
+
+            // show how many new messages
+            if(pos > 0){
+                val msg = getString(R.string.new_status_since).format("$pos")
+                (activity as MainActivity).showSnackBar(msg)
+            }
+
+            // When status delete, sinceId will lose it's meaning, should ignore
+            if(!ifItemFound){ return }
+
             if(pos > 0){
                 dLog("=========> last sinceId is $lastSinceId, scroll to position $pos")
-                val msg = getString(R.string.new_status_since).format("$pos")
                 (statuses_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
-                (activity as MainActivity).showSnackBar(msg)
             }
         }catch(e: Exception){
             eLog("${e.message}")

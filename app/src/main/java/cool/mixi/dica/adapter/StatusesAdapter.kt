@@ -861,7 +861,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
 
     private fun getImageView(): ImageView {
         var img = ImageView(context)
-        val childParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        val childParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
         img.layoutParams = childParams
         img.scaleType = ImageView.ScaleType.FIT_XY
         img.adjustViewBounds = true
