@@ -30,6 +30,17 @@ interface ApiService {
         @Field("lat") lat: String,
         @Field("long") long: String,
         @Field("group_allow[]") group_allow: ArrayList<Int>?): Call<String>
+//
+//    @POST("statuses/update_with_media")
+//    @Multipart
+//    fun statusUpdate(
+//        @Part("source") source: RequestBody,
+//        @Part("status") status: RequestBody,
+//        @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
+//        @Part("lat") lat: RequestBody,
+//        @Part("long") long: RequestBody,
+//        @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
+//        @Part image: MultipartBody.Part): Call<String>
 
     @POST("statuses/update_with_media")
     @Multipart
@@ -40,7 +51,11 @@ interface ApiService {
         @Part("lat") lat: RequestBody,
         @Part("long") long: RequestBody,
         @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
-        @Part image: MultipartBody.Part): Call<String>
+        @Part("media_ids") mediaIds: RequestBody?): Call<String>
+
+    @POST("media/upload")
+    @Multipart
+    fun mediaUpload(@Part media: MultipartBody.Part): Call<String>
 
     @GET("statuses/show?include_entities=true")
     fun statusShow(@Query("id") id: Int,
@@ -183,7 +198,7 @@ interface ApiService {
             val clientBuilder = OkHttpClient.Builder()
             if(BuildConfig.DEBUG) {
                 val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.BODY
+                interceptor.level = HttpLoggingInterceptor.Level.HEADERS
                 clientBuilder.addInterceptor(interceptor)
             }
 
