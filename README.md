@@ -41,6 +41,7 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 
 ***LINKS***
 
+* [Support Forum](https://meld.de/profile/dica)
 
 * [CHANGELOG](https://github.com/jasoncheng/dica/wiki/CHANGELOG)
 
