@@ -102,6 +102,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     private val requestOptionsGif = RequestOptions()
         .fitCenter()
         .skipMemoryCache(true)
+        .override(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL)
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
 
     private val compilerQuote: Pattern =  Pattern.compile("^> ([^\n]*)",
@@ -864,7 +865,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         var img = ImageView(context)
         val childParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
         img.layoutParams = childParams
-        img.scaleType = ImageView.ScaleType.FIT_XY
+        img.scaleType = ImageView.ScaleType.FIT_CENTER
         img.adjustViewBounds = true
         childParams.setMargins(0, 20, 0, 20)
         return img
