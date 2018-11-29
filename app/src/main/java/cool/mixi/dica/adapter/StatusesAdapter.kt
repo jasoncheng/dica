@@ -96,6 +96,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     private val requestOptions = RequestOptions()
         .fitCenter()
         .format(DecodeFormat.PREFER_ARGB_8888)
+        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .transforms(RoundedCorners(16))!!
 
     private val requestOptionsGif = RequestOptions()

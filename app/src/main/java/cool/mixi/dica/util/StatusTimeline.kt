@@ -91,7 +91,6 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     class MoreRunnable(private val ref: SoftReference<StatusTimeline>, val callback: WeakReference<IStatusDataSource>?): Runnable {
         override fun run() {
             ref.get()?.let {
-                iLog("${it.dataSource.javaClass.simpleName} loadMore maxId ${it.maxId}")
                 if(callback == null) {
                     it.dataSource.sourceOld()?.enqueue(StatuesCallback(it, false, null))
                 } else {

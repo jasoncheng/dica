@@ -16,9 +16,9 @@ import java.net.URL
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
-fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "=====> $log")
-fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "=====> $log")
-fun Any.dLog(log: String) = Log.d(this::class.java.simpleName, "=====> $log")
+fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "DICA $log")
+fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "DICA $log")
+fun Any.dLog(log: String) = Log.d(this::class.java.simpleName, "DICA $log")
 fun String.md5(): String {
     try {
         val instance: MessageDigest = MessageDigest.getInstance("MD5")
@@ -50,10 +50,8 @@ fun String.glideUrl(): GlideUrl {
     val host = URL(this).host.toLowerCase()
     headersBuilder.addHeader("user-agent", App.instance.getString(R.string.app_name))
     headersBuilder.addHeader("accept", "*/*")
-//    headersBuilder.addHeader("Pragma", "no-cache")
-//    headersBuilder.addHeader("cache-control", "no-cache")
     ApiService.cookies[host]?.let {
-//        dLog("setCooke w/ image loading $host - $this - $it")
+        dLog("set-cookie w/ image loading $host - $this - $it")
         headersBuilder.addHeader("Cookie", it)
     }
     return GlideUrl(this, headersBuilder.build())

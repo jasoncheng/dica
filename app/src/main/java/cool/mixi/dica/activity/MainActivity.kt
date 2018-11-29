@@ -11,6 +11,9 @@ import android.support.v4.view.ViewCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.PopupMenu
 import android.view.View
+import android.webkit.CookieManager
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import cool.mixi.dica.App
@@ -24,11 +27,14 @@ import cool.mixi.dica.fragment.ComposeDialogFragment
 import cool.mixi.dica.fragment.NotificationDialog
 import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
+import java.net.URLEncoder
 import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
 
@@ -114,6 +120,9 @@ class MainActivity : BaseActivity() {
 
         // Intent Process
         processIntent()
+
+        // fetch session
+        getSessionID()
     }
 
     override fun onStart() {
@@ -303,6 +312,31 @@ class MainActivity : BaseActivity() {
         mHandler.removeCallbacks(mNotificationRunnable)
         mNotificationRunnable?.let {
             mHandler.postDelayed(it, 5000)
+        }
+    }
+
+    class MyWebClient: WebViewClient() {
+        override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+            return false
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            val cookieManager = CookieManager.getInstance()
+            val cookieStr = cookieManager.getCookie(url)
+            ApiService.setCookie(cookieStr)
+        }
+    }
+
+    private fun getSessionID(){
+        doAsync {
+            uiThread {
+                val web = WebView(this@MainActivity)
+                web.webViewClient = MyWebClient()
+                val url = "${PrefUtil.getApiUrl()}/login"
+                val postData = "username=" + URLEncoder.encode(PrefUtil.getUsername(), "UTF-8") +
+                        "&password=" + URLEncoder.encode(PrefUtil.getPassword(), "UTF-8")
+                web.postUrl(url, postData.toByteArray())
+            }
         }
     }
 }

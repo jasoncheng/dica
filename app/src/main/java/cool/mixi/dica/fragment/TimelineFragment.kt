@@ -10,7 +10,10 @@ import cool.mixi.dica.R
 import cool.mixi.dica.activity.MainActivity
 import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Status
-import cool.mixi.dica.util.*
+import cool.mixi.dica.util.IStatusDataSource
+import cool.mixi.dica.util.PrefUtil
+import cool.mixi.dica.util.StatusTimeline
+import cool.mixi.dica.util.eLog
 import kotlinx.android.synthetic.main.fg_timeline.*
 import retrofit2.Call
 
@@ -72,7 +75,6 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
             (statuses_list.adapter as StatusesAdapter).initLoaded = true
            // SinceId & find position and scroll to
             val lastSinceId = PrefUtil.getTimelineSinceId(this.javaClass.simpleName)
-            dLog("lastSinceId $lastSinceId, ${stl?.sinceId} ${stl?.maxId}- ${this.javaClass.simpleName}")
             val currentSinceId = stl?.sinceId ?: 0
             if(currentSinceId == 0 ||  currentSinceId <= lastSinceId){
                 return
@@ -84,7 +86,6 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
                 if(status.id == lastSinceId){
                     pos = index
                     ifItemFound = true
-                    dLog("item found at $pos")
                 }
             }
 
@@ -100,7 +101,6 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
             if(!ifItemFound){ return }
 
             if(pos > 0){
-                dLog("=========> last sinceId is $lastSinceId, scroll to position $pos")
                 (statuses_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
             }
         }catch(e: Exception){
