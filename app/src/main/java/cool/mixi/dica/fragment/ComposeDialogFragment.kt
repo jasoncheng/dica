@@ -20,6 +20,7 @@ import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.BaseActivity
 import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Media
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.dlg_compose.*
@@ -27,6 +28,8 @@ import kotlinx.android.synthetic.main.dlg_compose.view.*
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import pl.aprilapps.easyphotopicker.DefaultCallback
 import pl.aprilapps.easyphotopicker.EasyImage
 import pl.tajchert.nammu.Nammu
@@ -50,6 +53,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
     var editText: EditText? = null
     var sharedText: String? = null
     var sharedFile: String? = null
+    var commonError: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         roomView = inflater?.inflate(R.layout.dlg_compose, container)
@@ -276,39 +280,63 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     private fun composeSubmit() {
         (activity as BaseActivity).loading(getString(R.string.status_saving))
+
         val text = et_text.text.toString()
         var lat = ""
         var long = ""
         var source = activity?.getString(R.string.app_name)
-        if(lastAddress != null){
-            lat = "${lastAddress?.latitude}"
-            long = "${lastAddress?.longitude}"
+        lastAddress?.let {
+            lat = "${it?.latitude}"
+            long = "${it?.longitude}"
         }
-
-        if(mediaFile == null){
-            dLog("======> statusUpdate $lat, $long")
-            ApiService.create().statusUpdate(source!!, text, in_reply_status_id!!, lat, long, App.instance.selectedGroup).enqueue(
-                StatusUpdateCallback(this)
-            )
-            return
+        val targetGroup = if(roomView?.main_radiogroup?.isSelected!!){
+            ArrayList()
+        } else {
+            App.instance.selectedGroup
         }
-
-        val requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), mediaFile)
-        val body = MultipartBody.Part.createFormData("media", mediaFile?.name, requestFile)
         val status = RequestBody.create(MediaType.parse("multipart/form-data"), text)
-
         val statusIdBody = RequestBody.create(MediaType.parse("multipart/form-data"), "$in_reply_status_id")
         val sourceBody = RequestBody.create(MediaType.parse("multipart/form-data"), source)
         val latBody = RequestBody.create(MediaType.parse("multipart/form-data"), lat)
         val longBody = RequestBody.create(MediaType.parse("multipart/form-data"), long)
         var map = LinkedHashMap<String, RequestBody>()
-        App.instance.selectedGroup.forEach {
-            map["group_allow[]"] = RequestBody.create(MediaType.parse("text/plain"),it.toString())
+        targetGroup.forEach {
+            map["group_allow[]"] = RequestBody.create(MediaType.parse("text/plain"), it.toString())
         }
-        dLog("======> statusUpdate $lat, $long")
-        ApiService.create().statusUpdate(sourceBody, status, statusIdBody, latBody, longBody, map, body).enqueue(
-            StatusUpdateCallback(this)
-        )
+
+        val ref = WeakReference<ComposeDialogFragment>(this)
+        doAsync {
+            var mediaIds:RequestBody? = null
+            var response: Response<String>? = null
+            ref.get()?.mediaFile?.let {
+                val requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), it)
+                val body = MultipartBody.Part.createFormData("media", it.name, requestFile)
+                response= ApiService.create().mediaUpload(body).execute()
+            }
+            uiThread {
+                try {
+                    if(response == null || response?.isSuccessful != true){
+                        ref.get()?.commonError?.let { that -> App.instance.toast(that.format(response?.body())) }
+                    } else {
+                        val media = Gson().fromJson(response?.body(), Media::class.java)
+                        mediaIds = RequestBody.create(MediaType.parse("multipart/form-data"), "${media.media_id}")
+                    }
+
+                    ApiService.create().statusUpdate(sourceBody, status, statusIdBody, latBody, longBody, map, mediaIds).enqueue(
+                        StatusUpdateCallback(ref.get()!!)
+                    )
+                }catch (e: Exception){
+                    response?.body().let { that ->
+                        if(that != null){
+                            App.instance.toast(that)
+                        } else {
+                            ref.get()?.commonError?.format("${e.message}")?.let { w -> App.instance.toast(w) }
+                        }
+                    }
+                    ref.get()?.activity?.let { that -> (that as BaseActivity).loaded() }
+                }
+            }
+        }
     }
 
     private fun composeDone() {

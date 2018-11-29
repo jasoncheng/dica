@@ -40,7 +40,11 @@ interface ApiService {
         @Part("lat") lat: RequestBody,
         @Part("long") long: RequestBody,
         @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
-        @Part image: MultipartBody.Part): Call<String>
+        @Part("media_ids") mediaIds: RequestBody?): Call<String>
+
+    @POST("media/upload")
+    @Multipart
+    fun mediaUpload(@Part media: MultipartBody.Part): Call<String>
 
     @GET("statuses/show?include_entities=true")
     fun statusShow(@Query("id") id: Int,
@@ -150,26 +154,17 @@ interface ApiService {
         }
 
 
-        private val saveCookieInterceptor = Interceptor {
-            val host = it.request().url().host()
-            val res = it.proceed(it.request())
-            res.headers().toMultimap().forEach { (key, value) ->
-                val thisCookie = value[0].split(";".toRegex())[0]
-                if(key.toLowerCase() == "set-cookie" &&
-                    (thisCookie.contains("PHPSESSID") || thisCookie.contains("session".toRegex()))){
-//                    dLog("Set-Cookie $thisCookie")
-                    cookies[host.toLowerCase()] = thisCookie
-                }
-            }
-
-            res
+        fun setCookie(cookieStr: String){
+            val thisCookie = cookieStr.split(";".toRegex())[0]
+            val host = URL(PrefUtil.getApiUrl()).host.toLowerCase()
+            cookies[host] = thisCookie
         }
 
         private val addCookieInterceptor = Interceptor { it ->
-            val host = it.request().url().host()
+            val host = it.request().url().host().toLowerCase()
             val builder = it.request().newBuilder()!!
             cookies[host]?.let {
-//                dLog("Request Header reuse w/ Cookie Cache $host $it")
+                dLog("Request Header reuse w/ cookie Cache $host $it")
                 builder.addHeader("Cookie", it)
             }
             it.proceed(builder.build())
@@ -192,7 +187,6 @@ interface ApiService {
                 .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(addCookieInterceptor)
-                .addInterceptor(saveCookieInterceptor)
                 .addInterceptor(cacheInterceptor)
             return clientBuilder
         }

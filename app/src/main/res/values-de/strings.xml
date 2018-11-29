@@ -51,4 +51,5 @@
   <string name="menu_delete">Global löschen</string>
   <string name="confirm_delete_status">Bestätigen Sie den Löschstatus?</string>
   <string name="processing">Verarbeitung .....</string>
+  <string name="new_status_since">Du hast %1$s neuen Status</string>
 </resources>

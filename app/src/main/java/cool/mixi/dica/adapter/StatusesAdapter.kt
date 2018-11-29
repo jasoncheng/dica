@@ -96,11 +96,13 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     private val requestOptions = RequestOptions()
         .fitCenter()
         .format(DecodeFormat.PREFER_ARGB_8888)
+        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .transforms(RoundedCorners(16))!!
 
     private val requestOptionsGif = RequestOptions()
         .fitCenter()
         .skipMemoryCache(true)
+        .override(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL)
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
 
     private val compilerQuote: Pattern =  Pattern.compile("^> ([^\n]*)",
@@ -471,7 +473,6 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     }
 
     private fun actFavorites(view: View){
-        val me = App.instance.myself?.friendica_owner!!
         val position = (view.parent.parent as ViewGroup).tag as Int
         data.getOrNull(position).let {
             if(it == null) return
@@ -862,9 +863,9 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
 
     private fun getImageView(): ImageView {
         var img = ImageView(context)
-        val childParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        val childParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
         img.layoutParams = childParams
-        img.scaleType = ImageView.ScaleType.FIT_XY
+        img.scaleType = ImageView.ScaleType.FIT_CENTER
         img.adjustViewBounds = true
         childParams.setMargins(0, 20, 0, 20)
         return img

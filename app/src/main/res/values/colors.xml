@@ -19,4 +19,5 @@
     <color name="txt_email">#827717</color>
     <color name="box_bg_website">#e1f5fe</color>
     <color name="txt_nsfw">#3949ab</color>
+    <color name="snack_bar_bg">#c1000000</color>
 </resources>
