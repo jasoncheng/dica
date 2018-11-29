@@ -6,6 +6,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.net.URL
 
 interface IHtmlCrawler {
     fun done(meta: Meta)
@@ -47,7 +48,8 @@ open class HtmlCrawler {
         doAsync {
             dLog("fetch $url")
             var agent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
-            var doc: Document? = null
+            var doc: Document?
+            val uri = URL(url)
             try {
                 doc = Jsoup.connect(meta.url).userAgent(agent).followRedirects(true).get()
                 meta.title = doc.select("title").text()
@@ -56,10 +58,16 @@ open class HtmlCrawler {
                 if(meta.icon == null){
                     meta.icon = doc?.select("link[rel=apple-touch-icon]")?.attr("href")
                 }
+                if(meta.icon == null){
+                    meta.icon = doc?.select("meta[name=msapplication-TileImage]")?.attr("content")
+                }
                 meta.icon?.let {
-                    if(it.startsWith("/")){
+                    if(it.startsWith("//")) {
+                        meta.icon = "${uri.protocol}:$it"
+                    } else if(it.startsWith("/")){
                         meta.icon = "$baseUri$it"
                     }
+                    dLog("MetaIcon ${meta.icon}")
                 }
             } catch (e: Exception) {}
 
