@@ -7,6 +7,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import cool.mixi.dica.App
+import cool.mixi.dica.R
 import cool.mixi.dica.activity.StickerActivity
 import cool.mixi.dica.util.PrefUtil
 import cool.mixi.dica.util.eLog
@@ -36,11 +37,11 @@ class MyWebView(context: Context, attrs: AttributeSet): WebView(context, attrs){
 class MyWebViewClient(private val ref: SoftReference<StickerActivity>): WebViewClient(){
 
     private var urlCapture: Boolean = false
-
+    private var notSuportSearchType = ref.get()?.getString(R.string.sticker_image_search_only)
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         val url = request?.url.toString()
         if(!url?.contains("tbm=isch")){
-            App.instance.toast("not support")
+            App.instance.toast("$notSuportSearchType")
             return true
         }
         return false
