@@ -2,51 +2,52 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="cool.mixi.dica">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <application
-            android:allowBackup="true"
-            android:name=".App"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:windowSoftInputMode="stateHidden|adjustResize"
-            android:supportsRtl="true"
-            android:testOnly="false"
-            android:largeHeap="true"
-            android:theme="@style/AppTheme">
-        <activity android:name=".activity.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
-          <intent-filter>
-            <action android:name="android.intent.action.SEND" />
-            <category android:name="android.intent.category.DEFAULT" />
-            <data android:mimeType="video/mp4" />
-          </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <action android:name="android.intent.action.PROCESS_TEXT"/>
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".activity.LoginActivity" android:windowSoftInputMode="stateHidden" />
-        <activity android:name=".activity.StatusActivity" />
-        <activity android:name=".activity.UserActivity" />
-    </application>
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <application
+          android:allowBackup="true"
+          android:name=".App"
+          android:icon="@mipmap/ic_launcher"
+          android:label="@string/app_name"
+          android:roundIcon="@mipmap/ic_launcher"
+          android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+          android:windowSoftInputMode="stateHidden|adjustResize"
+          android:supportsRtl="true"
+          android:testOnly="false"
+          android:largeHeap="true"
+          android:theme="@style/AppTheme">
+    <activity android:name=".activity.MainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="image/*" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="video/mp4" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <action android:name="android.intent.action.PROCESS_TEXT"/>
+        <data android:mimeType="text/plain" />
+      </intent-filter>
+    </activity>
+    <activity android:name=".activity.LoginActivity" android:windowSoftInputMode="stateHidden" />
+    <activity android:name=".activity.StatusActivity" />
+    <activity android:name=".activity.UserActivity" />
+    <activity android:name=".activity.StickerActivity" android:windowSoftInputMode="stateHidden"  />
+  </application>
 
 </manifest>
