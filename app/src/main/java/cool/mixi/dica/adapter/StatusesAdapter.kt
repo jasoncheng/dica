@@ -25,7 +25,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DecodeFormat
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import cool.mixi.dica.App
@@ -96,14 +95,12 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     private val requestOptions = RequestOptions()
         .fitCenter()
         .format(DecodeFormat.PREFER_ARGB_8888)
-        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .transforms(RoundedCorners(16))!!
 
     private val requestOptionsGif = RequestOptions()
         .fitCenter()
         .skipMemoryCache(true)
         .override(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL)
-        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
 
     private val compilerQuote: Pattern =  Pattern.compile("^> ([^\n]*)",
         Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL)

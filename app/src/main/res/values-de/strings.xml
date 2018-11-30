@@ -52,4 +52,6 @@
   <string name="confirm_delete_status">Bestätigen Sie den Löschstatus?</string>
   <string name="processing">Verarbeitung .....</string>
   <string name="new_status_since">Du hast %1$s neuen Status</string>
+  <string name="sticker_image_search_only">Diese Art der Suche wird nicht unterstützt</string>
+  <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
 </resources>

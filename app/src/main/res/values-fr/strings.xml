@@ -52,4 +52,6 @@
   <string name="confirm_delete_status">Confirmer l\'état de suppression?</string>
   <string name="processing">processing.....</string>
   <string name="new_status_since">vous avez %1$s nouveau statut</string>
+  <string name="sticker_image_search_only">supporte pas ce type de recherche</string>
+  <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
 </resources>
