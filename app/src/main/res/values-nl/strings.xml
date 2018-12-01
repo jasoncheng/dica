@@ -51,4 +51,6 @@
   <string name="confirm_delete_status">Status echt verwijderen?</string>
   <string name="processing">verwerken.....</string>
   <string name="new_status_since">you got %1$s new status</string>
+  <string name="sticker_image_search_only">understøtter ikke denne type søgning</string>
+  <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
 </resources>

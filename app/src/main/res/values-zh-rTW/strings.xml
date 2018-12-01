@@ -52,4 +52,6 @@
   <string name="confirm_delete_status">確認刪除嗎?</string>
   <string name="processing">處理中....</string>
   <string name="new_status_since">你有 %1$s 則新訊息</string>
+  <string name="googleStickerUri"><![CDATA[q=貼圖&tbm=isch&tbs=itp:clipart]]></string>
+  <string name="sticker_image_search_only">不支援非圖片的搜尋</string>
 </resources>

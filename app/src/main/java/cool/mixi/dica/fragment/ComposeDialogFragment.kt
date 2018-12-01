@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.location.Address
 import android.location.Location
 import android.os.Bundle
@@ -19,6 +20,7 @@ import com.google.gson.Gson
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.BaseActivity
+import cool.mixi.dica.activity.StickerActivity
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Media
 import cool.mixi.dica.bean.Status
@@ -44,7 +46,13 @@ import javax.net.ssl.HttpsURLConnection
 
 class ComposeDialogFragment: BaseDialogFragment() {
 
+
+    // for photo from device
     var mediaFile: File? = null
+
+    // for Sticker
+    var mediaUrl: String? = null
+
     var roomView: View? = null
     var lastAddress: Address? = null
 
@@ -66,6 +74,11 @@ class ComposeDialogFragment: BaseDialogFragment() {
             composeSubmit()
         }
 
+        roomView?.iv_emoji?.setOnClickListener {
+            val intent = Intent(context, StickerActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivityForResult(intent, Consts.REQ_STICKER)
+        }
         roomView?.iv_from_album?.setOnClickListener {
             Nammu.askForPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE, galleryPermCallback)
         }
@@ -123,8 +136,9 @@ class ComposeDialogFragment: BaseDialogFragment() {
                 addPhotoPreview(File(it))
             }
             return
+        } else if(requestCode == Consts.REQ_STICKER){
+            data?.getStringExtra(Consts.EXTRA_STICKER_URI)?.let { addPhotoPreview(it) }
         }
-
         EasyImage.handleActivityResult(requestCode, resultCode, data, activity, imageSelectedCallback)
     }
 
@@ -216,8 +230,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         fg.myShow(fragmentManager, Consts.FG_PHOTO_CROP)
     }
 
-    private fun addPhotoPreview(imageFile: File){
-        mediaFile = imageFile
+    private fun getMediaPreview(): ImageView {
         val box = roomView?.photo_box as ViewGroup
         var imgView = ImageView(this.context)
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -225,19 +238,34 @@ class ComposeDialogFragment: BaseDialogFragment() {
         imgView.layoutParams = lp
         imgView.layoutParams.height = 200
         imgView.layoutParams.width = 200
+        imgView.setBackgroundColor(Color.LTGRAY)
         box.removeAllViews()
         box.addView(imgView)
         box.visibility = View.VISIBLE
+        imgView.setOnClickListener {
+            (it.parent as ViewGroup).removeView(it)
+            mediaFile = null
+            mediaUrl = null
+            box.visibility = View.GONE
+        }
+        return imgView
+    }
+
+    fun addPhotoPreview(url: String){
+        mediaFile = null
+        mediaUrl = url
+        Glide.with(context!!).load(url).into(getMediaPreview())
+    }
+
+    private fun addPhotoPreview(imageFile: File){
+        mediaFile = imageFile
+        mediaUrl = null
+        val imgView = getMediaPreview()
         dLog("mediaPath: ${imageFile.absoluteFile}")
         if(imageFile.absoluteFile.endsWith("mp4")) {
             Glide.with(context!!).asBitmap().load(imageFile).into(imgView!!)
         } else {
             Glide.with(context!!).load(imageFile).into(imgView!!)
-        }
-        imgView.setOnClickListener {
-            (it.parent as ViewGroup).removeView(it)
-            mediaFile = null
-            box.visibility = View.GONE
         }
     }
 
@@ -281,7 +309,13 @@ class ComposeDialogFragment: BaseDialogFragment() {
     private fun composeSubmit() {
         (activity as BaseActivity).loading(getString(R.string.status_saving))
 
-        val text = et_text.text.toString()
+        var text = et_text.text.toString()
+        mediaUrl.isNullOrEmpty().let {
+            if(!it){
+                text = "$text\n[img]$mediaUrl[/img]"
+            }
+        }
+
         var lat = ""
         var long = ""
         var source = activity?.getString(R.string.app_name)

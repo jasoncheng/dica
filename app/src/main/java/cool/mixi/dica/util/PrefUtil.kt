@@ -12,12 +12,15 @@ class PrefUtil {
         private fun default(): SharedPreferences =
             PreferenceManager.getDefaultSharedPreferences(App.instance.applicationContext)
 
+        private val defaultStickerUri = App.instance.getString(R.string.googleStickerUri)!!
+
         fun resetAll() {
             setApiUrl("")
             setLastStatus("")
             setPassword("")
             setSiteIcon("")
             setSiteName("")
+            resetStickeUrl()
             clearSinceId()
         }
 
@@ -80,6 +83,18 @@ class PrefUtil {
 
         fun getTimelineSinceId(fragmentName: String): Int {
             return default().getInt(fragmentName, 0)
+        }
+
+        fun getStickerUrl(): String {
+            return default().getString("sticker", defaultStickerUri)
+        }
+
+        fun resetStickeUrl() {
+            setStickerUrl(defaultStickerUri)
+        }
+
+        fun setStickerUrl(uri: String){
+            default().edit().putString("sticker", uri).commit()
         }
 
         //TODO: ugly here

@@ -51,4 +51,6 @@
   <string name="confirm_delete_status">Confirm Delete Status ?</string>
   <string name="processing">processing.....</string>
   <string name="new_status_since">you got %1$s new status</string>
+  <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
+  <string name="sticker_image_search_only">not support this type of search</string>
 </resources>

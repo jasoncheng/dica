@@ -9,6 +9,7 @@ object Consts {
 
 
     val REQ_PHOTO_PATH = 999
+    val REQ_STICKER = 987
 
     val OTYPE_ITEM = "item"
 
@@ -34,4 +35,5 @@ object Consts {
     val EXTRA_NOTIFICATIONS = "notifications"
     val EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
     val EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
+    val EXTRA_STICKER_URI = "sticker"
 }
