@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.PopupMenu
 import android.support.v7.widget.RecyclerView
@@ -24,6 +25,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
@@ -70,15 +72,15 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
     // if this is internal / external Network
     var isOffSiteSN = false
 
-    private val quoteSpanColor: Int = context.getColor(R.color.quote_span_border)
+    private val quoteSpanColor: Int = ContextCompat.getColor(context, R.color.quote_span_border)
     private val likeDrawable = context.getDrawable(R.drawable.thumb_up_sel)
     private val unlikeDrawable = context.getDrawable(R.drawable.thumb_up)
     private val privateMessage = context.getDrawable(R.drawable.lock)
     private val favoritesDrawable = context.getDrawable(R.drawable.favorites_sel)
     private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
-    private val statusSourceColor = context.getColor(R.color.txt_status_source)
-    private val tagTextColor = context.getColor(R.color.txt_tag)
-    private val emailTextColor = context.getColor(R.color.txt_email)
+    private val statusSourceColor = ContextCompat.getColor(context, R.color.txt_status_source)
+    private val tagTextColor = ContextCompat.getColor(context, R.color.txt_tag)
+    private val emailTextColor = ContextCompat.getColor(context, R.color.txt_email)
     private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
     private val strSuccessRetweet: String = context.getString(R.string.retweet_success)
     private val strRetweetFail = context.getString(R.string.retweet_fail)
@@ -94,10 +96,10 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
 
     private val requestOptions = RequestOptions()
         .fitCenter()
-        .format(DecodeFormat.PREFER_ARGB_8888)
         .transforms(RoundedCorners(16))!!
 
     private val requestOptionsGif = RequestOptions()
+        .dontTransform()
         .fitCenter()
         .skipMemoryCache(true)
         .override(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL)
@@ -135,7 +137,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         data.getOrNull(pos).let { it ->
             if(it == null) return
 
-
+            // DateTime process
             var lockContainer = holder.datetime
             try {
                 var date = Date(it.created_at)
@@ -300,6 +302,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
 
         holder.avatar?.setTag(R.id.avatar_tag, pos)
         holder.avatar?.setOnClickListener { gotoUserPage(it) }
+
         Glide.with(context.applicationContext)
             .load(st.user.profile_image_url_large)
             .apply(RequestOptions().circleCrop())
@@ -615,6 +618,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         status.attachments?.forEach {
             var partialUrl = FriendicaUtil.getProxyUrlPartial(it.url)
             tmpPartialPhoto[partialUrl] = it.url
+            dLog("VVV $partialUrl ${it.url}")
         }
 
         // Style: Background
@@ -630,17 +634,27 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         var txtAr = ArrayList<String>()
 
         lines.forEachIndexed { index, it ->
-            if(it.startsWith("http", true)){
-                if(isPureText){
-                    renderText(parent, txtAr)
-                    txtAr.clear()
-                }
-                isPureText = false
-                displayedUrl.add(it)
-                renderUrl(parent, status, it)
+            var newIt = if(it.endsWith("/") && it.length > 2){
+                it.substring(0, it.length-2)
             } else {
-                isPureText = true
-                txtAr.add(it)
+                it
+            }
+
+            when {
+                displayedUrl.contains(newIt) -> {}
+                newIt.startsWith("http", true) -> {
+                    if(isPureText){
+                        renderText(parent, txtAr)
+                        txtAr.clear()
+                    }
+                    isPureText = false
+                    displayedUrl.add(it)
+                    renderUrl(parent, status, newIt)
+                }
+                else -> {
+                    isPureText = true
+                    txtAr.add(newIt)
+                }
             }
         }
         renderText(parent, txtAr)
@@ -705,7 +719,6 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             img.setOnClickListener { mediaPhotoClk(it) }
             img.setTag(R.id.media_image, url)
             parent.addView(img)
-
             if(urlLower.contains("\\.gif".toRegex())){
                 Glide.with(context.applicationContext).load(url.glideUrl()).apply(requestOptionsGif).into(img)
             } else {
@@ -717,6 +730,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
                 renderWebUrl(parent, meta)
             } else {
                 HtmlCrawler.getInstance().run(url, MyHtmlCrawler(status, refAdapter))
+                renderText(parent, url)
             }
         }
     }

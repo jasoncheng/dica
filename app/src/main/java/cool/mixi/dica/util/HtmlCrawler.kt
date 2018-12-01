@@ -67,12 +67,13 @@ open class HtmlCrawler {
                     } else if(it.startsWith("/")){
                         meta.icon = "$baseUri$it"
                     }
-                    dLog("MetaIcon ${meta.icon}")
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                eLog("${e.message}")
+            }
 
             uiThread {
-                meta.title?.let { callback.done(meta) }
+                meta.icon?.let { callback.done(meta) }
             }
         }
     }

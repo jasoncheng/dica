@@ -171,6 +171,14 @@ fun String.dicaRenderData(): String {
 
             if(!url.startsWith("http")) continue
             if(it == url) continue
+            if(it.endsWith("*")){
+                tmp = tmp.replace("*", "")
+                continue
+            }
+            if("*$url" == it){
+                tmp = tmp.replace("*", "")
+                continue
+            }
 
             if(matcher.start() > 0) newUrl = "\n$newUrl"
             if(matcher.end() < it.length) newUrl = "$newUrl\n"
