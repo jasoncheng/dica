@@ -98,6 +98,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         .transforms(RoundedCorners(16))!!
 
     private val requestOptionsGif = RequestOptions()
+        .dontTransform()
         .fitCenter()
         .skipMemoryCache(true)
         .override(com.bumptech.glide.request.target.Target.SIZE_ORIGINAL)

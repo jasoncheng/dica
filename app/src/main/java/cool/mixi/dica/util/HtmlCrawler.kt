@@ -67,7 +67,6 @@ open class HtmlCrawler {
                     } else if(it.startsWith("/")){
                         meta.icon = "$baseUri$it"
                     }
-                    dLog("MetaIcon ${meta.icon}")
                 }
             } catch (e: Exception) {}
 
