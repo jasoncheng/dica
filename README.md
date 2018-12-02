@@ -17,7 +17,7 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 
 * Enable for all [Friendica](https://friendi.ca) base website
 * Support display network public stream: Friendica / Diaspora* / Mastodon
-* Dashboard [Public / Friends / My / Favorite timeline]
+* Dashboard [Public / Public Networks / Friends / My / Favorite timeline]
 * Simple user page / status page
 * Status post (photo / location tag / group permission)
 * Support offline capacity
@@ -25,6 +25,7 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 * Like / UnLike
 * Favorites
 * Retweet
+* Sticker
 
 
 ***DONATE US***

@@ -5,10 +5,7 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.MainActivity
-import cool.mixi.dica.fragment.TimelineFavoritesFragment
-import cool.mixi.dica.fragment.TimelineFriendsFragment
-import cool.mixi.dica.fragment.TimelineMyFragment
-import cool.mixi.dica.fragment.TimelinePublicFragment
+import cool.mixi.dica.fragment.*
 
 class IndexPageAdapter(val activity: MainActivity, fragmentManager: FragmentManager): FragmentPagerAdapter(fragmentManager){
 
@@ -18,7 +15,8 @@ class IndexPageAdapter(val activity: MainActivity, fragmentManager: FragmentMana
         return when(position) {
             0 -> TimelineFriendsFragment()
             1 -> TimelinePublicFragment()
-            2 -> TimelineMyFragment()
+            2 -> TimelineNetworkFragment()
+            3 -> TimelineMyFragment()
             else -> TimelineFavoritesFragment()
         }
     }

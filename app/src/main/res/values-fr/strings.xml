@@ -54,4 +54,5 @@
   <string name="new_status_since">vous avez %1$s nouveau statut</string>
   <string name="sticker_image_search_only">supporte pas ce type de recherche</string>
   <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
+  <string name="index_network_public">réseau</string>
 </resources>

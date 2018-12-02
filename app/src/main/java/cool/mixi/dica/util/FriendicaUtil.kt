@@ -37,7 +37,7 @@ class FriendicaUtil {
             var base64 =
                 String(android.util.Base64.encode(
                     tmpUrl.toByteArray(),
-                    android.util.Base64.URL_SAFE), StandardCharsets.UTF_8)
+                    android.util.Base64.NO_WRAP), StandardCharsets.UTF_8)
             longpath+="/"+base64.replace("\\+\\/".toRegex(), "-_")
             return longpath.replace("\n".toRegex(), "")
         }

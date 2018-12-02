@@ -36,7 +36,6 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         isInitLoad = false
-//        PrefUtil.setTimelineSinceId(this.javaClass.simpleName, 0)
         return inflater.inflate(R.layout.fg_timeline, container, false)
     }
 
@@ -73,7 +72,8 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
         try {
             statuses_list.adapter.notifyItemRangeChanged(0, data.size)
             (statuses_list.adapter as StatusesAdapter).initLoaded = true
-           // SinceId & find position and scroll to
+
+            // SinceId & find position and scroll to
             val lastSinceId = PrefUtil.getTimelineSinceId(this.javaClass.simpleName)
             val currentSinceId = stl?.sinceId ?: 0
             if(currentSinceId == 0 ||  currentSinceId <= lastSinceId){

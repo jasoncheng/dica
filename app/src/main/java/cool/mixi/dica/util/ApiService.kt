@@ -58,6 +58,10 @@ interface ApiService {
     fun statusFriendsTimeline(@Query("since_id") since_id: String,
                               @Query("max_id") max_id: String): Call<List<Status>>
 
+    @GET("statuses/networkpublic_timeline?exclude_replies=true")
+    fun statusNetworkTimeline(@Query("since_id") since_id: String,
+                              @Query("max_id") max_id: String): Call<List<Status>>
+
     @GET("statuses/user_timeline?exclude_replies=true")
     fun statusUserTimeline(
         @Query("user_id") user_id: Int,
@@ -160,6 +164,21 @@ interface ApiService {
             cookies[host] = thisCookie
         }
 
+        private val saveCookieInterceptor = Interceptor {
+            val host = it.request().url().host()
+            val res = it.proceed(it.request())
+            res.headers().toMultimap().forEach { (key, value) ->
+                val thisCookie = value[0].split(";".toRegex())[0]
+                if(key.toLowerCase() == "set-cookie" &&
+                    (thisCookie.contains("PHPSESSID") || thisCookie.contains("session".toRegex()))){
+                    dLog("Set-Cookie $thisCookie")
+                    cookies[host.toLowerCase()] = thisCookie
+                }
+            }
+
+            res
+        }
+
         private val addCookieInterceptor = Interceptor { it ->
             val host = it.request().url().host().toLowerCase()
             val builder = it.request().newBuilder()!!
@@ -186,6 +205,7 @@ interface ApiService {
                 .cache(getCache())
                 .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
+                .addInterceptor(saveCookieInterceptor)
                 .addInterceptor(addCookieInterceptor)
                 .addInterceptor(cacheInterceptor)
             return clientBuilder
