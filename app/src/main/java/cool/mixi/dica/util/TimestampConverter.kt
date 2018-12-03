@@ -1,6 +1,6 @@
 package cool.mixi.dica.util
 
-import android.arch.persistence.room.TypeConverter
+import androidx.room.TypeConverter
 import java.util.*
 
 object TimestampConverter {

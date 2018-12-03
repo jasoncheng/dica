@@ -1,9 +1,9 @@
 package cool.mixi.dica.fragment
 
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,17 +16,20 @@ import cool.mixi.dica.util.FriendicaUtil
 import kotlinx.android.synthetic.main.dlg_notifications.view.*
 
 
-class NotificationDialog: BaseDialogFragment(), SwipeRefreshLayout.OnRefreshListener {
+class NotificationDialog: BaseDialogFragment(), androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
     private var rootView: View? = null
     var data: ArrayList<Notification>? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         rootView = inflater?.inflate(R.layout.dlg_notifications, container)
-        rootView?.table?.layoutManager = LinearLayoutManager(context)
+        rootView?.table?.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         rootView?.table?.adapter = NotificationAdapter(data as java.util.ArrayList<Notification>, this)
         rootView?.swipeRefreshLayout?.setOnRefreshListener(this)
         rootView?.all_seen?.setOnClickListener { markAllAsRead() }
-        var decoration = DividerItemDecoration(App.instance.applicationContext, DividerItemDecoration.VERTICAL)
+        var decoration = androidx.recyclerview.widget.DividerItemDecoration(
+            App.instance.applicationContext,
+            androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
+        )
         rootView?.table?.addItemDecoration(decoration)
         return rootView
     }

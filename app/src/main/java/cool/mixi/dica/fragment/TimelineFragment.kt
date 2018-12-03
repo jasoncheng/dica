@@ -1,8 +1,8 @@
 package cool.mixi.dica.fragment
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +18,7 @@ import cool.mixi.dica.util.eLog
 import kotlinx.android.synthetic.main.fg_timeline.*
 import retrofit2.Call
 
-abstract class TimelineFragment: Fragment(), IStatusDataSource {
+abstract class TimelineFragment: androidx.fragment.app.Fragment(), IStatusDataSource {
 
     var stl: StatusTimeline? = null
     private var isInitLoad = false
@@ -108,7 +108,7 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
             }
 
             if(pos > 0){
-                (statuses_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+                (statuses_list.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
             }
         }catch(e: Exception){
             eLog("${e.message}")

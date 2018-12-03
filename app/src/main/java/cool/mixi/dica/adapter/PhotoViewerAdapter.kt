@@ -1,6 +1,6 @@
 package cool.mixi.dica.adapter
 
-import android.support.v4.view.PagerAdapter
+import androidx.viewpager.widget.PagerAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +11,7 @@ import cool.mixi.dica.fragment.PhotoViewerFragment
 import kotlinx.android.synthetic.main.fg_photoviewer_item.view.*
 import java.lang.ref.WeakReference
 
-class PhotoViewerAdapter(val data: ArrayList<String>, private val ref: WeakReference<PhotoViewerFragment>): PagerAdapter() {
+class PhotoViewerAdapter(val data: ArrayList<String>, private val ref: WeakReference<PhotoViewerFragment>): androidx.viewpager.widget.PagerAdapter() {
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
         return view == `object`

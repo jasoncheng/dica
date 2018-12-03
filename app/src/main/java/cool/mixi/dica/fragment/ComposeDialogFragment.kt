@@ -25,6 +25,7 @@ import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Media
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.*
+import kotlinx.android.synthetic.main.dlg_compose.*
 import kotlinx.android.synthetic.main.dlg_compose.view.*
 import okhttp3.MediaType
 import okhttp3.MultipartBody

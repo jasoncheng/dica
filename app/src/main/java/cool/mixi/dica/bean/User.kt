@@ -1,6 +1,6 @@
 package cool.mixi.dica.bean
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import cool.mixi.dica.util.TimestampConverter
 import java.io.Serializable
 import java.net.URL

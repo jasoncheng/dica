@@ -8,7 +8,7 @@
         android:layout_height="match_parent"
         tools:context="cool.mixi.dica.activity.IndexActivity">
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/constraintLayout">
@@ -56,15 +56,15 @@
               android:layout_marginEnd="20dp"
               android:visibility="gone"
               app:layout_constraintTop_toTopOf="parent" android:textStyle="bold"/>
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
             android:id="@+id/vp_index"
             android:layout_below="@+id/constraintLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/iv_compose"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
