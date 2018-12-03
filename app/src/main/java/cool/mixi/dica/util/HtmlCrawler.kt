@@ -24,14 +24,6 @@ open class HtmlCrawler {
             return instance?: synchronized(this){
                 HtmlCrawler().also {
                     instance = it
-
-                    doAsync {
-                        dLog("Meta total ${AppDatabase.getInstance().metaDao().count()}")
-//                        AppDatabase.getInstance().metaDao().expire(AppDatabase.getDefaultExpire())?.forEach {
-//                            dLog("Meta delete ${it.url} ${it.created}")
-//                        }
-                        AppDatabase.getInstance().metaDao().expireClean()
-                    }
                 }
             }
         }

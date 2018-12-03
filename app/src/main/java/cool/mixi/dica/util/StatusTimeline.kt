@@ -126,7 +126,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
     class OnStatusTableScrollListener(private val ref: SoftReference<StatusTimeline>?): RecyclerView.OnScrollListener() {
         private var lastVisibleItem: Int? = 0
-        override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             ref?.get()?.let {
                 recyclerView?.removeOnScrollListener(this)
@@ -140,7 +140,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
             }
         }
 
-        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val layoutManager = recyclerView?.layoutManager as LinearLayoutManager
             lastVisibleItem = layoutManager.findLastVisibleItemPosition()
@@ -204,11 +204,13 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 // any more sourceOld status ?
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
                     act.allLoaded = true
-                    act.table.adapter.notifyItemChanged(idx)
+                    act.table.adapter?.notifyItemChanged(idx)
                     return
                 }
             }
 
+            // Cache user
+            res?.let { App.instance.addUserToDB(it) }
 
             // handle data by itself
             if(callback != null){
@@ -218,7 +220,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
             // no any data
             if(act.statuses.size == 0 && res!!.isEmpty()){
-                act.table.adapter.notifyDataSetChanged()
+                act.table.adapter?.notifyDataSetChanged()
                 return
             }
 
@@ -227,12 +229,12 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                     if(act.statuses.contains(it)) { return@continuing }
                     act.statuses.add(0, it)
                 }
-                act.table.adapter.notifyDataSetChanged()
+                act.table.adapter?.notifyDataSetChanged()
             } else {
                 res?.forEachIndexed continuing@ { _, it ->
                     if(act.statuses.contains(it)) { return@continuing }
                     act.statuses.add(it)
-                    act.table.adapter.notifyItemInserted(act.table.adapter.itemCount)
+                    act.table.adapter?.notifyItemInserted(act?.table?.adapter?.itemCount ?: 0)
                 }
             }
         }

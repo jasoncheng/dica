@@ -3,6 +3,7 @@ package cool.mixi.dica.database.dao
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.Query
+import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Meta
 import cool.mixi.dica.database.AppDatabase
 import java.util.*
@@ -13,7 +14,7 @@ interface MetaDao {
     fun expire(expireDate: Date):List<Meta>?
 
     @Query("DELETE FROM meta WHERE created < :expireDate")
-    fun expireClean(expireDate: Date? = AppDatabase.getDefaultExpire())
+    fun expireClean(expireDate: Date? = AppDatabase.getDefaultExpire(Consts.TTL_META))
 
     @Query("SELECT COUNT(*) FROM meta")
     fun count(): Int

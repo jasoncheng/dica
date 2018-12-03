@@ -4,10 +4,10 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 import cool.mixi.dica.R
-import cool.mixi.dica.activity.MainActivity
+import cool.mixi.dica.activity.IndexActivity
 import cool.mixi.dica.fragment.*
 
-class IndexPageAdapter(val activity: MainActivity, fragmentManager: FragmentManager): FragmentPagerAdapter(fragmentManager){
+class IndexPageAdapter(val activity: IndexActivity, fragmentManager: FragmentManager): FragmentPagerAdapter(fragmentManager){
 
     private val names = activity.resources.getStringArray(R.array.index_tab)
 

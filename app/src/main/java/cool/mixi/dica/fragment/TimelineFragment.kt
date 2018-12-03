@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import cool.mixi.dica.R
-import cool.mixi.dica.activity.MainActivity
+import cool.mixi.dica.activity.IndexActivity
 import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
@@ -59,7 +59,7 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
     }
 
     fun reloadNotification(){
-        (activity as MainActivity).getNotifications()
+        (activity as IndexActivity).getNotifications()
     }
 
     private fun saveSinceId(){
@@ -71,7 +71,7 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
         stl?.clear()
         stl?.addAll(data)
         try {
-            statuses_list.adapter.notifyItemRangeChanged(0, data.size)
+            statuses_list.adapter?.notifyItemRangeChanged(0, data.size)
             (statuses_list.adapter as StatusesAdapter).initLoaded = true
 
             // SinceId & find position and scroll to
@@ -95,14 +95,14 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
             // show how many new messages
             if(pos > 0 && ifItemFound){
                 val msg = getString(R.string.new_status_since).format("$pos")
-                (activity as MainActivity).showSnackBar(msg)
+                (activity as IndexActivity).showSnackBar(msg)
             }
 
             // When status delete, sinceId will lose it's meaning, should ignore
             if(!ifItemFound){
                 if(data.size == Consts.TIMELINE_PAGE_SIZE){
                     val msg = getString(R.string.new_status_more_than_page_size).format("${Consts.TIMELINE_PAGE_SIZE}")
-                    (activity as MainActivity).showSnackBar(msg)
+                    (activity as IndexActivity).showSnackBar(msg)
                 }
                 return
             }

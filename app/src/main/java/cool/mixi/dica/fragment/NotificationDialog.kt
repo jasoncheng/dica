@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import cool.mixi.dica.App
 import cool.mixi.dica.R
-import cool.mixi.dica.activity.MainActivity
+import cool.mixi.dica.activity.IndexActivity
 import cool.mixi.dica.adapter.NotificationAdapter
 import cool.mixi.dica.bean.Notification
 import cool.mixi.dica.util.FriendicaUtil
@@ -37,7 +37,7 @@ class NotificationDialog: BaseDialogFragment(), SwipeRefreshLayout.OnRefreshList
     }
 
     override fun onDestroyView() {
-        (activity as MainActivity).updateUnreadUI()
+        (activity as IndexActivity).updateUnreadUI()
         super.onDestroyView()
     }
 
@@ -50,7 +50,7 @@ class NotificationDialog: BaseDialogFragment(), SwipeRefreshLayout.OnRefreshList
     }
 
     private fun markAllAsRead() {
-        var act = activity as MainActivity
+        var act = activity as IndexActivity
         var idx = 0
         loop@ act.notifications.forEach {
             if(it.seen == 1) {
@@ -72,6 +72,6 @@ class NotificationDialog: BaseDialogFragment(), SwipeRefreshLayout.OnRefreshList
 
     override fun onRefresh() {
         rootView?.swipeRefreshLayout?.isRefreshing = true
-        (activity as MainActivity).getNotifications()
+        (activity as IndexActivity).getNotifications()
     }
 }

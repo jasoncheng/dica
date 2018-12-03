@@ -57,7 +57,7 @@ class LoginActivity: BaseActivity() {
 
     fun loginSuccess() {
         loaded()
-        var intent = Intent(App.instance.applicationContext, MainActivity::class.java)
+        var intent = Intent(App.instance.applicationContext, IndexActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
         finish()
