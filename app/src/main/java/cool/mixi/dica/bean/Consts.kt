@@ -6,7 +6,7 @@ object Consts {
     val API_CONNECT_TIMEOUT = 60.toLong()
     val API_READ_TIMEOUT = 60.toLong()
     val CACHE_SIZE_IN_MB = 10
-
+    val TIMELINE_PAGE_SIZE = 20
 
     val REQ_PHOTO_PATH = 999
     val REQ_STICKER = 987
