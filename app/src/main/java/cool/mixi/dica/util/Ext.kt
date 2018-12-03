@@ -50,15 +50,11 @@ fun String.glideUrl(): GlideUrl {
     val host = URL(this).host.toLowerCase()
     headersBuilder.addHeader("user-agent", App.instance.getString(R.string.app_name))
     headersBuilder.addHeader("accept", "*/*")
-    ApiService.cookies[host]?.let {
-        dLog("set-cookie w/ image loading $host - $this - $it")
-        headersBuilder.addHeader("Cookie", it)
-    }
+    ApiService.cookies[host]?.let { headersBuilder.addHeader("Cookie", it) }
     return GlideUrl(this, headersBuilder.build())
 }
 
 fun String.possibleNetworkAcctFromUrl(): String {
-    dLog("possibleNetworkAcctFromUrl $this")
     var uri = URL(this)
     return "${this.substring(this.lastIndexOf("/")+1)}@${uri.host}"
 }

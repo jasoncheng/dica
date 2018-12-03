@@ -618,7 +618,6 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         status.attachments?.forEach {
             var partialUrl = FriendicaUtil.getProxyUrlPartial(it.url)
             tmpPartialPhoto[partialUrl] = it.url
-            dLog("VVV $partialUrl ${it.url}")
         }
 
         // Style: Background

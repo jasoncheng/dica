@@ -2,6 +2,10 @@ package cool.mixi.dica.bean
 
 object Consts {
 
+    // Room Storage Library
+    const val DB_NAME = "DiCa"
+    const val TTL_META = 60 * 24 * 3
+
     val COMPRESS_PHOTO_QUALITY = 70
     val API_CONNECT_TIMEOUT = 60.toLong()
     val API_READ_TIMEOUT = 60.toLong()
