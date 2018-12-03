@@ -171,7 +171,7 @@ interface ApiService {
                 val thisCookie = value[0].split(";".toRegex())[0]
                 if(key.toLowerCase() == "set-cookie" &&
                     (thisCookie.contains("PHPSESSID") || thisCookie.contains("session".toRegex()))){
-                    dLog("Set-Cookie $thisCookie")
+//                    dLog("Set-Cookie $thisCookie")
                     cookies[host.toLowerCase()] = thisCookie
                 }
             }
@@ -183,7 +183,7 @@ interface ApiService {
             val host = it.request().url().host().toLowerCase()
             val builder = it.request().newBuilder()!!
             cookies[host]?.let {
-                dLog("Request Header reuse w/ cookie Cache $host $it")
+//                dLog("Request Header reuse w/ cookie Cache $host $it")
                 builder.addHeader("Cookie", it)
             }
             it.proceed(builder.build())
