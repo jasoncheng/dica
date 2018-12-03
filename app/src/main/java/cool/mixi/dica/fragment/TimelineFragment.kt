@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.MainActivity
 import cool.mixi.dica.adapter.StatusesAdapter
+import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.IStatusDataSource
 import cool.mixi.dica.util.PrefUtil
@@ -92,13 +93,19 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
             saveSinceId()
 
             // show how many new messages
-            if(pos > 0){
+            if(pos > 0 && ifItemFound){
                 val msg = getString(R.string.new_status_since).format("$pos")
                 (activity as MainActivity).showSnackBar(msg)
             }
 
             // When status delete, sinceId will lose it's meaning, should ignore
-            if(!ifItemFound){ return }
+            if(!ifItemFound){
+                if(data.size == Consts.TIMELINE_PAGE_SIZE){
+                    val msg = getString(R.string.new_status_more_than_page_size).format("${Consts.TIMELINE_PAGE_SIZE}")
+                    (activity as MainActivity).showSnackBar(msg)
+                }
+                return
+            }
 
             if(pos > 0){
                 (statuses_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)

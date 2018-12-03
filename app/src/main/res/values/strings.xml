@@ -54,4 +54,5 @@
   <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
   <string name="sticker_image_search_only">not support this type of search</string>
   <string name="index_network_public">network</string>
+  <string name="new_status_more_than_page_size">more than %1$s new statuses</string>
 </resources>
