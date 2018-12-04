@@ -30,10 +30,15 @@ class FriendicaUtil {
 
     companion object {
         private val serviceUnavailable = App.instance.getString(R.string.common_error)
+
+        //TODO:
+        // URL1: https://MELD.de/proxy/91/aHR0cHM6Ly93d3cuaGFuZGVsc2JsYXR0LmNvbS9pbWFnZXMvd2VsdGN1cC8yMzcxNjI1NC8xLWZvcm1hdDIwMDIuanBn.jpg
+        // URL2: https://MELD.de/proxy/24/aHR0cHM6Ly93d3cuaGFuZGVsc2JsYXR0LmNvbS9pbWFnZXMvd2VsdGN1cC8yMzcxNjI1NC8xLWZvcm1hdDcuanBnP2Zvcm1hdD1mb3JtYXQ3.jpg
         fun getProxyUrlPartial(originalUrl: String): String{
             var tmpUrl = TextUtils.htmlEncode(originalUrl)
             var shortpath = tmpUrl.md5()
-            var longpath = shortpath.substring(0, 2)
+//            var longpath = shortpath.substring(0, 2)
+            var longpath = ""
             var base64 =
                 String(android.util.Base64.encode(
                     tmpUrl.toByteArray(),

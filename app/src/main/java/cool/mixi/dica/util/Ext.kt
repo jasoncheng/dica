@@ -41,6 +41,17 @@ fun String.md5(): String {
     return ""
 }
 
+fun String.urlEscapeQueryAndHash(): String {
+    val endPos = if (this.indexOf("?") > 0) {
+        this.indexOf("?")
+    } else if (this.indexOf("#") > 0) {
+        this.indexOf("#")
+    } else {
+        this.length
+    }
+    return this.substring(0, endPos)
+}
+
 fun String.emailGetDomain(): String{
     return this.substring(this.indexOf("@") + 1)
 }

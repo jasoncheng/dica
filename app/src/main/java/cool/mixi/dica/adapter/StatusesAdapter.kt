@@ -632,7 +632,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
         var isPureText = false
         var txtAr = ArrayList<String>()
 
-        lines.forEachIndexed { index, it ->
+        lines.forEachIndexed { _, it ->
             var newIt = if(it.endsWith("/") && it.length > 2){
                 it.substring(0, it.length-2)
             } else {
@@ -640,14 +640,14 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             }
 
             when {
-                displayedUrl.contains(newIt) -> {}
+                displayedUrl.contains(newIt.urlEscapeQueryAndHash()) -> {}
                 newIt.startsWith("http", true) -> {
                     if(isPureText){
                         renderText(parent, txtAr)
                         txtAr.clear()
                     }
                     isPureText = false
-                    displayedUrl.add(it)
+                    displayedUrl.add(it.urlEscapeQueryAndHash())
                     renderUrl(parent, status, newIt)
                 }
                 else -> {
