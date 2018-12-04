@@ -5,18 +5,20 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.location.Address
 import android.location.Location
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
+import com.hendraanggrian.appcompat.socialview.Mention
+import com.hendraanggrian.appcompat.widget.MentionArrayAdapter
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.BaseActivity
@@ -24,6 +26,7 @@ import cool.mixi.dica.activity.StickerActivity
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Media
 import cool.mixi.dica.bean.Status
+import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.dlg_compose.*
 import kotlinx.android.synthetic.main.dlg_compose.view.*
@@ -48,22 +51,34 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
 
     // for photo from device
-    var mediaFile: File? = null
+    private var mediaFile: File? = null
 
     // for Sticker
-    var mediaUrl: String? = null
+    private var mediaUrl: String? = null
 
     var roomView: View? = null
     var lastAddress: Address? = null
 
-    var in_reply_status_id: Int? = 0
-    var in_reply_screenname: String? = ""
-    var editText: EditText? = null
+    private var in_reply_status_id: Int? = 0
+    private var in_reply_screenname: String? = ""
+    private var editText: EditText? = null
+    private var commonError: String? = null
     var sharedText: String? = null
     var sharedFile: String? = null
-    var commonError: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        dialog.let {
+            setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomDialog)
+            it.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            it.setCanceledOnTouchOutside(true)
+            val lp = it.window.attributes
+            lp.gravity = Gravity.BOTTOM
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT
+            it.window.attributes = lp
+            it.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        }
+
+
         roomView = inflater?.inflate(R.layout.dlg_compose, container)
         dialog.setTitle("")
 
@@ -149,6 +164,17 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
         sharedText?.let { str ->
             editText?.let { it.setText(str) }
+        }
+
+        doAsync {
+            val users = AppDatabase.getInstance().userDao().all()
+            val adapter = MentionArrayAdapter<Mention>(context!!)
+            uiThread {
+                users?.forEach { that ->
+                    adapter.add(Mention(that.getEmail(), "${that.name}", that.profile_image_url_large))
+                }
+                et_text.mentionAdapter = adapter
+            }
         }
     }
 

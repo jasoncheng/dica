@@ -1,13 +1,13 @@
 package cool.mixi.dica.fragment
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import cool.mixi.dica.R
-import cool.mixi.dica.activity.MainActivity
+import cool.mixi.dica.activity.IndexActivity
 import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Status
@@ -18,7 +18,7 @@ import cool.mixi.dica.util.eLog
 import kotlinx.android.synthetic.main.fg_timeline.*
 import retrofit2.Call
 
-abstract class TimelineFragment: Fragment(), IStatusDataSource {
+abstract class TimelineFragment: androidx.fragment.app.Fragment(), IStatusDataSource {
 
     var stl: StatusTimeline? = null
     private var isInitLoad = false
@@ -59,7 +59,7 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
     }
 
     fun reloadNotification(){
-        (activity as MainActivity).getNotifications()
+        (activity as IndexActivity).getNotifications()
     }
 
     private fun saveSinceId(){
@@ -71,7 +71,7 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
         stl?.clear()
         stl?.addAll(data)
         try {
-            statuses_list.adapter.notifyItemRangeChanged(0, data.size)
+            statuses_list.adapter?.notifyItemRangeChanged(0, data.size)
             (statuses_list.adapter as StatusesAdapter).initLoaded = true
 
             // SinceId & find position and scroll to
@@ -95,20 +95,20 @@ abstract class TimelineFragment: Fragment(), IStatusDataSource {
             // show how many new messages
             if(pos > 0 && ifItemFound){
                 val msg = getString(R.string.new_status_since).format("$pos")
-                (activity as MainActivity).showSnackBar(msg)
+                (activity as IndexActivity).showSnackBar(msg)
             }
 
             // When status delete, sinceId will lose it's meaning, should ignore
             if(!ifItemFound){
                 if(data.size == Consts.TIMELINE_PAGE_SIZE){
                     val msg = getString(R.string.new_status_more_than_page_size).format("${Consts.TIMELINE_PAGE_SIZE}")
-                    (activity as MainActivity).showSnackBar(msg)
+                    (activity as IndexActivity).showSnackBar(msg)
                 }
                 return
             }
 
             if(pos > 0){
-                (statuses_list.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
+                (statuses_list.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).scrollToPositionWithOffset(pos, 0)
             }
         }catch(e: Exception){
             eLog("${e.message}")

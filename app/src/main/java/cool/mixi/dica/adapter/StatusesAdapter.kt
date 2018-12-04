@@ -5,10 +5,10 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.PopupMenu
-import android.support.v7.widget.RecyclerView
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.PopupMenu
+import androidx.recyclerview.widget.RecyclerView
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
@@ -63,7 +63,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class StatusesAdapter(val data:ArrayList<Status>, val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
+class StatusesAdapter(val data:ArrayList<Status>, val context: Context): androidx.recyclerview.widget.RecyclerView.Adapter<BasicStatusViewHolder>() {
 
     var ownerInfo: User? = null
     var isFavoritesFragment: Boolean = false
@@ -985,7 +985,7 @@ class OffSiteUserClickSpan(private val linkColor: Int, val adapter: SoftReferenc
     }
 }
 
-open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
+open class BasicStatusViewHolder(view: View):  androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name
     open var avatar:ImageView? = view.avatar
     var statusMenu: ImageView? = view.more_options
