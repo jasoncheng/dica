@@ -39,7 +39,11 @@ class FriendicaUtil {
                     tmpUrl.toByteArray(),
                     android.util.Base64.NO_WRAP), StandardCharsets.UTF_8)
             longpath+="/"+base64.replace("\\+\\/".toRegex(), "-_")
-            return longpath.replace("\n".toRegex(), "")
+            return try {
+                longpath.replace("\n".toRegex(), "").substring(0, 64)
+            }catch (e: Exception){
+                longpath
+            }
         }
 
         fun like(isLike: Boolean, id: Int, callback: ILike) {
