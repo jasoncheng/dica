@@ -2,8 +2,6 @@ package cool.mixi.dica.util
 
 import android.content.Context
 import android.os.Handler
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cool.mixi.dica.App
 import cool.mixi.dica.R
@@ -195,7 +193,6 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
                 // Bind Address if possible
                 LocationUtil.instance.bindGeoAddress(it, MyBindStatusGeoCallback(act?.selfRef))
 
-                // TODO: Test
                 it.text = it.text.dicaRenderData()
 
                 // NotSafeForWork
