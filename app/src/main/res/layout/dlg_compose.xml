@@ -53,7 +53,7 @@
   <!--android:singleLine="false"-->
   <!--android:gravity="top|left"-->
   <!--android:layout_marginTop="8dp"/>-->
-  <com.hendraanggrian.appcompat.widget.SocialAutoCompleteTextView
+  <cool.mixi.dica.view.MySocialEditTextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:ems="10"
@@ -62,6 +62,7 @@
           android:singleLine="false"
           android:gravity="top|left"
           app:mentionColor="@color/txt_email"
+          app:hyperlinkColor="@color/txt_email"
           app:hashtagColor="@color/txt_tag"
           android:layout_marginTop="8dp"
           android:hint="@string/compose_text"  />

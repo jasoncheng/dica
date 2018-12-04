@@ -13,8 +13,8 @@ import java.util.*
         Index(value = ["screen_name", "name"])
     ]
 )
-data class User(
-    var id: Int = 0,
+data class User (
+    var id:Int = 0,
     @ColumnInfo(name = "avatar") var profile_image_url_large: String = "",
     var url: String = "",
     var screen_name: String = "",
@@ -34,6 +34,10 @@ data class User(
         if(other?.javaClass != this.javaClass) return false
         other as User
         return other.id == this.id
+    }
+
+    fun getEmail(): String {
+        return "$screen_name@${getDomain()}"
     }
 
     fun getDomain(): String {
