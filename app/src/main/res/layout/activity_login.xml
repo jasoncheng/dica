@@ -4,7 +4,7 @@
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:fillViewport="true">
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -72,5 +72,5 @@
                 android:drawableRight="@drawable/friend_logo"
                 android:drawablePadding="4dp"
                 android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"/>
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

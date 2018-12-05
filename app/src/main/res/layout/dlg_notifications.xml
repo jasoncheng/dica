@@ -11,18 +11,18 @@
               android:id="@+id/all_seen"
               android:text="@string/mark_all_notifications_seen"/>
 
-    <android.support.v4.widget.SwipeRefreshLayout android:layout_width="match_parent"
-                                                  android:layout_height="match_parent"
-                                                  android:id="@+id/swipeRefreshLayout"
-                                                  app:layout_constraintEnd_toEndOf="parent"
-                                                  app:layout_constraintStart_toStartOf="parent"
-                                                  app:layout_constraintBottom_toBottomOf="parent">
-    <android.support.v7.widget.RecyclerView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:layout_width="match_parent"
+                                                           android:layout_height="match_parent"
+                                                           android:id="@+id/swipeRefreshLayout"
+                                                           app:layout_constraintEnd_toEndOf="parent"
+                                                           app:layout_constraintStart_toStartOf="parent"
+                                                           app:layout_constraintBottom_toBottomOf="parent">
+    <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/table"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp" android:layout_marginBottom="8dp"/>
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

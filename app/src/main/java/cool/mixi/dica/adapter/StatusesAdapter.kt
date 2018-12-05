@@ -5,10 +5,10 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.PopupMenu
-import android.support.v7.widget.RecyclerView
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.PopupMenu
+import androidx.recyclerview.widget.RecyclerView
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
@@ -63,7 +63,8 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class StatusesAdapter(val data:ArrayList<Status>, val context: Context): RecyclerView.Adapter<BasicStatusViewHolder>() {
+//TODO: do to much data process on adapter, should refactor later...
+class StatusesAdapter(val data:ArrayList<Status>, val context: Context): androidx.recyclerview.widget.RecyclerView.Adapter<BasicStatusViewHolder>() {
 
     var ownerInfo: User? = null
     var isFavoritesFragment: Boolean = false
@@ -618,7 +619,6 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         status.attachments?.forEach {
             var partialUrl = FriendicaUtil.getProxyUrlPartial(it.url)
             tmpPartialPhoto[partialUrl] = it.url
-            dLog("VVV $partialUrl ${it.url}")
         }
 
         // Style: Background
@@ -633,7 +633,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
         var isPureText = false
         var txtAr = ArrayList<String>()
 
-        lines.forEachIndexed { index, it ->
+        lines.forEachIndexed { _, it ->
             var newIt = if(it.endsWith("/") && it.length > 2){
                 it.substring(0, it.length-2)
             } else {
@@ -641,15 +641,25 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): Recycle
             }
 
             when {
-                displayedUrl.contains(newIt) -> {}
+                displayedUrl.contains(newIt.urlEscapeQueryAndHash()) -> {}
                 newIt.startsWith("http", true) -> {
                     if(isPureText){
                         renderText(parent, txtAr)
                         txtAr.clear()
                     }
                     isPureText = false
-                    displayedUrl.add(it)
+                    displayedUrl.add(it.urlEscapeQueryAndHash())
                     renderUrl(parent, status, newIt)
+
+                    // URL type2
+                    FriendicaUtil.getProxyUrlPartial2(newIt).let {
+                        it.isNullOrEmpty().let { that ->
+                            if(!that) {
+                                tmpPartialPhoto[it] = it
+                                displayedUrl.add(it)
+                            }
+                        }
+                    }
                 }
                 else -> {
                     isPureText = true
@@ -986,7 +996,7 @@ class OffSiteUserClickSpan(private val linkColor: Int, val adapter: SoftReferenc
     }
 }
 
-open class BasicStatusViewHolder(view: View):  RecyclerView.ViewHolder(view) {
+open class BasicStatusViewHolder(view: View):  androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
     open var userName:TextView? = view.tv_status_user_name
     open var avatar:ImageView? = view.avatar
     var statusMenu: ImageView? = view.more_options

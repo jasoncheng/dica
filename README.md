@@ -26,6 +26,7 @@ This is a very very very simple [Friendica](https://friendi.ca)  (unofficial) an
 * Favorites
 * Retweet
 * Sticker
+* Mention
 
 
 ***DONATE US***

@@ -2,7 +2,7 @@ package cool.mixi.dica.adapter
 
 import android.content.Intent
 import android.graphics.Color
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +19,7 @@ import kotlinx.android.synthetic.main.notification_item.view.*
 import java.util.*
 
 class NotificationAdapter(val data: ArrayList<Notification>, private val fragment: NotificationDialog)
-    : RecyclerView.Adapter<NotifyViewHolder>() {
+    : androidx.recyclerview.widget.RecyclerView.Adapter<NotifyViewHolder>() {
 
     private val unReadColor = fragment.resources.getColor(R.color.notification_unread)
 
@@ -68,7 +68,7 @@ class NotificationAdapter(val data: ArrayList<Notification>, private val fragmen
     }
 }
 
-open class NotifyViewHolder(view: View): RecyclerView.ViewHolder(view) {
+open class NotifyViewHolder(view: View): androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
     var msg = view.tv_message
     var date = view.tv_datetime
     var avatar = view.avatar

@@ -2,38 +2,42 @@ package cool.mixi.dica.bean
 
 object Consts {
 
-    val COMPRESS_PHOTO_QUALITY = 70
-    val API_CONNECT_TIMEOUT = 60.toLong()
-    val API_READ_TIMEOUT = 60.toLong()
-    val CACHE_SIZE_IN_MB = 10
+    const val DB_NAME = "DiCa"
+    const val TTL_META = 60 * 24 * 3
+    const val TTL_USER = 60 * 24 * 5
 
+    const val COMPRESS_PHOTO_QUALITY = 70
+    const val API_CONNECT_TIMEOUT = 60.toLong()
+    const val API_READ_TIMEOUT = 60.toLong()
+    const val CACHE_SIZE_IN_MB = 10
+    const val TIMELINE_PAGE_SIZE = 20
 
-    val REQ_PHOTO_PATH = 999
-    val REQ_STICKER = 987
+    const val REQ_PHOTO_PATH = 999
+    const val REQ_STICKER = 987
 
-    val OTYPE_ITEM = "item"
+    const val OTYPE_ITEM = "item"
 
-    val FRIENDICA_WEB = "https://friendi.ca"
-    val MIXI_URL = "http://dica.mixi.cool"
-    val API_HOST = "https://mawa.link"
-    val ID_STATUS = "statusId"
+    const val FRIENDICA_WEB = "https://friendi.ca"
+    const val MIXI_URL = "http://dica.mixi.cool"
+    const val API_HOST = "https://mawa.link"
+    const val ID_STATUS = "statusId"
 
-    val FG_COMPOSE = "compose"
-    val FG_PHOTO_CROP = "crop"
-    val FG_USERS = "users"
-    val FG_PHOTO_VIEWER = "photoViewer"
+    const val FG_COMPOSE = "compose"
+    const val FG_PHOTO_CROP = "crop"
+    const val FG_USERS = "users"
+    const val FG_PHOTO_VIEWER = "photoViewer"
 
-    val SDCARD_FOLDER_OUT = "out"
+    const val SDCARD_FOLDER_OUT = "out"
 
-    val EXTRA_PHOTO_URI = "photoUri"
-    val EXTRA_USER = "user"
-    val EXTRA_USER_ID = "userId"
-    val EXTRA_USER_EMAIL = "email"
-    val EXTRA_USER_URL = "url"
-    val EXTRA_PHOTOS = "photos"
-    val EXTRA_PHOTO_INDEX = "photoIndex"
-    val EXTRA_NOTIFICATIONS = "notifications"
-    val EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
-    val EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
-    val EXTRA_STICKER_URI = "sticker"
+    const val EXTRA_PHOTO_URI = "photoUri"
+    const val EXTRA_USER = "user"
+    const val EXTRA_USER_ID = "userId"
+    const val EXTRA_USER_EMAIL = "email"
+    const val EXTRA_USER_URL = "url"
+    const val EXTRA_PHOTOS = "photos"
+    const val EXTRA_PHOTO_INDEX = "photoIndex"
+    const val EXTRA_NOTIFICATIONS = "notifications"
+    const val EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
+    const val EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
+    const val EXTRA_STICKER_URI = "sticker"
 }

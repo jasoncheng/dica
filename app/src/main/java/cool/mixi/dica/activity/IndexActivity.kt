@@ -6,10 +6,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
-import android.support.design.widget.Snackbar
-import android.support.v4.view.ViewCompat
-import android.support.v4.view.ViewPager
-import android.support.v7.widget.PopupMenu
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.view.ViewCompat
+import androidx.viewpager.widget.ViewPager
+import androidx.appcompat.widget.PopupMenu
 import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -32,7 +32,7 @@ import java.lang.ref.WeakReference
 import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
 
-class MainActivity : BaseActivity() {
+class IndexActivity : BaseActivity() {
 
     var notifications: ArrayList<Notification> = ArrayList()
     private val mHandler = Handler()
@@ -162,7 +162,7 @@ class MainActivity : BaseActivity() {
     fun initViewPager(){
         val names = resources.getStringArray(R.array.index_tab)
         vp_index.adapter = IndexPageAdapter(this, supportFragmentManager)
-        vp_index.setOnPageChangeListener(object: ViewPager.OnPageChangeListener{
+        vp_index.setOnPageChangeListener(object: androidx.viewpager.widget.ViewPager.OnPageChangeListener{
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
             }
 
@@ -176,8 +176,8 @@ class MainActivity : BaseActivity() {
         })
     }
 
-    class MyHtmlCrawler(val activity: MainActivity): IHtmlCrawler {
-        private val ref = WeakReference<MainActivity>(activity)
+    class MyHtmlCrawler(val activity: IndexActivity): IHtmlCrawler {
+        private val ref = WeakReference<IndexActivity>(activity)
         override fun done(meta: Meta) {
             if(!meta.title.isNullOrEmpty()){
                 var title = meta.title!!.replace(" \\(home\\)".toRegex(), "")
@@ -211,8 +211,8 @@ class MainActivity : BaseActivity() {
         startActivity(intent)
     }
 
-    class ProfileCallback(activity: MainActivity): Callback<Profile> {
-        private val ref = WeakReference<MainActivity>(activity)
+    class ProfileCallback(activity: IndexActivity): Callback<Profile> {
+        private val ref = WeakReference<IndexActivity>(activity)
         override fun onFailure(call: Call<Profile>, t: Throwable) {
             if(ref.get() == null){ return}
         }
@@ -233,8 +233,8 @@ class MainActivity : BaseActivity() {
     }
 
     // Notifications start here
-    class MyNotificationCallback(activity: MainActivity): Callback<List<Notification>> {
-        private val ref = WeakReference<MainActivity>(activity)
+    class MyNotificationCallback(activity: IndexActivity): Callback<List<Notification>> {
+        private val ref = WeakReference<IndexActivity>(activity)
         override fun onFailure(call: Call<List<Notification>>, t: Throwable) {}
         override fun onResponse(call: Call<List<Notification>>, response: Response<List<Notification>>) {
             if(ref.get() == null) { return }
@@ -291,7 +291,7 @@ class MainActivity : BaseActivity() {
     }
 
     // for Notification
-    class NotificationRunnable(val activity: MainActivity): Runnable {
+    class NotificationRunnable(val activity: IndexActivity): Runnable {
         private val ref = SoftReference(activity)
         override fun run() {
             ref.get()?.let {
