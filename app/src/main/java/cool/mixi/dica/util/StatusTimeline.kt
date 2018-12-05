@@ -218,6 +218,8 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
 //                it.attachments = tmpAr
 //                it.text = tmpStr
 
+                FriendicaUtil.filterDuplicateLike(it)
+
                 it.text = it.text.dicaRenderData()
 
                 // NotSafeForWork

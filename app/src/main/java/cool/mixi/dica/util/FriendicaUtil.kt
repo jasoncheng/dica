@@ -5,6 +5,7 @@ import android.text.TextUtils
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Status
+import cool.mixi.dica.bean.User
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -129,7 +130,6 @@ class FriendicaUtil {
         fun retweet(nid: Int, callback: IRetweet?) {
             ApiService.create().statusRetweet(nid).enqueue(object : Callback<Status>{
                 override fun onFailure(call: Call<Status>, t: Throwable) {
-                    eLog("retweet ${nid} ${t.message}")
                     callback?.fail("${t.message}")
                 }
 
@@ -143,6 +143,14 @@ class FriendicaUtil {
                 }
 
             })
+        }
+
+        fun filterDuplicateLike(status: Status){
+            val ar = ArrayList<User>()
+            status.friendica_activities.like.forEach {
+                if(!ar.contains(it)) ar.add(it)
+            }
+            status.friendica_activities.like = ar
         }
     }
 }
