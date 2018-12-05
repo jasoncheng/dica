@@ -1,5 +1,6 @@
 package cool.mixi.dica.util
 
+import android.net.Uri
 import android.text.TextUtils
 import cool.mixi.dica.App
 import cool.mixi.dica.R
@@ -7,6 +8,7 @@ import cool.mixi.dica.bean.Status
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.net.ssl.HttpsURLConnection
 
@@ -34,6 +36,7 @@ class FriendicaUtil {
         //TODO:
         // URL1: https://MELD.de/proxy/91/aHR0cHM6Ly93d3cuaGFuZGVsc2JsYXR0LmNvbS9pbWFnZXMvd2VsdGN1cC8yMzcxNjI1NC8xLWZvcm1hdDIwMDIuanBn.jpg
         // URL2: https://MELD.de/proxy/24/aHR0cHM6Ly93d3cuaGFuZGVsc2JsYXR0LmNvbS9pbWFnZXMvd2VsdGN1cC8yMzcxNjI1NC8xLWZvcm1hdDcuanBnP2Zvcm1hdD1mb3JtYXQ3.jpg
+        // URL3: https://MELD.de/proxy/4a6e66e6d7695de4607fe32888fc1357?url=https%3A%2F%2Fpod.geraspora.de%2Fcamo%2F
         fun getProxyUrlPartial(originalUrl: String): String{
             var tmpUrl = TextUtils.htmlEncode(originalUrl)
             var shortpath = tmpUrl.md5()
@@ -48,6 +51,15 @@ class FriendicaUtil {
                 longpath.replace("\n".toRegex(), "").substring(0, 64)
             }catch (e: Exception){
                 longpath
+            }
+        }
+
+        fun getProxyUrlPartial2(proxyUrl: String): String {
+            return try {
+                var uri = Uri.parse(proxyUrl)
+                URLDecoder.decode(uri.getQueryParameter("url"),  "UTF-8")
+            }catch (e: Exception){
+                ""
             }
         }
 
