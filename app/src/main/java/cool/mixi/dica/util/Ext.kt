@@ -166,10 +166,19 @@ fun String.dicaHTMLFilter(toBBCode: Boolean, baseUri: String): String {
     return sb.toString()
 }
 
-// If URL or Image, newline
+// 1. If URL or Image w/ newline
+// 2. ignore duplicate url
+// 3. *site title + url*
 fun String.dicaRenderData(): String {
+
+    // strip *site title+url*
+    var newStr = this
+    if(newStr.contains("\\*".toRegex()) && newStr.contains("http")){
+        newStr = newStr.replace("\\*([^*]+)\\*".toRegex(), "")
+    }
+
     val ar = ArrayList<String>()
-    this.lines().forEach {
+    newStr.lines().forEach {
         var tmp = it
         var matcher = Patterns.WEB_URL.matcher(it)
         while (matcher.find()){
@@ -178,10 +187,12 @@ fun String.dicaRenderData(): String {
 
             if(!url.startsWith("http")) continue
             if(it == url) continue
+
             if(it.endsWith("*")){
                 tmp = tmp.replace("*", "")
                 continue
             }
+
             if("*$url" == it){
                 tmp = tmp.replace("*", "")
                 continue
@@ -195,6 +206,7 @@ fun String.dicaRenderData(): String {
     }
     val final = ar.joinToString("\n")
     ar.clear()
+    dLog("output $final")
     return final
 }
 

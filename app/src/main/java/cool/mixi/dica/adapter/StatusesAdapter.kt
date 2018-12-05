@@ -63,6 +63,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
+//TODO: do to much data process on adapter, should refactor later...
 class StatusesAdapter(val data:ArrayList<Status>, val context: Context): androidx.recyclerview.widget.RecyclerView.Adapter<BasicStatusViewHolder>() {
 
     var ownerInfo: User? = null
@@ -649,6 +650,16 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
                     isPureText = false
                     displayedUrl.add(it.urlEscapeQueryAndHash())
                     renderUrl(parent, status, newIt)
+
+                    // URL type2
+                    FriendicaUtil.getProxyUrlPartial2(newIt).let {
+                        it.isNullOrEmpty().let { that ->
+                            if(!that) {
+                                tmpPartialPhoto[it] = it
+                                displayedUrl.add(it)
+                            }
+                        }
+                    }
                 }
                 else -> {
                     isPureText = true
