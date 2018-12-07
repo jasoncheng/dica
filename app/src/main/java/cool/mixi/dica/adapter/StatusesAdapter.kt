@@ -93,6 +93,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
 
     private val requestOptions = RequestOptions()
         .fitCenter()
+        .skipMemoryCache(true)
         .transforms(RoundedCorners(16))!!
 
     private val requestOptionsGif = RequestOptions()
@@ -831,7 +832,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
         childParams.setMargins(0, 20, 0, 20)
         view.layoutParams = childParams
 
-        Glide.with(context.applicationContext).load(meta.icon).into(view.site_avatar)
+        Glide.with(context.applicationContext).load(meta.icon).apply(RequestOptions().skipMemoryCache(true)).into(view.site_avatar)
         if(meta.description.isNullOrEmpty()){
             view.site_desc.text = meta.url
         } else {
