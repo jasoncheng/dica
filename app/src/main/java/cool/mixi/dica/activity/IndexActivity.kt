@@ -6,13 +6,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
-import com.google.android.material.snackbar.Snackbar
-import androidx.core.view.ViewCompat
-import androidx.viewpager.widget.ViewPager
-import androidx.appcompat.widget.PopupMenu
 import android.view.View
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.snackbar.Snackbar
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.adapter.IndexPageAdapter
@@ -38,9 +38,12 @@ class IndexActivity : BaseActivity() {
     private val mHandler = Handler()
     private var mNotificationRunnable: NotificationRunnable? = null
     private var snackBar: Snackbar? = null
+    var tabNames: Array<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        tabNames = resources.getStringArray(R.array.index_tab)
 
         // Notification
         mNotificationRunnable = NotificationRunnable(this)
@@ -114,14 +117,14 @@ class IndexActivity : BaseActivity() {
 
         // Intent Process
         processIntent()
-
-        // fetch session
-//        getSessionID()
     }
 
     override fun onStart() {
         super.onStart()
         getNotifications()
+        vp_index?.currentItem?.let {
+            tv_home_page_name.text = tabNames!![it]
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -160,7 +163,6 @@ class IndexActivity : BaseActivity() {
     }
 
     fun initViewPager(){
-        val names = resources.getStringArray(R.array.index_tab)
         vp_index.adapter = IndexPageAdapter(this, supportFragmentManager)
         vp_index.setOnPageChangeListener(object: androidx.viewpager.widget.ViewPager.OnPageChangeListener{
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
@@ -171,7 +173,7 @@ class IndexActivity : BaseActivity() {
 
             override fun onPageSelected(position: Int) {
                 hideSnackBar()
-                tv_home_page_name.text = names[position]
+                tv_home_page_name.text = tabNames!![position]
             }
         })
     }
@@ -282,7 +284,7 @@ class IndexActivity : BaseActivity() {
     // Top SnackBar
     fun showSnackBar(msg: String){
         snackBar = Snackbar.make(vp_index, msg, Snackbar.LENGTH_LONG)
-        snackBar?.view?.setBackgroundColor(getColor(R.color.snack_bar_bg))
+        snackBar?.view?.setBackgroundColor(ContextCompat.getColor(this.baseContext, R.color.snack_bar_bg))
         snackBar?.show()
     }
 

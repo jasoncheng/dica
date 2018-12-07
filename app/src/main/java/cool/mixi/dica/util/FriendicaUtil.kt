@@ -2,6 +2,7 @@ package cool.mixi.dica.util
 
 import android.net.Uri
 import android.text.TextUtils
+import android.util.Patterns
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Status
@@ -33,11 +34,6 @@ class FriendicaUtil {
 
     companion object {
         private val serviceUnavailable = App.instance.getString(R.string.common_error)
-
-        //TODO:
-        // URL1: https://MELD.de/proxy/91/aHR0cHM6Ly93d3cuaGFuZGVsc2JsYXR0LmNvbS9pbWFnZXMvd2VsdGN1cC8yMzcxNjI1NC8xLWZvcm1hdDIwMDIuanBn.jpg
-        // URL2: https://MELD.de/proxy/24/aHR0cHM6Ly93d3cuaGFuZGVsc2JsYXR0LmNvbS9pbWFnZXMvd2VsdGN1cC8yMzcxNjI1NC8xLWZvcm1hdDcuanBnP2Zvcm1hdD1mb3JtYXQ3.jpg
-        // URL3: https://MELD.de/proxy/4a6e66e6d7695de4607fe32888fc1357?url=https%3A%2F%2Fpod.geraspora.de%2Fcamo%2F
         fun getProxyUrlPartial(originalUrl: String): String{
             var tmpUrl = TextUtils.htmlEncode(originalUrl)
             var shortpath = tmpUrl.md5()
@@ -49,7 +45,7 @@ class FriendicaUtil {
                     android.util.Base64.NO_WRAP), StandardCharsets.UTF_8)
             longpath+="/"+base64.replace("\\+\\/".toRegex(), "-_")
             return try {
-                longpath.replace("\n".toRegex(), "").substring(0, 64)
+                longpath.replace("\n".toRegex(), "").substring(0, 48)
             }catch (e: Exception){
                 longpath
             }
@@ -151,6 +147,74 @@ class FriendicaUtil {
                 if(!ar.contains(it)) ar.add(it)
             }
             status.friendica_activities.like = ar
+        }
+
+        // Hyper link/Image should newline
+        // remove url end with /
+        // remove duplicate link
+        // remove original link that already proxy
+        // remove  *site name+link*
+        // remove attachment once content include
+        // remove duplicate url but different protocol (http & https)
+        // remove useless feedburner link
+        // attachment process, add extension if not exists
+        fun statusPreProcess(status: Status){
+            var newStr = status.text
+            if(newStr.contains("\\*.*http.*\\*".toRegex())){
+                newStr = newStr.replaceFirst("\\*([^*]+)\\*".toRegex(), "")
+            }
+            newStr = newStr.replace("\\(http([^)]+)\\)".toRegex(), "")
+            var matcher = Patterns.WEB_URL.matcher(newStr)
+            var displayedUrl = ArrayList<String>()
+            while (matcher.find()){
+                var url = matcher.group()
+                url = url.replace("\\/$", "")
+
+                // Email
+                if(!url.startsWith("http", true)) continue
+
+                val decodeUrl = URLDecoder.decode(url, "UTF-8")
+                val pureUrl = url.urlEscapeQueryAndHash()
+                if(displayedUrl.contains(url)) {
+                    newStr = newStr.replaceAfter(url, "")
+                } else if(displayedUrl.contains(pureUrl) || displayedUrl.contains(decodeUrl)){
+                    newStr = newStr.replace(url, "")
+                }
+
+                val proxy2 = FriendicaUtil.getProxyUrlPartial2(url)
+                displayedUrl.add(pureUrl)
+                displayedUrl.add(proxy2)
+                displayedUrl.add(url)
+                if(pureUrl.startsWith("http:", true)) displayedUrl.add(pureUrl.replace("http:", "https:"))
+                if(pureUrl.startsWith("https:", true)) displayedUrl.add(pureUrl.replace("https:", "http:"))
+
+                // NewLine
+                if(!newStr.contains("\n$url", true)) newStr = newStr.replaceFirst(url, "\n$url")
+                if(!newStr.contains("$url\n", true)) newStr = newStr.replaceFirst(url, "$url\n")
+                val it = status.attachments?.iterator()
+                it?.let {
+                    while (it.hasNext()){
+                        val att = it.next()
+                        val urlContain = FriendicaUtil.getProxyUrlPartial(att.url)
+
+                        if(att.url.contains("feedburner", true)) it.remove()
+                        if(url.contains(urlContain, true)) it.remove()
+                        if(displayedUrl.contains(att.url)) it.remove()
+                    }
+                }
+            }
+
+            status.text = newStr
+            status.attachments?.forEach {
+                if(displayedUrl.contains(it.url)) return@forEach
+                if(!it.mimetype.contains("image")) return@forEach
+                if(it.url.contains("\\.(jpg|jpeg|png|gif)$".toRegex())) return@forEach
+                it.url = if(it.url.contains("?")) {
+                    "${it.url}&ext=.jpg"
+                } else {
+                    "${it.url}?ext=.jpg"
+                }
+            }
         }
     }
 }

@@ -42,12 +42,10 @@ fun String.md5(): String {
 }
 
 fun String.urlEscapeQueryAndHash(): String {
-    val endPos = if (this.indexOf("?") > 0) {
-        this.indexOf("?")
-    } else if (this.indexOf("#") > 0) {
-        this.indexOf("#")
-    } else {
-        this.length
+    val endPos = when {
+        this.indexOf("?") > 0 -> this.indexOf("?")
+        this.indexOf("#") > 0 -> this.indexOf("#")
+        else -> this.length
     }
     return this.substring(0, endPos)
 }
