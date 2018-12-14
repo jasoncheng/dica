@@ -1,29 +1,36 @@
 package cool.mixi.dica.fragment
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.IndexActivity
 import cool.mixi.dica.adapter.NotificationAdapter
-import cool.mixi.dica.bean.Notification
 import cool.mixi.dica.util.FriendicaUtil
+import cool.mixi.dica.util.PrefUtil
+import kotlinx.android.synthetic.main.dlg_notifications.*
 import kotlinx.android.synthetic.main.dlg_notifications.view.*
 
 
 class NotificationDialog: BaseDialogFragment(), androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
     private var rootView: View? = null
-    var data: ArrayList<Notification>? = null
-
+    var drawableNotifyOff:Drawable? = null
+    var drawableNotifyOn:Drawable? = null
+    var strNotifyOff:String? = null
+    var strNotifyOn:String? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        drawableNotifyOff = ContextCompat.getDrawable(App.instance.applicationContext, R.drawable.notify_off)
+        drawableNotifyOn = ContextCompat.getDrawable(App.instance.applicationContext, R.drawable.notify_on)
+        strNotifyOff = getString(R.string.notify_off)
+        strNotifyOn = getString(R.string.notify_on)
+
         rootView = inflater?.inflate(R.layout.dlg_notifications, container)
         rootView?.table?.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        rootView?.table?.adapter = NotificationAdapter(data as java.util.ArrayList<Notification>, this)
+        rootView?.table?.adapter = NotificationAdapter(this)
         rootView?.swipeRefreshLayout?.setOnRefreshListener(this)
         rootView?.all_seen?.setOnClickListener { markAllAsRead() }
         var decoration = androidx.recyclerview.widget.DividerItemDecoration(
@@ -31,12 +38,19 @@ class NotificationDialog: BaseDialogFragment(), androidx.swiperefreshlayout.widg
             androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
         )
         rootView?.table?.addItemDecoration(decoration)
+
+        rootView?.tv_notify?.setOnClickListener {
+            PrefUtil.setPollNotification(!PrefUtil.isPollNotification())
+            updateNotifyStatus()
+            (activity as IndexActivity).setPollNotification()
+        }
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         refreshDataSource()
+        updateNotifyStatus()
     }
 
     override fun onDestroyView() {
@@ -52,10 +66,20 @@ class NotificationDialog: BaseDialogFragment(), androidx.swiperefreshlayout.widg
         )
     }
 
+    private fun updateNotifyStatus(){
+        val isEnableNotify = PrefUtil.isPollNotification()
+        if(isEnableNotify){
+            tv_notify.setCompoundDrawablesWithIntrinsicBounds(drawableNotifyOn, null, null, null)
+            tv_notify.text = strNotifyOn
+        } else {
+            tv_notify.setCompoundDrawablesWithIntrinsicBounds(drawableNotifyOff, null, null, null)
+            tv_notify.text = strNotifyOff
+        }
+    }
+
     private fun markAllAsRead() {
-        var act = activity as IndexActivity
         var idx = 0
-        loop@ act.notifications.forEach {
+        loop@ App.instance.notifications.forEach {
             if(it.seen == 1) {
                 idx++
                 return@forEach
@@ -66,6 +90,7 @@ class NotificationDialog: BaseDialogFragment(), androidx.swiperefreshlayout.widg
             rootView?.table?.adapter?.notifyItemChanged(idx)
             idx++
         }
+        App.instance.checkIfRequireClearAllNotification()
     }
 
     fun refreshDataSource() {

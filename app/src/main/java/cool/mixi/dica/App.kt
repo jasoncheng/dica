@@ -1,11 +1,10 @@
 package cool.mixi.dica
 
 import android.app.Application
+import android.app.NotificationManager
+import android.content.Context
 import android.widget.Toast
-import cool.mixi.dica.bean.Group
-import cool.mixi.dica.bean.Profile
-import cool.mixi.dica.bean.Status
-import cool.mixi.dica.bean.User
+import cool.mixi.dica.bean.*
 import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.util.ApiService
 import cool.mixi.dica.util.dLog
@@ -17,10 +16,9 @@ import java.util.*
 import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.HashMap
 
-
-
 class App: Application() {
 
+    var notifications: ArrayList<Notification> = ArrayList()
     var myself: Profile? = null
     var mygroup: ArrayList<Group>? = null
     var selectedGroup: ArrayList<Int> = ArrayList()
@@ -34,15 +32,6 @@ class App: Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        loadGroup()
-
-        // Clean Data
-        doAsync {
-            AppDatabase.getInstance().metaDao().expireClean()
-            AppDatabase.getInstance().userDao().expireClean()
-            dLog("User info #${AppDatabase.getInstance().userDao().count()}")
-            dLog("Meta info #${AppDatabase.getInstance().metaDao().count()}")
-        }
     }
 
     fun getWebFinger(email: String): String? {
@@ -88,5 +77,25 @@ class App: Application() {
                 userDao.upsert(user)
             }
         }
+    }
+
+    fun checkIfRequireClearAllNotification(){
+        if(getUnSeenNotificationCount() > 0) return
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
+    }
+
+    fun addNotification(data: List<Notification>){
+        notifications.clear()
+        data.forEach {
+            notifications.add(it)
+        }
+    }
+
+    fun getUnSeenNotificationCount(): Int {
+        var c = 0
+        notifications.forEach {
+            if(it.seen == 0) c++
+        }
+        return c
     }
 }

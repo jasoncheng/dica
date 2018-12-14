@@ -56,4 +56,7 @@
   <string name="sticker_image_search_only">不支援非圖片的搜尋</string>
   <string name="index_network_public">網絡的</string>
   <string name="new_status_more_than_page_size">超過 %1$s 新訊息</string>
+  <string name="notify_on">每15分鐘更新</string>
+  <string name="notify_off">不通知</string>
+  <string name="new_notification_count">你有 %1$s 則通知</string>
 </resources>

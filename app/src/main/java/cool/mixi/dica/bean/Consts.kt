@@ -5,6 +5,7 @@ object Consts {
     const val DB_NAME = "DiCa"
     const val TTL_META = 60 * 24 * 3
     const val TTL_USER = 60 * 24 * 5
+    const val POLL_NOTIFICATION_INTERVAL = 30L
 
     const val COMPRESS_PHOTO_QUALITY = 70
     const val API_CONNECT_TIMEOUT = 60.toLong()

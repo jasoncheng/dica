@@ -378,6 +378,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
                     if(response == null || response?.isSuccessful != true){
                         ref.get()?.commonError?.let { that -> App.instance.toast(that.format(response?.body())) }
                     } else {
+                        dLog("=======> media file ${response?.body()}")
                         val media = Gson().fromJson(response?.body(), Media::class.java)
                         mediaIds = RequestBody.create(MediaType.parse("multipart/form-data"), "${media.media_id}")
                     }

@@ -55,4 +55,7 @@
   <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
   <string name="index_network_public">netværk</string>
   <string name="new_status_more_than_page_size">mere end %1$s nye statuser</string>
+  <string name="notify_off">anmeldelse af</string>
+  <string name="new_notification_count">Du har %1$s anmeldelser</string>
+  <string name="notify_on">Opdateret hvert 15. minut</string>
 </resources>
