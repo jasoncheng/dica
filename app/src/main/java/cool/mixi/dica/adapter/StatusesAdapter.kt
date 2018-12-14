@@ -701,22 +701,22 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
                 Glide.with(context.applicationContext).load(url.glideUrl()).apply(requestOptions).into(img)
             }
         } else {
-            val meta = HtmlCrawler.getInstance().get(url)
-
-            // filter different url from same title
-            meta?.title?.let {
-                if(status.displayedTitle.contains(it)) {
-                    status.text = status.text.replace(url, "")
+            HtmlCrawler.getInstance().get(url).let {
+                if(it == null){
+                    HtmlCrawler.getInstance().run(url, MyHtmlCrawler(status, refAdapter))
+                    renderText(parent, url)
                     return
                 }
-                status.displayedTitle.add(it)
-            }
 
-            if(meta != null){
-                renderWebUrl(parent, meta)
-            } else {
-                HtmlCrawler.getInstance().run(url, MyHtmlCrawler(status, refAdapter))
-                renderText(parent, url)
+                it.title?.let {that ->
+                    if(status.displayedTitle.containsKey(that)) {
+                        if (url != status.displayedTitle[that]) {
+                            return
+                        }
+                    }
+                    status.displayedTitle.put(that, url)
+                }
+                renderWebUrl(parent, it)
             }
         }
     }
