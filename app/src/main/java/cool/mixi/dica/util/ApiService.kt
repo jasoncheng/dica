@@ -128,7 +128,7 @@ interface ApiService {
     companion object Factory {
 
         var cookies = HashMap<String, String>()
-        private val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
+        private const val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
 
         private val client: OkHttpClient
             get() {
@@ -157,13 +157,6 @@ interface ApiService {
             it.proceed(request)
         }
 
-
-        fun setCookie(cookieStr: String){
-            val thisCookie = cookieStr.split(";".toRegex())[0]
-            val host = URL(PrefUtil.getApiUrl()).host.toLowerCase()
-            cookies[host] = thisCookie
-        }
-
         private val saveCookieInterceptor = Interceptor {
             val host = it.request().url().host()
             val res = it.proceed(it.request())
@@ -171,7 +164,6 @@ interface ApiService {
                 val thisCookie = value[0].split(";".toRegex())[0]
                 if(key.toLowerCase() == "set-cookie" &&
                     (thisCookie.contains("PHPSESSID") || thisCookie.contains("session".toRegex()))){
-//                    dLog("Set-Cookie $thisCookie")
                     cookies[host.toLowerCase()] = thisCookie
                 }
             }
@@ -182,10 +174,7 @@ interface ApiService {
         private val addCookieInterceptor = Interceptor { it ->
             val host = it.request().url().host().toLowerCase()
             val builder = it.request().newBuilder()!!
-            cookies[host]?.let {
-//                dLog("Request Header reuse w/ cookie Cache $host $it")
-                builder.addHeader("Cookie", it)
-            }
+            cookies[host]?.let {  builder.addHeader("Cookie", it) }
             it.proceed(builder.build())
         }
 

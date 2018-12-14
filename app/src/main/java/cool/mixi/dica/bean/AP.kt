@@ -75,9 +75,11 @@ data class APEntry (
         status.source = statusNetNoticeInfo.source
         status.external_url = id
         status.statusnet_html = content
-        status.text = content.dicaHTMLFilter(false, id.getBaseUri()).dicaRenderData()
+//        status.text = content.dicaHTMLFilter(false, id.getBaseUri()).dicaRenderData()
         status.attachments = link.toAttachments()
         status.apEntry = this
+        status.text = content.dicaHTMLFilter(false, id.getBaseUri())
+        FriendicaUtil.statusPreProcess(status)
         return status
     }
 }

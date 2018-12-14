@@ -5,10 +5,6 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.PopupMenu
-import androidx.recyclerview.widget.RecyclerView
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
@@ -24,9 +20,10 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
-import com.bumptech.glide.Priority
-import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import cool.mixi.dica.App
@@ -60,7 +57,6 @@ import java.util.*
 import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 //TODO: do to much data process on adapter, should refactor later...
@@ -97,6 +93,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
 
     private val requestOptions = RequestOptions()
         .fitCenter()
+        .skipMemoryCache(true)
         .transforms(RoundedCorners(16))!!
 
     private val requestOptionsGif = RequestOptions()
@@ -276,7 +273,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             val bold = StyleSpan(Typeface.BOLD)
             var sizeStr = likes.size.toString()
             var likeTxt = context.getString(R.string.likes_counter, likes.size.toString())
-            var color = ForegroundColorSpan(context.getColor(R.color.like_counter))
+            var color = ForegroundColorSpan(ContextCompat.getColor(context, R.color.like_counter))
             var sp = SpannableString(likeTxt)
             sp.setSpan(color, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
             sp.setSpan(bold, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
@@ -613,14 +610,6 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
         if(parent == null || status.text == null) return
         parent.removeAllViews()
 
-        // encode proxy photo if exists
-        var tmpPartialPhoto = HashMap<String, String>()
-        var displayedUrl = ArrayList<String>()
-        status.attachments?.forEach {
-            var partialUrl = FriendicaUtil.getProxyUrlPartial(it.url)
-            tmpPartialPhoto[partialUrl] = it.url
-        }
-
         // Style: Background
         if(status.text.startsWith("♲")){
             parent.background = recyclingBG
@@ -641,25 +630,13 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             }
 
             when {
-                displayedUrl.contains(newIt.urlEscapeQueryAndHash()) -> {}
                 newIt.startsWith("http", true) -> {
                     if(isPureText){
                         renderText(parent, txtAr)
                         txtAr.clear()
                     }
                     isPureText = false
-                    displayedUrl.add(it.urlEscapeQueryAndHash())
                     renderUrl(parent, status, newIt)
-
-                    // URL type2
-                    FriendicaUtil.getProxyUrlPartial2(newIt).let {
-                        it.isNullOrEmpty().let { that ->
-                            if(!that) {
-                                tmpPartialPhoto[it] = it
-                                displayedUrl.add(it)
-                            }
-                        }
-                    }
                 }
                 else -> {
                     isPureText = true
@@ -670,19 +647,8 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
         renderText(parent, txtAr)
 
         // Style: Extra photos (show extra attachment photo, if not wrap into status.text)
-        tmpPartialPhoto.keys.forEach {
-            var photoUrl = tmpPartialPhoto[it]
-            var photoDisplayed = false
-            for(that in displayedUrl) {
-                if(that.contains(it)){
-                    photoDisplayed = true
-                    break
-                }
-            }
-
-            if(!photoDisplayed && !displayedUrl.contains(photoUrl)){
-                renderUrl(parent, status, photoUrl!!)
-            }
+        status.attachments?.forEach {
+            renderUrl(parent, status, it.url!!)
         }
     }
 
@@ -782,7 +748,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             var strNew = str.replaceFirst("> ".toRegex(), "").trim()
             val start = s.indexOf(str)
             val end = start+strNew.length
-            if(start > 0 && end <= s.length) {
+            if(start >= 0 && end <= s.length) {
                 indexAr.add(arrayOf(start, end).toIntArray())
                 s = s.replace(str, strNew, true)
             }
@@ -866,7 +832,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
         childParams.setMargins(0, 20, 0, 20)
         view.layoutParams = childParams
 
-        Glide.with(context.applicationContext).load(meta.icon).into(view.site_avatar)
+        Glide.with(context.applicationContext).load(meta.icon).apply(RequestOptions().skipMemoryCache(true)).into(view.site_avatar)
         if(meta.description.isNullOrEmpty()){
             view.site_desc.text = meta.url
         } else {

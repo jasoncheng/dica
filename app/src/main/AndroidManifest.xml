@@ -50,6 +50,8 @@
     <activity android:name=".activity.StatusActivity" />
     <activity android:name=".activity.UserActivity" />
     <activity android:name=".activity.StickerActivity" android:windowSoftInputMode="stateHidden"  />
+    <service android:name=".service.NotificationJonService" android:exported="true"
+             android:permission="android.permission.BIND_JOB_SERVICE" />
   </application>
 
 </manifest>

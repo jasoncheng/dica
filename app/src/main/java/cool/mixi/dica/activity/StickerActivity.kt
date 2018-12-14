@@ -32,7 +32,7 @@ class StickerActivity: BaseActivity(), IStickerPicker {
         } catch (e: Exception) { eLog("${e.message}") }
 
         if (uri?.getQueryParameter("q") == null || uri.getQueryParameter("q") == "null") {
-            PrefUtil.resetStickeUrl()
+            PrefUtil.resetStickerUrl()
             return
         }
 
