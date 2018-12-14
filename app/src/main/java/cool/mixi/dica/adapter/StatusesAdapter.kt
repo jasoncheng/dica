@@ -702,6 +702,16 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             }
         } else {
             val meta = HtmlCrawler.getInstance().get(url)
+
+            // filter different url from same title
+            meta?.title?.let {
+                if(status.displayedTitle.contains(it)) {
+                    status.text = status.text.replace(url, "")
+                    return
+                }
+                status.displayedTitle.add(it)
+            }
+
             if(meta != null){
                 renderWebUrl(parent, meta)
             } else {
