@@ -153,6 +153,11 @@ class IndexActivity : BaseActivity() {
     }
 
     private fun processIntent(){
+        if(intent != null && intent.getBooleanExtra(Consts.EXTRA_NOTIFICATIONS, false)){
+            showNotifications()
+            return
+        }
+
         if(intent == null || intent.action != Intent.ACTION_SEND){ return }
         val dlg = ComposeDialogFragment()
         if("text/plain".equals(intent.type)){
