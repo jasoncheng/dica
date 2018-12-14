@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.IndexActivity
+import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.util.ApiService
 import cool.mixi.dica.util.dLog
 import org.jetbrains.anko.doAsync
@@ -52,9 +53,11 @@ class NotificationJonService: JobService() {
                 }
 
                 val resultIntent = Intent(applicationContext, IndexActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    this.putExtra(Consts.EXTRA_NOTIFICATIONS, true)
                 }
-                val pendingIntent = PendingIntent.getActivity(applicationContext, 0, resultIntent, 0)
+
+                val pendingIntent = PendingIntent.getActivity(applicationContext, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                 val message = getString(R.string.new_notification_count).format("$size")
                 val notification = NotificationCompat.Builder(App.instance.applicationContext)
                     .setSmallIcon(R.drawable.ic_launcher)
