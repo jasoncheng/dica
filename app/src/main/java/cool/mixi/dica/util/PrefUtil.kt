@@ -20,7 +20,7 @@ class PrefUtil {
             setPassword("")
             setSiteIcon("")
             setSiteName("")
-            resetStickeUrl()
+            resetStickerUrl()
             clearSinceId()
         }
 
@@ -89,12 +89,20 @@ class PrefUtil {
             return default().getString("sticker", defaultStickerUri)
         }
 
-        fun resetStickeUrl() {
+        fun resetStickerUrl() {
             setStickerUrl(defaultStickerUri)
         }
 
         fun setStickerUrl(uri: String){
             default().edit().putString("sticker", uri).commit()
+        }
+
+        fun setPollNotification(isEnable: Boolean){
+            default().edit().putBoolean("pollNotification", isEnable).commit()
+        }
+
+        fun isPollNotification(): Boolean {
+            return default().getBoolean("pollNotification", true)
         }
 
         //TODO: ugly here

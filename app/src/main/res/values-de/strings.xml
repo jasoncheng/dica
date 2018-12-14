@@ -56,4 +56,7 @@
   <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
   <string name="index_network_public">Netzwerk</string>
   <string name="new_status_more_than_page_size">mehr als %1$s neue Status</string>
+  <string name="notify_off">Benachrichtigung deaktiviert</string>
+  <string name="new_notification_count">Sie haben %1$s Benachrichtigungen</string>
+  <string name="notify_on">Alle 15 Minuten aktualisiert</string>
 </resources>

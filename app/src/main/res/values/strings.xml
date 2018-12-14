@@ -55,4 +55,7 @@
   <string name="sticker_image_search_only">not support this type of search</string>
   <string name="index_network_public">network</string>
   <string name="new_status_more_than_page_size">more than %1$s new statuses</string>
+  <string name="notify_on">per 15 mins check</string>
+  <string name="notify_off">notification off</string>
+  <string name="new_notification_count">you have %1$s new notification(s)</string>
 </resources>

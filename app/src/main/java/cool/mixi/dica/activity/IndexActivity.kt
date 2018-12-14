@@ -1,5 +1,10 @@
 package cool.mixi.dica.activity
 
+import android.app.NotificationManager
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
@@ -20,10 +25,13 @@ import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Meta
 import cool.mixi.dica.bean.Notification
 import cool.mixi.dica.bean.Profile
+import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.fragment.ComposeDialogFragment
 import cool.mixi.dica.fragment.NotificationDialog
+import cool.mixi.dica.service.NotificationJonService
 import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.activity_main.*
+import org.jetbrains.anko.doAsync
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -34,7 +42,6 @@ import javax.net.ssl.HttpsURLConnection
 
 class IndexActivity : BaseActivity() {
 
-    var notifications: ArrayList<Notification> = ArrayList()
     private val mHandler = Handler()
     private var mNotificationRunnable: NotificationRunnable? = null
     private var snackBar: Snackbar? = null
@@ -42,6 +49,8 @@ class IndexActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setPollNotification()
 
         tabNames = resources.getStringArray(R.array.index_tab)
 
@@ -78,8 +87,7 @@ class IndexActivity : BaseActivity() {
 
         // avatar
         home_avatar.setOnClickListener {
-            val unreadCount = getUnSeenCount()
-            if(unreadCount > 0){
+            if(App.instance.getUnSeenNotificationCount() > 0){
                 showNotifications()
                 return@setOnClickListener
             }
@@ -119,9 +127,21 @@ class IndexActivity : BaseActivity() {
         processIntent()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean Data
+        doAsync {
+            AppDatabase.getInstance().metaDao().expireClean()
+            AppDatabase.getInstance().userDao().expireClean()
+            dLog("User info #${AppDatabase.getInstance().userDao().count()}")
+            dLog("Meta info #${AppDatabase.getInstance().metaDao().count()}")
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         getNotifications()
+        updateUnreadUI()
         vp_index?.currentItem?.let {
             tv_home_page_name.text = tabNames!![it]
         }
@@ -241,9 +261,8 @@ class IndexActivity : BaseActivity() {
         override fun onResponse(call: Call<List<Notification>>, response: Response<List<Notification>>) {
             if(ref.get() == null) { return }
             val activity = ref.get()
-            activity?.notifications?.clear()
-            response.body()?.forEach {
-                activity?.notifications?.add(it)
+            response.body()?.let {
+                App.instance.addNotification(it)
             }
             activity?.getNotificationDialog()?.refreshDataSource()
             activity?.updateUnreadUI()
@@ -252,7 +271,7 @@ class IndexActivity : BaseActivity() {
 
     fun updateUnreadUI() {
         ViewCompat.setElevation(tv_unread, 9.toFloat())
-        val count = getUnSeenCount()
+        val count = App.instance.getUnSeenNotificationCount()
         if(count == 0){
             tv_unread.visibility = View.GONE
         } else {
@@ -268,18 +287,8 @@ class IndexActivity : BaseActivity() {
 
     private fun showNotifications() {
         val dlg = NotificationDialog()
-        dlg.data = notifications
         dlg.myShow(supportFragmentManager, Consts.EXTRA_NOTIFICATIONS)
     }
-
-    private fun getUnSeenCount(): Int {
-        var c = 0
-        notifications.forEach {
-            if(it.seen == 0) c++
-        }
-        return c
-    }
-
 
     // Top SnackBar
     fun showSnackBar(msg: String){
@@ -307,5 +316,31 @@ class IndexActivity : BaseActivity() {
         mNotificationRunnable?.let {
             mHandler.postDelayed(it, 5000)
         }
+    }
+
+    fun setPollNotification(){
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
+        val service = ComponentName(applicationContext, NotificationJonService::class.java)
+        val schedule = applicationContext.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        val isPollEnable = PrefUtil.isPollNotification()
+        if(!isPollEnable){
+            schedule.cancelAll()
+            dLog("schedule cancelAll")
+            return
+        }
+
+        if(isPollEnable && isSchedule(schedule)){
+            dLog("already schedule")
+            return
+        }
+        val jobInfo = JobInfo.Builder(NotificationJonService.jobId, service).setPeriodic(15 * 60 * 1000).build()
+        schedule.schedule(jobInfo)
+    }
+
+    private fun isSchedule(scheduler: JobScheduler): Boolean {
+        scheduler.allPendingJobs.forEach {
+            if(it.id == NotificationJonService.jobId) return true
+        }
+        return false
     }
 }

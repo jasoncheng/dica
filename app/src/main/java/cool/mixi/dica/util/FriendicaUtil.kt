@@ -197,7 +197,7 @@ class FriendicaUtil {
                         val att = it.next()
                         val urlContain = FriendicaUtil.getProxyUrlPartial(att.url)
 
-                        if(att.url.contains("feedburner", true)) it.remove()
+                        if(att.url.contains("feed burner", true)) it.remove()
                         if(url.contains(urlContain, true)) it.remove()
                         if(displayedUrl.contains(att.url)) it.remove()
                     }
