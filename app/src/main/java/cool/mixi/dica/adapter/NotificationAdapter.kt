@@ -10,6 +10,7 @@ import com.bumptech.glide.request.RequestOptions
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.StatusActivity
+import cool.mixi.dica.activity.UserActivity
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.fragment.NotificationDialog
 import cool.mixi.dica.util.FriendicaUtil
@@ -51,14 +52,20 @@ class NotificationAdapter(private val fragment: NotificationDialog)
     private fun goToStatusPage(view: View) {
         val pos = view.tag as? Int ?: return
         val notification = App.instance.notifications[pos]
-        if(notification.otype != Consts.OTYPE_ITEM){
-            App.instance.toast(fragment.getString(R.string.not_implement_yet))
-            return
+        when {
+            notification.otype == Consts.OTYPE_ITEM -> {
+                val intent = Intent(fragment.context, StatusActivity::class.java)
+                intent.putExtra(Consts.ID_STATUS, notification.parent)
+                fragment.startActivity(intent)
+            }
+            notification.otype == Consts.OTYPE_INTRO -> {
+                val intent = Intent(fragment.context, UserActivity::class.java)
+                intent.putExtra(Consts.EXTRA_USER_NAME, notification.name)
+                fragment.startActivity(intent)
+            }
+            else -> App.instance.toast(fragment.getString(R.string.not_implement_yet))
         }
 
-        val intent = Intent(fragment.context, StatusActivity::class.java)
-        intent.putExtra(Consts.ID_STATUS, notification.parent)
-        fragment.startActivity(intent)
         FriendicaUtil.seen(notification.id, null)
         notification.seen = 1
         notifyItemChanged(pos)

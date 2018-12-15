@@ -84,6 +84,9 @@ interface ApiService {
     @GET("users/show")
     fun usersShow(@Query("user_id") user_id: String): Call<User>
 
+    @GET("users/search")
+    fun usersSearch(@Query("q") q: String): Call<List<User>>
+
     @POST("friendica/activity/like")
     @FormUrlEncoded
     fun like(@Field("id") id: Int): Call<String>
