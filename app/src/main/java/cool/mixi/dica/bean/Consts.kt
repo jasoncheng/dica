@@ -17,6 +17,7 @@ object Consts {
     const val REQ_STICKER = 987
 
     const val OTYPE_ITEM = "item"
+    const val OTYPE_INTRO = "intro"
 
     const val FRIENDICA_WEB = "https://friendi.ca"
     const val MIXI_URL = "http://dica.mixi.cool"
@@ -33,6 +34,7 @@ object Consts {
     const val EXTRA_PHOTO_URI = "photoUri"
     const val EXTRA_USER = "user"
     const val EXTRA_USER_ID = "userId"
+    const val EXTRA_USER_NAME = "userName"
     const val EXTRA_USER_EMAIL = "email"
     const val EXTRA_USER_URL = "url"
     const val EXTRA_PHOTOS = "photos"
