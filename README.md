@@ -50,6 +50,6 @@ This is a very very very simple [Friendica](https://friendi.ca)  android client,
 
 * [Domain](http://dica.mixi.cool)
 
-##LICENSE
+## LICENSE
 
 DiCa is released under the The GNU General Public License v3.0 (GPLv3)
