@@ -7,6 +7,8 @@ import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.*
 import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.activity_user.*
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -20,6 +22,7 @@ class UserActivity: BaseActivity(), IStatusDataSource {
     var userId: String? = null
     var userEmail: String? = null
     var userUrl: String? = null
+    var userName: String? = null
     var isOffSiteSN = false
     var userNotFoundStr = ""
     var serviceNotAvailable = ""
@@ -39,19 +42,36 @@ class UserActivity: BaseActivity(), IStatusDataSource {
         userId = intent.getStringExtra(Consts.EXTRA_USER_ID)
         userEmail = intent.getStringExtra(Consts.EXTRA_USER_EMAIL)
         userUrl = intent.getStringExtra(Consts.EXTRA_USER_URL)
+        userName = intent.getStringExtra(Consts.EXTRA_USER_NAME)
+
         if(user != null){
             dLog(user.toString())
             initLoad()
             return
         }
 
-        if(userId == null && user == null && userEmail == null){
+        if(userId == null && user == null && userEmail == null && userName == null){
             finish()
             return
         }
 
         when {
             userId != null -> ApiService.create().usersShow(userId!!).enqueue(CallbackUser(this))
+            userName != null -> {
+                doAsync {
+                    val users = ApiService.create().usersSearch(userName!!).execute()
+                    try {
+                        user = users.body()!![0]
+                    }catch (e:Exception){
+                        App.instance.toast(userNotFoundStr)
+                        finish()
+                        return@doAsync
+                    }
+                    uiThread {
+                        initLoad()
+                    }
+                }
+            }
             userEmail != null -> getUserInfoFromEmail(userEmail!!)
             userUrl != null -> {
                 val email = userUrl!!.possibleNetworkAcctFromUrl()

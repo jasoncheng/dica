@@ -24,7 +24,8 @@ data class Status(
     var avatar:String = "",
 
     // extra params
-    var enableNSFW: Boolean = false
+    var enableNSFW: Boolean = false,
+    var displayedTitle: HashMap<String,String> = HashMap()
 ) {
     override fun equals(other: Any?): Boolean {
         if(other?.javaClass != this.javaClass)  return false

@@ -31,6 +31,7 @@ class NotificationDialog: BaseDialogFragment(), androidx.swiperefreshlayout.widg
         rootView = inflater?.inflate(R.layout.dlg_notifications, container)
         rootView?.table?.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         rootView?.table?.adapter = NotificationAdapter(this)
+        rootView?.table?.adapter?.notifyDataSetChanged()
         rootView?.swipeRefreshLayout?.setOnRefreshListener(this)
         rootView?.all_seen?.setOnClickListener { markAllAsRead() }
         var decoration = androidx.recyclerview.widget.DividerItemDecoration(

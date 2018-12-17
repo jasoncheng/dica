@@ -6,6 +6,7 @@
 /build
 /captures
 .externalNativeBuild
+app/release
 app/release.keystore
 app/build.gradle.release
 app/build.gradle.debug
