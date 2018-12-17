@@ -29,7 +29,8 @@ interface ApiService {
         @Field("in_reply_to_status_id") in_reply_to_status_id: Int,
         @Field("lat") lat: String,
         @Field("long") long: String,
-        @Field("group_allow[]") group_allow: ArrayList<Int>?): Call<String>
+        @Field("group_allow[]") group_allow: ArrayList<Int>?,
+        @Field("media_ids") media_ids:String): Call<String>
 
 //    @POST("statuses/update_with_media")
 //    @Multipart
