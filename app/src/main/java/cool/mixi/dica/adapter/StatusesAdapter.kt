@@ -516,7 +516,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             if(isOffSiteSN){
                 val text = it.toFriendicaShareText()
                 ApiService.create()
-                    .statusUpdate(context.getString(R.string.app_name), text, 0, "", "", ArrayList())
+                    .statusUpdate(context.getString(R.string.app_name), text, 0, "", "", ArrayList(), "")
                     .enqueue(StatusUpdateCallback(dlg, refAdapter))
                 return
             }

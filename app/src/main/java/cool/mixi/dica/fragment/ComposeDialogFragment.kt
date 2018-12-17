@@ -392,6 +392,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         val ref = WeakReference<ComposeDialogFragment>(this)
         doAsync {
             val commonError = ref.get()!!.commonError!!
+            var firstMediaId: String = ""
             var errorMsgs:StringBuffer = StringBuffer()
             ref.get()?.mediaUris?.forEachIndexed { index, it ->
                 if(it.startsWith("http", true)){
@@ -414,8 +415,12 @@ class ComposeDialogFragment: BaseDialogFragment() {
                     try {
                         val media = Gson().fromJson(response?.body(), Media::class.java)
                         dLog("Media ${media}")
+                        if(media != null && media.media_id > 0 && firstMediaId.isEmpty()){
+                            firstMediaId = "${media.media_id}"
+                        }
                         media.image?.friendica_preview_url?.let { that ->
                             text = "$text\n[img]$that[/img]\n"
+                            firstMediaId = ""
                         }
                     }catch (e: Exception){
                         val msg = "#$index - ${response.body()}\n"
@@ -434,16 +439,16 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
                 ref.get()?.activity?.let { that -> (that as BaseActivity).loaded() }
 
+                //TODO: after 2019/03 new API official, this part of [if] should be interrupted by return
                 if(errorMsgs.isNotEmpty()){
                     val snackBar = Snackbar.make(bt_submit
                         , errorMsgs.toString(), Snackbar.LENGTH_INDEFINITE)
                     snackBar.setAction(android.R.string.ok) { snackBar.dismiss() }
                     snackBar.show()
-                    return@uiThread
                 }
 
                 ApiService.create()
-                    .statusUpdate("$source", "$text", inReplyStatusId, "$lat", "$long", targetGroup)
+                    .statusUpdate("$source", "$text", inReplyStatusId, "$lat", "$long", targetGroup, firstMediaId)
                     .enqueue(StatusUpdateCallback(ref.get()!!))
             }
         }

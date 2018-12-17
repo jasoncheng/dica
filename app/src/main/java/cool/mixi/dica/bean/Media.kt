@@ -1,7 +1,7 @@
 package cool.mixi.dica.bean
 
 data class Media(
-    var media_id: Int,
+    var media_id: Int = 0,
     var size:Int,
     var image: MediaImage?
 )
