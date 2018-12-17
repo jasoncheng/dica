@@ -58,4 +58,5 @@
   <string name="notify_on">per 15 mins check</string>
   <string name="notify_off">notification off</string>
   <string name="new_notification_count">you have %1$s new notification(s)</string>
+  <string name="max_photo_number_upload">maximum photo upload limited to %1$s photos</string>
 </resources>

@@ -5,11 +5,12 @@ object Consts {
     const val DB_NAME = "DiCa"
     const val TTL_META = 60 * 24 * 3
     const val TTL_USER = 60 * 24 * 5
-    const val POLL_NOTIFICATION_INTERVAL = 30L
+    const val UPLOAD_MAX_PHOTOS = 3
 
     const val COMPRESS_PHOTO_QUALITY = 70
     const val API_CONNECT_TIMEOUT = 60.toLong()
-    const val API_READ_TIMEOUT = 60.toLong()
+    const val API_READ_TIMEOUT = 120.toLong()
+    const val API_WRITE_TIMEOUT = 120.toLong()
     const val CACHE_SIZE_IN_MB = 10
     const val TIMELINE_PAGE_SIZE = 20
 

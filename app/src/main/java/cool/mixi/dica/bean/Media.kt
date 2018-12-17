@@ -9,5 +9,6 @@ data class Media(
 data class MediaImage(
     var w: Int,
     var h: Int,
-    var image_type: String
+    var image_type: String,
+    var friendica_preview_url: String?
 )
