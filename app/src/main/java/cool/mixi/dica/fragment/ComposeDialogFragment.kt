@@ -4,11 +4,15 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.location.Address
 import android.location.Location
 import android.os.Bundle
+import android.os.Environment
 import android.view.*
 import android.widget.EditText
 import android.widget.ImageView
@@ -16,6 +20,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.hendraanggrian.appcompat.socialview.Mention
 import com.hendraanggrian.appcompat.widget.MentionArrayAdapter
@@ -43,30 +48,34 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.lang.ref.WeakReference
-import java.util.*
 import javax.net.ssl.HttpsURLConnection
 
 class ComposeDialogFragment: BaseDialogFragment() {
 
 
-    // for photo from device
-    private var mediaFile: File? = null
+    var tmpMediaUri:ArrayList<String> = ArrayList()
 
-    // for Sticker
-    private var mediaUrl: String? = null
+    private var mediaUris: ArrayList<String> = ArrayList()
 
     var roomView: View? = null
     var lastAddress: Address? = null
 
-    private var in_reply_status_id: Int? = 0
-    private var in_reply_screenname: String? = ""
+    private var inReplyStatusId: Int = 0
+    private var inReplyScreenName: String? = ""
     private var editText: EditText? = null
     private var commonError: String? = null
     var sharedText: String? = null
-    var sharedFile: String? = null
+    private var previewImageBoxBg: Drawable? = null
+    private var maxPhotoUploadNumber: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        previewImageBoxBg = context?.getDrawable(R.drawable.photo_preview_box)
+        maxPhotoUploadNumber = getString(R.string.max_photo_number_upload).format("${Consts.UPLOAD_MAX_PHOTOS}")
+        commonError = getString(R.string.common_error)
+
         dialog.let {
             setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomDialog)
             it.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -90,17 +99,23 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
 
         roomView?.iv_emoji?.setOnClickListener {
+            if(isOverPhotosLimit()) return@setOnClickListener
             val intent = Intent(context, StickerActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
             startActivityForResult(intent, Consts.REQ_STICKER)
         }
+
         roomView?.iv_from_album?.setOnClickListener {
+            if(isOverPhotosLimit()) return@setOnClickListener
             Nammu.askForPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE, galleryPermCallback)
         }
+
         roomView?.iv_from_camera?.setOnClickListener {
+            if(isOverPhotosLimit()) return@setOnClickListener
             Nammu.askForPermission(activity,
             arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), cameraPermCallback)
         }
+
         roomView?.iv_location?.setOnClickListener {
             if(lastAddress != null){
                 (it as TextView).text = ""
@@ -114,11 +129,14 @@ class ComposeDialogFragment: BaseDialogFragment() {
         roomView?.rb_public?.setOnClickListener{ App.instance.selectedGroup.clear() }
         roomView?.rb_assign?.setOnClickListener{ choiceGroupDialog() }
 
+        // clear childView first
+        roomView?.photo_box?.removeAllViews()
+
         // Reply to?
         if(arguments != null){
-            in_reply_screenname = arguments?.getString(Consts.EXTRA_IN_REPLY_USERNAME)
-            in_reply_status_id = arguments?.getInt(Consts.EXTRA_IN_REPLY_STATUS_ID, 0)
-            var str = getString(R.string.status_reply_to).format(in_reply_screenname)
+            inReplyScreenName = arguments?.getString(Consts.EXTRA_IN_REPLY_USERNAME)
+            inReplyStatusId = arguments?.getInt(Consts.EXTRA_IN_REPLY_STATUS_ID, 0)!!
+            var str = getString(R.string.status_reply_to).format(inReplyScreenName)
             roomView?.group_reply?.visibility = View.VISIBLE
             roomView?.tv_reply_to?.text = str
         }
@@ -148,7 +166,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == Consts.REQ_PHOTO_PATH) {
             data?.getStringExtra(Consts.EXTRA_PHOTO_URI)?.let {
-                addPhotoPreview(File(it))
+                addPhotoPreview(it)
             }
             return
         } else if(requestCode == Consts.REQ_STICKER){
@@ -159,9 +177,10 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sharedFile?.let {
-            addPhotoPreview(File(it))
-        }
+
+        tmpMediaUri.iterator().forEach { addPhotoPreview(compressFilePath(it)) }
+        tmpMediaUri.clear()
+
         sharedText?.let { str ->
             editText?.let { it.setText(str) }
         }
@@ -176,6 +195,15 @@ class ComposeDialogFragment: BaseDialogFragment() {
                 et_text.mentionAdapter = adapter
             }
         }
+    }
+
+    private fun isOverPhotosLimit():Boolean {
+        val c = roomView!!.photo_box.childCount
+        val oversize = c >= Consts.UPLOAD_MAX_PHOTOS
+        if(oversize) {
+            App.instance.toast(maxPhotoUploadNumber!!)
+        }
+        return oversize
     }
 
     private fun setMyLocation() {
@@ -200,7 +228,22 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     private val imageSelectedCallback = object : DefaultCallback() {
         override fun onImagesPicked(p0: MutableList<File>, p1: EasyImage.ImageSource?, p2: Int) {
-            handleImagePick(p0[0])
+            if(isOverPhotosLimit()){
+                return
+            }
+
+            if(p0.size == 1){
+                handleImagePick(p0[0])
+                return
+            }
+
+            p0.forEach {
+                if(isOverPhotosLimit()){
+                    return@forEach
+                }
+
+                addPhotoPreview(compressFilePath(it.absolutePath))
+            }
         }
 
         override fun onImagePickerError(e: Exception?, source: EasyImage.ImageSource?, type: Int) {
@@ -256,42 +299,39 @@ class ComposeDialogFragment: BaseDialogFragment() {
         fg.myShow(fragmentManager, Consts.FG_PHOTO_CROP)
     }
 
-    private fun getMediaPreview(): ImageView {
+    private fun setMediaPreviewBox(): ImageView {
         val box = roomView?.photo_box as ViewGroup
         var imgView = ImageView(this.context)
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT)
+        lp.setMargins(10, 10, 10, 10)
         imgView.layoutParams = lp
         imgView.layoutParams.height = 200
         imgView.layoutParams.width = 200
-        imgView.setBackgroundColor(Color.LTGRAY)
-        box.removeAllViews()
-        box.addView(imgView)
-        box.visibility = View.VISIBLE
+        imgView.setTag(R.id.preview_image_pos, box.childCount)
+        imgView.background = previewImageBoxBg
         imgView.setOnClickListener {
             (it.parent as ViewGroup).removeView(it)
-            mediaFile = null
-            mediaUrl = null
-            box.visibility = View.GONE
+            val pos = it.getTag(R.id.preview_image_pos)
+            mediaUris.remove(pos)
+            if(box.childCount == 0) box.visibility = View.GONE
         }
+        box.addView(imgView)
         return imgView
     }
 
-    fun addPhotoPreview(url: String){
-        mediaFile = null
-        mediaUrl = url
-        Glide.with(context!!).load(url).into(getMediaPreview())
-    }
-
-    private fun addPhotoPreview(imageFile: File){
-        mediaFile = imageFile
-        mediaUrl = null
-        val imgView = getMediaPreview()
-        dLog("mediaPath: ${imageFile.absoluteFile}")
-        if(imageFile.absoluteFile.endsWith("mp4")) {
-            Glide.with(context!!).asBitmap().load(imageFile).into(imgView!!)
+    private fun addPhotoPreview(uri: String){
+        mediaUris.add(uri)
+        val imgView = setMediaPreviewBox()
+        if(uri.startsWith("http", true)){
+            Glide.with(context!!).load(uri).into(imgView)
         } else {
-            Glide.with(context!!).load(imageFile).into(imgView!!)
+            val imageFile = File(uri)
+            if(imageFile.absoluteFile.endsWith("mp4")) {
+                Glide.with(context!!).asBitmap().load(imageFile).into(imgView!!)
+            } else {
+                Glide.with(context!!).load(imageFile).into(imgView!!)
+            }
         }
     }
 
@@ -336,12 +376,6 @@ class ComposeDialogFragment: BaseDialogFragment() {
         (activity as BaseActivity).loading(getString(R.string.status_saving))
 
         var text = et_text.text.toString()
-        mediaUrl.isNullOrEmpty().let {
-            if(!it){
-                text = "$text\n[img]$mediaUrl[/img]"
-            }
-        }
-
         var lat = ""
         var long = ""
         var source = activity?.getString(R.string.app_name)
@@ -354,48 +388,63 @@ class ComposeDialogFragment: BaseDialogFragment() {
         } else {
             App.instance.selectedGroup
         }
-        val status = RequestBody.create(MediaType.parse("multipart/form-data"), text)
-        val statusIdBody = RequestBody.create(MediaType.parse("multipart/form-data"), "$in_reply_status_id")
-        val sourceBody = RequestBody.create(MediaType.parse("multipart/form-data"), source)
-        val latBody = RequestBody.create(MediaType.parse("multipart/form-data"), lat)
-        val longBody = RequestBody.create(MediaType.parse("multipart/form-data"), long)
-        var map = LinkedHashMap<String, RequestBody>()
-        targetGroup.forEach {
-            map["group_allow[]"] = RequestBody.create(MediaType.parse("text/plain"), it.toString())
-        }
 
         val ref = WeakReference<ComposeDialogFragment>(this)
         doAsync {
-            var mediaIds:RequestBody? = null
-            var response: Response<String>? = null
-            ref.get()?.mediaFile?.let {
-                val requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), it)
-                val body = MultipartBody.Part.createFormData("media", it.name, requestFile)
-                response= ApiService.create().mediaUpload(body).execute()
-            }
-            uiThread {
+            val commonError = ref.get()!!.commonError!!
+            var errorMsgs:StringBuffer = StringBuffer()
+            ref.get()?.mediaUris?.forEachIndexed { index, it ->
+                if(it.startsWith("http", true)){
+                    text = "$text\n[img]$it[/img]\n"
+                    return@forEachIndexed
+                }
+
+                val file = File(it)
+                dLog("fileSize: ${file.length()}")
+                val requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file)
+                val body = MultipartBody.Part.createFormData("media", file.name, requestFile)
                 try {
-                    if(response == null || response?.isSuccessful != true){
-                        ref.get()?.commonError?.let { that -> App.instance.toast(that.format(response?.body())) }
-                    } else {
-                        dLog("=======> media file ${response?.body()}")
-                        val media = Gson().fromJson(response?.body(), Media::class.java)
-                        mediaIds = RequestBody.create(MediaType.parse("multipart/form-data"), "${media.media_id}")
+                    val response= ApiService.create().mediaUpload(body).execute()
+                    dLog("media/upload: ${response.body()}, ${response.message()}, ${response.errorBody().toString()}")
+                    if(response == null || !response.isSuccessful){
+                        errorMsgs.append(" #$index - ${response?.body()}\n")
+                        return@forEachIndexed
                     }
 
-                    ApiService.create().statusUpdate(sourceBody, status, statusIdBody, latBody, longBody, map, mediaIds).enqueue(
-                        StatusUpdateCallback(ref.get()!!)
-                    )
-                }catch (e: Exception){
-                    response?.body().let { that ->
-                        if(that != null){
-                            App.instance.toast(that)
-                        } else {
-                            ref.get()?.commonError?.format("${e.message}")?.let { w -> App.instance.toast(w) }
+                    try {
+                        val media = Gson().fromJson(response?.body(), Media::class.java)
+                        dLog("Media ${media}")
+                        media.image?.friendica_preview_url?.let { that ->
+                            text = "$text\n[img]$that[/img]\n"
                         }
+                    }catch (e: Exception){
+                        val msg = "#$index - ${response.body()}\n"
+                        errorMsgs.append(msg)
+                        eLog("err $msg")
                     }
-                    ref.get()?.activity?.let { that -> (that as BaseActivity).loaded() }
+
+                }catch (e: Exception){
+                    val msg = "#$index - ${e.message}\n"
+                    errorMsgs.append(msg)
+                    eLog("err2 $msg")
                 }
+            }
+
+            uiThread {
+
+                ref.get()?.activity?.let { that -> (that as BaseActivity).loaded() }
+
+                if(errorMsgs.isNotEmpty()){
+                    val snackBar = Snackbar.make(bt_submit
+                        , errorMsgs.toString(), Snackbar.LENGTH_INDEFINITE)
+                    snackBar.setAction(android.R.string.ok) { snackBar.dismiss() }
+                    snackBar.show()
+                    return@uiThread
+                }
+
+                ApiService.create()
+                    .statusUpdate("$source", "$text", inReplyStatusId, "$lat", "$long", targetGroup)
+                    .enqueue(StatusUpdateCallback(ref.get()!!))
             }
         }
     }
@@ -441,9 +490,37 @@ class ComposeDialogFragment: BaseDialogFragment() {
         builder?.create()?.show()
     }
 
-    fun afterGroupSelected(){
+    private fun afterGroupSelected(){
         if(App.instance.selectedGroup.size == 0){
             roomView?.rb_public?.isChecked = true
         }
+    }
+
+    private fun compressFilePath(filePath: String): String {
+        val orgFile = File(filePath)
+        val bitmap: Bitmap = BitmapFactory.decodeFile(filePath)
+        val ext = filePath.substringAfterLast(".", "")
+        val out = Environment.getExternalStorageDirectory().toString() + "/" + Consts.SDCARD_FOLDER_OUT
+        val f3 = File(out)
+        if (!f3.exists()) {
+            f3.mkdirs()
+        }
+
+        var outStream: OutputStream?
+        val targetFile = "$out/${filePath.md5()}.$ext"
+        val file = File("$targetFile")
+        try {
+            outStream = FileOutputStream(file)
+            bitmap!!.compress(Bitmap.CompressFormat.JPEG, Consts.COMPRESS_PHOTO_QUALITY, outStream)
+            outStream!!.close()
+        } catch (e: Exception) {
+            dLog("${e.message}")
+        } finally {
+            file.deleteOnExit()
+        }
+
+        dLog("originalFilePath ${orgFile.absolutePath}: ${orgFile.length()}")
+        dLog("compressFilePath ${file.absolutePath}: ${file.length()}")
+        return file.absolutePath
     }
 }

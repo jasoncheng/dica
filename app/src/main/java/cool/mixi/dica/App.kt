@@ -9,6 +9,7 @@ import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.util.ApiService
 import cool.mixi.dica.util.dLog
 import org.jetbrains.anko.doAsync
+import pl.aprilapps.easyphotopicker.EasyImage
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,6 +33,8 @@ class App: Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        EasyImage.configuration(this).setAllowMultiplePickInGallery(true)
     }
 
     fun getWebFinger(email: String): String? {
