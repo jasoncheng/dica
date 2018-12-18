@@ -12,8 +12,8 @@ android {
         applicationId 'cool.mixi.dica'
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 18121701
-        versionName "0.1.5"
+        versionCode 18121802
+        versionName "0.1.6"
     }
     signingConfigs {
         jason {
