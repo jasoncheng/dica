@@ -433,7 +433,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
                     eLog("err2 $msg")
                 }
             }
-
+            
             uiThread {
                 //TODO: after 2019/03 new API official, this part of [if] should be interrupted by return
                 if(errorMsgs.isNotEmpty()){

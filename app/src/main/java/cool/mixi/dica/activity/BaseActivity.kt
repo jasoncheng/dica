@@ -3,9 +3,9 @@ package cool.mixi.dica.activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.TextView
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.fragment.ComposeDialogFragment
@@ -41,7 +41,7 @@ open class BaseActivity: AppCompatActivity() {
         }
     }
 
-    fun getComposeDialog(): ComposeDialogFragment? {
+    private fun getComposeDialog(): ComposeDialogFragment? {
         return supportFragmentManager.findFragmentByTag(Consts.FG_COMPOSE) as ComposeDialogFragment
     }
 }
