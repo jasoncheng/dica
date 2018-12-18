@@ -39,6 +39,7 @@ object Consts {
     const val EXTRA_USER_EMAIL = "email"
     const val EXTRA_USER_URL = "url"
     const val EXTRA_PHOTOS = "photos"
+    const val EXTRA_SEARCH_TERM = "searchTerm"
     const val EXTRA_PHOTO_INDEX = "photoIndex"
     const val EXTRA_NOTIFICATIONS = "notifications"
     const val EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"

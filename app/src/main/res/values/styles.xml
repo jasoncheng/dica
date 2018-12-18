@@ -9,6 +9,15 @@
         <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 
+    <style name="SearchTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <!--<item name="windowNoTitle">true</item>-->
+        <!--<item name="windowActionBar">false</item>-->
+        <item name="android:windowBackground">@color/colorBackground</item>
+    </style>
+
     <style name="BottomDialog" parent="@style/AppTheme">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
