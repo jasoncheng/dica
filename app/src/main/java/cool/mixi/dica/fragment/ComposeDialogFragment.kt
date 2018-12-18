@@ -12,7 +12,6 @@ import android.graphics.drawable.Drawable
 import android.location.Address
 import android.location.Location
 import android.os.Bundle
-import android.os.Environment
 import android.view.*
 import android.widget.EditText
 import android.widget.ImageView
@@ -436,15 +435,13 @@ class ComposeDialogFragment: BaseDialogFragment() {
             }
 
             uiThread {
-
-                ref.get()?.activity?.let { that -> (that as BaseActivity).loaded() }
-
                 //TODO: after 2019/03 new API official, this part of [if] should be interrupted by return
                 if(errorMsgs.isNotEmpty()){
                     val snackBar = Snackbar.make(bt_submit
                         , errorMsgs.toString(), Snackbar.LENGTH_INDEFINITE)
                     snackBar.setAction(android.R.string.ok) { snackBar.dismiss() }
                     snackBar.show()
+                    ref.get()?.activity?.let { that -> (that as BaseActivity).loaded() }
                 }
 
                 ApiService.create()
@@ -505,15 +502,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
         val orgFile = File(filePath)
         val bitmap: Bitmap = BitmapFactory.decodeFile(filePath)
         val ext = filePath.substringAfterLast(".", "")
-        val out = Environment.getExternalStorageDirectory().toString() + "/" + Consts.SDCARD_FOLDER_OUT
-        val f3 = File(out)
-        if (!f3.exists()) {
-            f3.mkdirs()
-        }
-
         var outStream: OutputStream?
-        val targetFile = "$out/${filePath.md5()}.$ext"
-        val file = File("$targetFile")
+        val file = File.createTempFile(getString(R.string.app_name), ".$ext")
         try {
             outStream = FileOutputStream(file)
             bitmap!!.compress(Bitmap.CompressFormat.JPEG, Consts.COMPRESS_PHOTO_QUALITY, outStream)
