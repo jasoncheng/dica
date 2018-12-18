@@ -378,6 +378,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
         var lat = ""
         var long = ""
         var source = activity?.getString(R.string.app_name)
+        val strUploading = getString(R.string.status_media_uploading)
+        val strStatusPosting = getString(R.string.status_posting)
         lastAddress?.let {
             lat = "${it?.latitude}"
             long = "${it?.longitude}"
@@ -390,9 +392,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
         val ref = WeakReference<ComposeDialogFragment>(this)
         doAsync {
-            val commonError = ref.get()!!.commonError!!
-            var firstMediaId: String = ""
-            var errorMsgs:StringBuffer = StringBuffer()
+            var firstMediaId = ""
+            var errorMsg = StringBuffer()
             ref.get()?.mediaUris?.forEachIndexed { index, it ->
                 if(it.startsWith("http", true)){
                     text = "$text\n[img]$it[/img]\n"
@@ -401,13 +402,19 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
                 val file = File(it)
                 dLog("fileSize: ${file.length()}")
+
                 val requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file)
                 val body = MultipartBody.Part.createFormData("media", file.name, requestFile)
+
+                ref.get()?.let { that ->
+                    uiThread { (that.activity as BaseActivity).loadingState(strUploading.format("${index+1}")) }
+                }
+
                 try {
                     val response= ApiService.create().mediaUpload(body).execute()
                     dLog("media/upload: ${response.body()}, ${response.message()}, ${response.errorBody().toString()}")
                     if(response == null || !response.isSuccessful){
-                        errorMsgs.append(" #$index - ${response?.body()}\n")
+                        errorMsg.append(" #$index - ${response?.body()}\n")
                         return@forEachIndexed
                     }
 
@@ -423,22 +430,28 @@ class ComposeDialogFragment: BaseDialogFragment() {
                         }
                     }catch (e: Exception){
                         val msg = "#$index - ${response.body()}\n"
-                        errorMsgs.append(msg)
+                        errorMsg.append(msg)
                         eLog("err $msg")
                     }
 
                 }catch (e: Exception){
                     val msg = "#$index - ${e.message}\n"
-                    errorMsgs.append(msg)
+                    errorMsg.append(msg)
                     eLog("err2 $msg")
                 }
             }
-            
+
+
+
             uiThread {
+                ref.get()?.let { that ->
+                    (that.activity as BaseActivity).loadingState(strStatusPosting)
+                }
+
                 //TODO: after 2019/03 new API official, this part of [if] should be interrupted by return
-                if(errorMsgs.isNotEmpty()){
+                if(errorMsg.isNotEmpty()){
                     val snackBar = Snackbar.make(bt_submit
-                        , errorMsgs.toString(), Snackbar.LENGTH_INDEFINITE)
+                        , errorMsg.toString(), Snackbar.LENGTH_INDEFINITE)
                     snackBar.setAction(android.R.string.ok) { snackBar.dismiss() }
                     snackBar.show()
                     ref.get()?.activity?.let { that -> (that as BaseActivity).loaded() }
