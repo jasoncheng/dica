@@ -22,7 +22,7 @@ object Consts {
 
     const val FRIENDICA_WEB = "https://friendi.ca"
     const val MIXI_URL = "http://dica.mixi.cool"
-    const val API_HOST = "https://mawa.link"
+    const val API_HOST = "https://meld.de"
     const val ID_STATUS = "statusId"
 
     const val FG_COMPOSE = "compose"
