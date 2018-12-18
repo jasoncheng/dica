@@ -52,7 +52,7 @@ class StatusActivity: BaseActivity(), IStatusDataSource {
         Collections.reverse(data)
         stl?.clear()
         stl?.addAll(data!!)
-        rv_statuses_list.adapter.notifyDataSetChanged()
+        rv_statuses_list.adapter?.notifyDataSetChanged()
     }
 
     override fun sourceOld(): Call<List<Status>>? {

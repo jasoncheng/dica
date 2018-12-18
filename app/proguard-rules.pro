@@ -23,6 +23,8 @@
 
 # Dica
 -keepclassmembers class cool.mixi.dica.bean.** {*;}
+-keep class cool.mixi.dica.view.** {*;}
+
 # Android
 -keep class com.google.**
 -dontwarn com.google.**

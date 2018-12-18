@@ -1,7 +1,7 @@
 package cool.mixi.dica.adapter
 
 import android.content.Intent
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.users_list_item.view.*
 import java.util.*
 
 class UsersAdapter(val data: ArrayList<User>, private val fragment: UsersDialog)
-    : RecyclerView.Adapter<UserViewHolder>() {
+    : androidx.recyclerview.widget.RecyclerView.Adapter<UserViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
         var view = LayoutInflater.from(fragment.context).inflate(R.layout.users_list_item, parent, false)
@@ -48,7 +48,7 @@ class UsersAdapter(val data: ArrayList<User>, private val fragment: UsersDialog)
 
 }
 
-open class UserViewHolder(view: View): RecyclerView.ViewHolder(view) {
+open class UserViewHolder(view: View): androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
     var userName = view.tv_username
     var avatar = view.avatar
 }

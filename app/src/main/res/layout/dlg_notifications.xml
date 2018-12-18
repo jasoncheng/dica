@@ -5,24 +5,39 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-              android:layout_gravity="right"
-              android:padding="8dp"
-              android:id="@+id/all_seen"
-              android:text="@string/mark_all_notifications_seen"/>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:background="#efefef"
+                android:orientation="horizontal"
+                  android:padding="8dp">
 
-    <android.support.v4.widget.SwipeRefreshLayout android:layout_width="match_parent"
-                                                  android:layout_height="match_parent"
-                                                  android:id="@+id/swipeRefreshLayout"
-                                                  app:layout_constraintEnd_toEndOf="parent"
-                                                  app:layout_constraintStart_toStartOf="parent"
-                                                  app:layout_constraintBottom_toBottomOf="parent">
-    <android.support.v7.widget.RecyclerView
+    <TextView android:id="@+id/tv_notify"
+              android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:text="@string/notify_off"
+              android:drawablePadding="4dp"
+              android:layout_marginRight="6dp"
+              android:layout_weight="1"
+              android:padding="2dp"
+              android:drawableLeft="@drawable/notify_off"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:id="@+id/all_seen"
+              android:textAlignment="textEnd"
+              android:layout_weight="1"
+              android:padding="2dp"
+              android:text="@string/mark_all_notifications_seen"/>
+  </LinearLayout>
+
+  <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:layout_width="match_parent"
+                                                         android:layout_height="match_parent"
+                                                         android:id="@+id/swipeRefreshLayout"
+                                                         app:layout_constraintEnd_toEndOf="parent"
+                                                         app:layout_constraintStart_toStartOf="parent"
+                                                         app:layout_constraintBottom_toBottomOf="parent">
+    <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/table"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp" android:layout_marginBottom="8dp"/>
-    </android.support.v4.widget.SwipeRefreshLayout>
+  </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

@@ -21,7 +21,11 @@ data class Status(
     var friendica_activities: FriendicaActivities = FriendicaActivities(),
     var attachments: ArrayList<Attachment>? = ArrayList(),
     var apEntry: APEntry? = APEntry(),
-    var avatar:String = ""
+    var avatar:String = "",
+
+    // extra params
+    var enableNSFW: Boolean = false,
+    var displayedTitle: HashMap<String,String> = HashMap()
 ) {
     override fun equals(other: Any?): Boolean {
         if(other?.javaClass != this.javaClass)  return false

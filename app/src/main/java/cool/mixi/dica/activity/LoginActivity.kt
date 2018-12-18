@@ -1,8 +1,11 @@
 package cool.mixi.dica.activity
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Consts
@@ -17,6 +20,7 @@ import retrofit2.Response
 import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
 
+
 class LoginActivity: BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +29,7 @@ class LoginActivity: BaseActivity() {
 
         et_api.hint = Consts.API_HOST
         bt_login.setOnClickListener {
+            hideKeyboard(this)
             PrefUtil.setUsername(et_username.text.toString())
             PrefUtil.setPassword(et_password.text.toString())
             PrefUtil.setApiUrl(et_api.text.toString())
@@ -51,7 +56,8 @@ class LoginActivity: BaseActivity() {
     }
 
     fun loginSuccess() {
-        var intent = Intent(App.instance.applicationContext, MainActivity::class.java)
+        loaded()
+        var intent = Intent(App.instance.applicationContext, IndexActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
         finish()
@@ -73,6 +79,16 @@ class LoginActivity: BaseActivity() {
         }
     }
 
+    fun hideKeyboard(activity: Activity) {
+        val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        //Find the currently focused view, so we can grab the correct window token from it.
+        var view = activity.currentFocus
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = View(activity)
+        }
+        imm!!.hideSoftInputFromWindow(view!!.windowToken, 0)
+    }
     class MyCallback(activity: LoginActivity): Callback<Profile> {
 
         private val ref = WeakReference<LoginActivity>(activity)

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="index_tab">
-        <item>@string/index_friends_timeline</item>
-        <item>@string/index_public_timeline</item>
-        <item>@string/index_my_timeline</item>
-        <item>@string/index_favorites_timeline</item>
-    </string-array>
+  <string-array name="index_tab">
+    <item>@string/index_friends_timeline</item>
+    <item>@string/index_public_timeline</item>
+    <item>@string/index_network_public</item>
+    <item>@string/index_my_timeline</item>
+    <item>@string/index_favorites_timeline</item>
+  </string-array>
 </resources>

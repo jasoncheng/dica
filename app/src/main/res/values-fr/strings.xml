@@ -6,8 +6,6 @@
   <string name="username">Nutzername</string>
   <string name="password">Passwort</string>
   <string name="loading">"Wird geladen "</string>
-
-  <!-- waitting for translate -->
   <string name="common_error">temporairement incapable d\'utiliser (%1$s)</string>
   <string name="all_data_load">"rien d'autre.. "</string>
   <string name="compose_submit">"soumettre "</string>
@@ -53,4 +51,15 @@
   <string name="menu_delete">"Supprimer globalement "</string>
   <string name="confirm_delete_status">Confirmer l\'état de suppression?</string>
   <string name="processing">processing.....</string>
+  <string name="new_status_since">vous avez %1$s nouveau statut</string>
+  <string name="sticker_image_search_only">supporte pas ce type de recherche</string>
+  <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
+  <string name="index_network_public">réseau</string>
+  <string name="new_status_more_than_page_size">plus de %1$s nouveaux statuts</string>
+  <string name="notify_off">notification désactivée</string>
+  <string name="new_notification_count">Vous avez %1$s notifications</string>
+  <string name="notify_on">Mis à jour toutes les 15 minutes</string>
+  <string name="max_photo_number_upload">téléchargement de photos maximum limité à %1$s photos</string>
+  <string name="status_posting">affichage d\'état ...</string>
+  <string name="status_media_uploading">téléchargement du média n ° %1$s</string>
 </resources>

@@ -2,7 +2,6 @@ package cool.mixi.dica.adapter
 
 import android.content.Intent
 import android.graphics.Color
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,15 +10,14 @@ import com.bumptech.glide.request.RequestOptions
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.StatusActivity
+import cool.mixi.dica.activity.UserActivity
 import cool.mixi.dica.bean.Consts
-import cool.mixi.dica.bean.Notification
 import cool.mixi.dica.fragment.NotificationDialog
 import cool.mixi.dica.util.FriendicaUtil
 import kotlinx.android.synthetic.main.notification_item.view.*
-import java.util.*
 
-class NotificationAdapter(val data: ArrayList<Notification>, private val fragment: NotificationDialog)
-    : RecyclerView.Adapter<NotifyViewHolder>() {
+class NotificationAdapter(private val fragment: NotificationDialog)
+    : androidx.recyclerview.widget.RecyclerView.Adapter<NotifyViewHolder>() {
 
     private val unReadColor = fragment.resources.getColor(R.color.notification_unread)
 
@@ -32,11 +30,11 @@ class NotificationAdapter(val data: ArrayList<Notification>, private val fragmen
     }
 
     override fun getItemCount(): Int {
-        return data.size
+        return App.instance.notifications.size
     }
 
     override fun onBindViewHolder(holder: NotifyViewHolder, position: Int) {
-        var notification = fragment.data?.get(position)
+        var notification = App.instance.notifications?.get(position)
         holder.itemView.tag = position
         if(notification?.seen == 1) {
             holder.itemView.setBackgroundColor(Color.TRANSPARENT)
@@ -53,22 +51,29 @@ class NotificationAdapter(val data: ArrayList<Notification>, private val fragmen
 
     private fun goToStatusPage(view: View) {
         val pos = view.tag as? Int ?: return
-        val notification = data[pos]
-        if(notification.otype != Consts.OTYPE_ITEM){
-            App.instance.toast(fragment.getString(R.string.not_implement_yet))
-            return
+        val notification = App.instance.notifications[pos]
+        when {
+            notification.otype == Consts.OTYPE_ITEM -> {
+                val intent = Intent(fragment.context, StatusActivity::class.java)
+                intent.putExtra(Consts.ID_STATUS, notification.parent)
+                fragment.startActivity(intent)
+            }
+            notification.otype == Consts.OTYPE_INTRO -> {
+                val intent = Intent(fragment.context, UserActivity::class.java)
+                intent.putExtra(Consts.EXTRA_USER_NAME, notification.name)
+                fragment.startActivity(intent)
+            }
+            else -> App.instance.toast(fragment.getString(R.string.not_implement_yet))
         }
 
-        val intent = Intent(fragment.context, StatusActivity::class.java)
-        intent.putExtra(Consts.ID_STATUS, notification.parent)
-        fragment.startActivity(intent)
         FriendicaUtil.seen(notification.id, null)
         notification.seen = 1
         notifyItemChanged(pos)
+        App.instance.checkIfRequireClearAllNotification()
     }
 }
 
-open class NotifyViewHolder(view: View): RecyclerView.ViewHolder(view) {
+open class NotifyViewHolder(view: View): androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
     var msg = view.tv_message
     var date = view.tv_datetime
     var avatar = view.avatar

@@ -2,9 +2,6 @@ package cool.mixi.dica.util
 
 import android.content.Context
 import android.os.Handler
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.StatusActivity
@@ -23,10 +20,10 @@ interface IStatusDataSource {
     fun loaded(data: List<Status>)
 }
 
-class StatusTimeline(val context: Context, val table: RecyclerView,
-                     private val swipeRefreshLayout: SwipeRefreshLayout,
+class StatusTimeline(val context: Context, val table: androidx.recyclerview.widget.RecyclerView,
+                     private val swipeRefreshLayout: androidx.swiperefreshlayout.widget.SwipeRefreshLayout,
                      private val dataSource: IStatusDataSource
-) : SwipeRefreshLayout.OnRefreshListener {
+) : androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
 
     var selfRef: SoftReference<StatusTimeline>? = null
 
@@ -45,12 +42,12 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     var maxId = 0
 
     // Handler
-    var mHandler: Handler? = null
-    var moreRunnable: MoreRunnable? = null
+    private var mHandler: Handler? = null
+    private var moreRunnable: MoreRunnable? = null
     fun init(): StatusTimeline {
         mHandler = Handler()
         selfRef = SoftReference(this)
-        table.layoutManager = LinearLayoutManager(context)
+        table.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         table.adapter = StatusesAdapter(statuses, context)
         table.setOnScrollListener(OnStatusTableScrollListener(selfRef))
         swipeRefreshLayout.setOnRefreshListener(this)
@@ -85,14 +82,12 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
     }
 
     fun loadNewest(callback: IStatusDataSource?){
-        iLog("${dataSource.javaClass.simpleName} loadNewest sinceId $sinceId")
         dataSource.sourceNew()?.enqueue(StatuesCallback(this, true, callback))
     }
 
     class MoreRunnable(private val ref: SoftReference<StatusTimeline>, val callback: WeakReference<IStatusDataSource>?): Runnable {
         override fun run() {
             ref.get()?.let {
-                iLog("${it.dataSource.javaClass.simpleName} loadMore maxId ${it.maxId}")
                 if(callback == null) {
                     it.dataSource.sourceOld()?.enqueue(StatuesCallback(it, false, null))
                 } else {
@@ -126,15 +121,15 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
         mHandler?.postDelayed(moreRunnable, 3000)
     }
 
-    class OnStatusTableScrollListener(private val ref: SoftReference<StatusTimeline>?): RecyclerView.OnScrollListener() {
+    class OnStatusTableScrollListener(private val ref: SoftReference<StatusTimeline>?): androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
         private var lastVisibleItem: Int? = 0
-        override fun onScrollStateChanged(recyclerView: RecyclerView?, newState: Int) {
+        override fun onScrollStateChanged(recyclerView: androidx.recyclerview.widget.RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             ref?.get()?.let {
                 recyclerView?.removeOnScrollListener(this)
             }
 
-            if(newState == RecyclerView.SCROLL_STATE_IDLE &&
+            if(newState == androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE &&
                 lastVisibleItem!! + 1 == recyclerView?.adapter?.itemCount) {
                 ref?.get()?.let {
                     it.loadMore(null)
@@ -142,9 +137,9 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
             }
         }
 
-        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+        override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            val layoutManager = recyclerView?.layoutManager as LinearLayoutManager
+            val layoutManager = recyclerView?.layoutManager as androidx.recyclerview.widget.LinearLayoutManager
             lastVisibleItem = layoutManager.findLastVisibleItemPosition()
         }
     }
@@ -197,16 +192,24 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                 // Bind Address if possible
                 LocationUtil.instance.bindGeoAddress(it, MyBindStatusGeoCallback(act?.selfRef))
 
-                // TODO: Test
-                it.text = it.text.dicaRenderData()
+                FriendicaUtil.filterDuplicateLike(it)
+
+//                it.text = it.text.dicaRenderData()
+                FriendicaUtil.statusPreProcess(it)
+
+                // NotSafeForWork
+                it.enableNSFW = it.text.contains("#nsfw", true)
 
                 // any more sourceOld status ?
                 if(!insertMode && res?.count()!! <= 1 && act.statuses.contains(it)){
                     act.allLoaded = true
-                    act.table.adapter.notifyItemChanged(idx)
+                    act.table.adapter?.notifyItemChanged(idx)
                     return
                 }
             }
+
+            // Cache user
+            res?.let { App.instance.addUserToDB(it) }
 
             // handle data by itself
             if(callback != null){
@@ -216,7 +219,7 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
 
             // no any data
             if(act.statuses.size == 0 && res!!.isEmpty()){
-                act.table.adapter.notifyDataSetChanged()
+                act.table.adapter?.notifyDataSetChanged()
                 return
             }
 
@@ -225,12 +228,12 @@ class StatusTimeline(val context: Context, val table: RecyclerView,
                     if(act.statuses.contains(it)) { return@continuing }
                     act.statuses.add(0, it)
                 }
-                act.table.adapter.notifyDataSetChanged()
+                act.table.adapter?.notifyDataSetChanged()
             } else {
                 res?.forEachIndexed continuing@ { _, it ->
                     if(act.statuses.contains(it)) { return@continuing }
                     act.statuses.add(it)
-                    act.table.adapter.notifyItemInserted(act.table.adapter.itemCount)
+                    act.table.adapter?.notifyItemInserted(act?.table?.adapter?.itemCount ?: 0)
                 }
             }
         }

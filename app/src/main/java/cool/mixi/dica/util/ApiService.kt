@@ -29,18 +29,23 @@ interface ApiService {
         @Field("in_reply_to_status_id") in_reply_to_status_id: Int,
         @Field("lat") lat: String,
         @Field("long") long: String,
-        @Field("group_allow[]") group_allow: ArrayList<Int>?): Call<String>
+        @Field("group_allow[]") group_allow: ArrayList<Int>?,
+        @Field("media_ids") media_ids:String): Call<String>
 
-    @POST("statuses/update_with_media")
+//    @POST("statuses/update_with_media")
+//    @Multipart
+//    fun statusUpdate(
+//        @Part("source") source: RequestBody,
+//        @Part("status") status: RequestBody,
+//        @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
+//        @Part("lat") lat: RequestBody,
+//        @Part("long") long: RequestBody,
+//        @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
+//        @Part("media_ids") mediaIds: RequestBody?): Call<String>
+
+    @POST("media/upload")
     @Multipart
-    fun statusUpdate(
-        @Part("source") source: RequestBody,
-        @Part("status") status: RequestBody,
-        @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
-        @Part("lat") lat: RequestBody,
-        @Part("long") long: RequestBody,
-        @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
-        @Part image: MultipartBody.Part): Call<String>
+    fun mediaUpload(@Part media: MultipartBody.Part): Call<String>
 
     @GET("statuses/show?include_entities=true")
     fun statusShow(@Query("id") id: Int,
@@ -52,6 +57,10 @@ interface ApiService {
 
     @GET("statuses/friends_timeline?exclude_replies=true")
     fun statusFriendsTimeline(@Query("since_id") since_id: String,
+                              @Query("max_id") max_id: String): Call<List<Status>>
+
+    @GET("statuses/networkpublic_timeline?exclude_replies=true")
+    fun statusNetworkTimeline(@Query("since_id") since_id: String,
                               @Query("max_id") max_id: String): Call<List<Status>>
 
     @GET("statuses/user_timeline?exclude_replies=true")
@@ -75,6 +84,9 @@ interface ApiService {
 
     @GET("users/show")
     fun usersShow(@Query("user_id") user_id: String): Call<User>
+
+    @GET("users/search")
+    fun usersSearch(@Query("q") q: String): Call<List<User>>
 
     @POST("friendica/activity/like")
     @FormUrlEncoded
@@ -120,7 +132,7 @@ interface ApiService {
     companion object Factory {
 
         var cookies = HashMap<String, String>()
-        private val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
+        private const val cacheSize = Consts.CACHE_SIZE_IN_MB * 1024 * 1024
 
         private val client: OkHttpClient
             get() {
@@ -149,7 +161,6 @@ interface ApiService {
             it.proceed(request)
         }
 
-
         private val saveCookieInterceptor = Interceptor {
             val host = it.request().url().host()
             val res = it.proceed(it.request())
@@ -157,7 +168,6 @@ interface ApiService {
                 val thisCookie = value[0].split(";".toRegex())[0]
                 if(key.toLowerCase() == "set-cookie" &&
                     (thisCookie.contains("PHPSESSID") || thisCookie.contains("session".toRegex()))){
-//                    dLog("Set-Cookie $thisCookie")
                     cookies[host.toLowerCase()] = thisCookie
                 }
             }
@@ -166,12 +176,9 @@ interface ApiService {
         }
 
         private val addCookieInterceptor = Interceptor { it ->
-            val host = it.request().url().host()
+            val host = it.request().url().host().toLowerCase()
             val builder = it.request().newBuilder()!!
-            cookies[host]?.let {
-//                dLog("Request Header reuse w/ Cookie Cache $host $it")
-                builder.addHeader("Cookie", it)
-            }
+            cookies[host]?.let {  builder.addHeader("Cookie", it) }
             it.proceed(builder.build())
         }
 
@@ -183,7 +190,7 @@ interface ApiService {
             val clientBuilder = OkHttpClient.Builder()
             if(BuildConfig.DEBUG) {
                 val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.BODY
+                interceptor.level = HttpLoggingInterceptor.Level.HEADERS
                 clientBuilder.addInterceptor(interceptor)
             }
 
@@ -191,8 +198,9 @@ interface ApiService {
                 .cache(getCache())
                 .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
-                .addInterceptor(addCookieInterceptor)
+                .writeTimeout(Consts.API_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(saveCookieInterceptor)
+                .addInterceptor(addCookieInterceptor)
                 .addInterceptor(cacheInterceptor)
             return clientBuilder
         }

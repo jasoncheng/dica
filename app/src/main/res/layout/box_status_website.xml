@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             xmlns:app="http://schemas.android.com/apk/res-auto"
-                                             xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-                                             android:layout_marginTop="6dp"
-                                             android:layout_marginBottom="6dp"
-                                             android:layout_marginLeft="2dp"
-                                             android:layout_marginRight="2dp"
-                                             android:background="@drawable/status_website_bg"
-                                             android:padding="4dp"
-                                             android:layout_height="wrap_content">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+                                                   android:layout_marginTop="6dp"
+                                                   android:layout_marginBottom="6dp"
+                                                   android:layout_marginLeft="2dp"
+                                                   android:layout_marginRight="2dp"
+                                                   android:background="@drawable/status_website_bg"
+                                                   android:padding="4dp"
+                                                   android:layout_height="wrap_content">
 
   <ImageView
           android:layout_width="60dp"
@@ -33,4 +33,4 @@
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toEndOf="@+id/site_avatar" android:layout_marginStart="8dp"
           android:textSize="12sp" android:layout_marginTop="4dp"/>
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

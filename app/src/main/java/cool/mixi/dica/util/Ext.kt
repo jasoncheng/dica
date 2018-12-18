@@ -16,9 +16,9 @@ import java.net.URL
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
-fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "=====> $log")
-fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "=====> $log")
-fun Any.dLog(log: String) = Log.d(this::class.java.simpleName, "=====> $log")
+fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "DICA $log")
+fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "DICA $log")
+fun Any.dLog(log: String) = Log.d(this::class.java.simpleName, "DICA $log")
 fun String.md5(): String {
     try {
         val instance: MessageDigest = MessageDigest.getInstance("MD5")
@@ -41,6 +41,15 @@ fun String.md5(): String {
     return ""
 }
 
+fun String.urlEscapeQueryAndHash(): String {
+    val endPos = when {
+        this.indexOf("?") > 0 -> this.indexOf("?")
+        this.indexOf("#") > 0 -> this.indexOf("#")
+        else -> this.length
+    }
+    return this.substring(0, endPos)
+}
+
 fun String.emailGetDomain(): String{
     return this.substring(this.indexOf("@") + 1)
 }
@@ -50,17 +59,11 @@ fun String.glideUrl(): GlideUrl {
     val host = URL(this).host.toLowerCase()
     headersBuilder.addHeader("user-agent", App.instance.getString(R.string.app_name))
     headersBuilder.addHeader("accept", "*/*")
-//    headersBuilder.addHeader("Pragma", "no-cache")
-//    headersBuilder.addHeader("cache-control", "no-cache")
-    ApiService.cookies[host]?.let {
-//        dLog("setCooke w/ image loading $host - $this - $it")
-        headersBuilder.addHeader("Cookie", it)
-    }
+    ApiService.cookies[host]?.let { headersBuilder.addHeader("Cookie", it) }
     return GlideUrl(this, headersBuilder.build())
 }
 
 fun String.possibleNetworkAcctFromUrl(): String {
-    dLog("possibleNetworkAcctFromUrl $this")
     var uri = URL(this)
     return "${this.substring(this.lastIndexOf("/")+1)}@${uri.host}"
 }
@@ -161,10 +164,19 @@ fun String.dicaHTMLFilter(toBBCode: Boolean, baseUri: String): String {
     return sb.toString()
 }
 
-// If URL or Image, newline
+// 1. If URL or Image w/ newline
+// 2. ignore duplicate url
+// 3. *site title + url*
 fun String.dicaRenderData(): String {
+
+    // strip *site title+url*
+    var newStr = this
+    if(newStr.contains("\\*".toRegex()) && newStr.contains("http")){
+        newStr = newStr.replace("\\*([^*]+)\\*".toRegex(), "")
+    }
+
     val ar = ArrayList<String>()
-    this.lines().forEach {
+    newStr.lines().forEach {
         var tmp = it
         var matcher = Patterns.WEB_URL.matcher(it)
         while (matcher.find()){
@@ -174,6 +186,16 @@ fun String.dicaRenderData(): String {
             if(!url.startsWith("http")) continue
             if(it == url) continue
 
+            if(it.endsWith("*")){
+                tmp = tmp.replace("*", "")
+                continue
+            }
+
+            if("*$url" == it){
+                tmp = tmp.replace("*", "")
+                continue
+            }
+
             if(matcher.start() > 0) newUrl = "\n$newUrl"
             if(matcher.end() < it.length) newUrl = "$newUrl\n"
             tmp = tmp.replace(url, newUrl)
@@ -182,6 +204,7 @@ fun String.dicaRenderData(): String {
     }
     val final = ar.joinToString("\n")
     ar.clear()
+    dLog("output $final")
     return final
 }
 
