@@ -57,8 +57,6 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     var tmpMediaUri:ArrayList<String> = ArrayList()
 
-    private var mediaUris: ArrayList<String> = ArrayList()
-
     var roomView: View? = null
     var lastAddress: Address? = null
 
@@ -69,11 +67,15 @@ class ComposeDialogFragment: BaseDialogFragment() {
     var sharedText: String? = null
     private var previewImageBoxBg: Drawable? = null
     private var maxPhotoUploadNumber: String? = null
+    private var strMsgErr:String? = null
+    private var strMsg:String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         previewImageBoxBg = context?.getDrawable(R.drawable.photo_preview_box)
         maxPhotoUploadNumber = getString(R.string.max_photo_number_upload).format("${Consts.UPLOAD_MAX_PHOTOS}")
         commonError = getString(R.string.common_error)
+        strMsgErr = getString(R.string.post_failure)
+        strMsg = getString(R.string.post_success)
 
         dialog.let {
             setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomDialog)
@@ -177,8 +179,15 @@ class ComposeDialogFragment: BaseDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tmpMediaUri.iterator().forEach { addPhotoPreview(compressFilePath(it)) }
-        tmpMediaUri.clear()
+        if(tmpMediaUri.size == 0){
+            // Restore from cache
+            App.instance.mediaUris.forEach { addPhotoPreviewFromLocalCache(it) }
+        } else {
+            // share to DiCa
+            tmpMediaUri.iterator().forEach { addPhotoPreview(compressFilePath(it)) }
+            tmpMediaUri.clear()
+        }
+
 
         sharedText?.let { str ->
             editText?.let { it.setText(str) }
@@ -298,7 +307,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         fg.myShow(fragmentManager, Consts.FG_PHOTO_CROP)
     }
 
-    private fun setMediaPreviewBox(): ImageView {
+    private fun setMediaPreviewBox(uri: String): ImageView {
         val box = roomView?.photo_box as ViewGroup
         var imgView = ImageView(this.context)
         val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -307,21 +316,21 @@ class ComposeDialogFragment: BaseDialogFragment() {
         imgView.layoutParams = lp
         imgView.layoutParams.height = 200
         imgView.layoutParams.width = 200
-        imgView.setTag(R.id.preview_image_pos, box.childCount)
+        imgView.setTag(R.id.preview_image_uri, uri)
         imgView.background = previewImageBoxBg
         imgView.setOnClickListener {
             (it.parent as ViewGroup).removeView(it)
-            val pos = it.getTag(R.id.preview_image_pos)
-            mediaUris.remove(pos)
+            val uri = it.getTag(R.id.preview_image_uri)
+            App.instance.mediaUris.remove(uri)
             if(box.childCount == 0) box.visibility = View.GONE
         }
         box.addView(imgView)
         return imgView
     }
 
-    private fun addPhotoPreview(uri: String){
-        mediaUris.add(uri)
-        val imgView = setMediaPreviewBox()
+    private fun addPhotoPreviewFromLocalCache(uri: String){
+        if(isOverPhotosLimit()){ return  }
+        val imgView = setMediaPreviewBox(uri)
         if(uri.startsWith("http", true)){
             Glide.with(context!!).load(uri).into(imgView)
         } else {
@@ -334,19 +343,35 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
     }
 
+    private fun addPhotoPreview(uri: String){
+        App.instance.mediaUris.add(uri)
+        addPhotoPreviewFromLocalCache(uri)
+    }
+
     class StatusUpdateCallback(fragment: ComposeDialogFragment): Callback<String> {
         private val ref = WeakReference<ComposeDialogFragment>(fragment)
-        private val strMsgErr = ref.get()?.getString(R.string.post_failure)
-        private val strMsg = ref.get()?.getString(R.string.post_success)
         override fun onFailure(call: Call<String>, t: Throwable) {
-            (ref.get()?.activity as BaseActivity).loaded()
-            App.instance.toast(strMsgErr?.format(t.message)!!)
             eLog("${t.message!!}")
+            if(ref.get() == null) return
+
+            ref.get()?.let {
+                App.instance.toast(it.strMsgErr?.format(t.message)!!)
+                (it as BaseActivity).loaded()
+            }
         }
 
         override fun onResponse(call: Call<String>, response: Response<String>) {
+            if(ref.get() == null || ref.get()?.activity == null) {
+                if(response != null && response.code() == HttpsURLConnection.HTTP_OK) {
+                    App.instance.clear()
+                }
+                return
+            }
+
             (ref.get()?.activity as BaseActivity).loaded()
 
+            val strMsgErr = ref.get()?.strMsgErr
+            val strMsg = ref.get()?.strMsg
             val res = response.body().toString()
             dLog("$res, ${response.errorBody()}, ${response.message()}")
 
@@ -367,6 +392,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
             msgToShow?.let {
                 App.instance.toast(msgToShow)
             }
+
+            App.instance.mediaUris.clear()
         }
 
     }
@@ -394,7 +421,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         doAsync {
             var firstMediaId = ""
             var errorMsg = StringBuffer()
-            ref.get()?.mediaUris?.forEachIndexed { index, it ->
+            App.instance.mediaUris?.forEachIndexed { index, it ->
                 if(it.startsWith("http", true)){
                     text = "$text\n[img]$it[/img]\n"
                     return@forEachIndexed
@@ -406,8 +433,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
                 val requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file)
                 val body = MultipartBody.Part.createFormData("media", file.name, requestFile)
 
-                ref.get()?.let { that ->
-                    uiThread { (that.activity as BaseActivity).loadingState(strUploading.format("${index+1}")) }
+                ref.get()?.activity?.let { that ->
+                    uiThread { (that as BaseActivity).loadingState(strUploading.format("${index+1}")) }
                 }
 
                 try {
@@ -444,8 +471,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
 
             uiThread {
-                ref.get()?.let { that ->
-                    (that.activity as BaseActivity).loadingState(strStatusPosting)
+                ref.get()?.activity?.let { that ->
+                    (that as BaseActivity).loadingState(strStatusPosting)
                 }
 
                 //TODO: after 2019/03 new API official, this part of [if] should be interrupted by return

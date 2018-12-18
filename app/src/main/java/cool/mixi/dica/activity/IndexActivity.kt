@@ -131,6 +131,7 @@ class IndexActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // Clean Data
+        App.instance.clear()
         doAsync {
             AppDatabase.getInstance().metaDao().expireClean()
             AppDatabase.getInstance().userDao().expireClean()

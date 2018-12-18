@@ -15,6 +15,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 class App: Application() {
@@ -25,6 +26,8 @@ class App: Application() {
     var selectedGroup: ArrayList<Int> = ArrayList()
     var webFingerUrlCache: HashMap<String, String> = HashMap()
     var cachedUser: ArrayList<User> = ArrayList()
+
+    var mediaUris: ArrayList<String> = ArrayList()
 
     companion object {
         lateinit var instance: App private set
@@ -82,6 +85,10 @@ class App: Application() {
         }
     }
 
+    fun clear(){
+        mediaUris.clear()
+    }
+
     fun checkIfRequireClearAllNotification(){
         if(getUnSeenNotificationCount() > 0) return
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
@@ -101,4 +108,5 @@ class App: Application() {
         }
         return c
     }
+
 }

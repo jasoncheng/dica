@@ -2,5 +2,5 @@
 <resources>
     <item name="media_image" type="id" />
     <item name="avatar_tag" type="id" />
-    <item name="preview_image_pos" type="id" />
+    <item name="preview_image_uri" type="id" />
 </resources>
