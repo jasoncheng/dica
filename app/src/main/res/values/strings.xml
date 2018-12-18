@@ -59,4 +59,6 @@
   <string name="notify_off">notification off</string>
   <string name="new_notification_count">you have %1$s new notification(s)</string>
   <string name="max_photo_number_upload">maximum photo upload limited to %1$s photos</string>
+  <string name="status_media_uploading">media #%1$s uploading</string>
+  <string name="status_posting">status posting...</string>
 </resources>

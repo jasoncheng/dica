@@ -181,7 +181,7 @@ class IndexActivity : BaseActivity() {
             intent?.action == Intent.ACTION_SEND_MULTIPLE
                     && intent.type?.startsWith("image/") == true -> {
                 intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.forEachIndexed { index, parcelable ->
-                    if(index >= Consts.UPLOAD_MAX_PHOTOS -1) return@forEachIndexed
+                    if(index > Consts.UPLOAD_MAX_PHOTOS -1) return@forEachIndexed
                     dlg.tmpMediaUri.add(getRealPathFromURI(parcelable as Uri))
                 }
             }

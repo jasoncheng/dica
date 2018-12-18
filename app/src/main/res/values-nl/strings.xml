@@ -59,4 +59,6 @@
   <string name="new_notification_count">Du har %1$s anmeldelser</string>
   <string name="notify_on">Opdateret hvert 15. minut</string>
   <string name="max_photo_number_upload">Maksimal billedopload begrænset til %1$s billeder</string>
+  <string name="status_posting">statuspostering ...</string>
+  <string name="status_media_uploading">Media # %1$s uploading</string>
 </resources>

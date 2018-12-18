@@ -60,4 +60,6 @@
   <string name="new_notification_count">Vous avez %1$s notifications</string>
   <string name="notify_on">Mis à jour toutes les 15 minutes</string>
   <string name="max_photo_number_upload">téléchargement de photos maximum limité à %1$s photos</string>
+  <string name="status_posting">affichage d\'état ...</string>
+  <string name="status_media_uploading">téléchargement du média n ° %1$s</string>
 </resources>

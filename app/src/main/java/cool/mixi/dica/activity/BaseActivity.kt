@@ -3,9 +3,9 @@ package cool.mixi.dica.activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import android.widget.TextView
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.fragment.ComposeDialogFragment
@@ -15,11 +15,12 @@ open class BaseActivity: AppCompatActivity() {
 
     var stl: StatusTimeline? = null
     var alertDialog:AlertDialog? = null
-
+    var loadingText: TextView? = null
     fun loading(message: String) {
         var builder = AlertDialog.Builder(this)
         var view = layoutInflater.inflate(R.layout.loading_dialog, null)
-        view.findViewById<TextView>(R.id.tv_loading).text = message
+        loadingText = view.findViewById(R.id.tv_loading)
+        loadingText?.text = message
         builder.setCancelable(true)
         builder.setView(view)
         alertDialog = builder.show()
@@ -27,6 +28,12 @@ open class BaseActivity: AppCompatActivity() {
 
     open fun loaded(){
         alertDialog?.dismiss()
+    }
+
+    open fun loadingState(txt: String){
+        loadingText?.let {
+            it.text = txt
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +48,7 @@ open class BaseActivity: AppCompatActivity() {
         }
     }
 
-    fun getComposeDialog(): ComposeDialogFragment? {
+    private fun getComposeDialog(): ComposeDialogFragment? {
         return supportFragmentManager.findFragmentByTag(Consts.FG_COMPOSE) as ComposeDialogFragment
     }
 }
