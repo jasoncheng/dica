@@ -58,7 +58,7 @@
   <string name="notify_off">meldingen uitschakelen</string>
   <string name="new_notification_count">je hebt %1$s meldingen</string>
   <string name="notify_on">Iedere 15 min. updaten</string>
-  <string name="max_photo_number_upload">Je kan maximaal %1$s foto's uploaden</string>
+  <string name="max_photo_number_upload">Je kan maximaal %1$s foto\'s uploaden</string>
   <string name="status_posting">Status aan het posten</string>
   <string name="status_media_uploading">Media # %1$s aan het uploaden</string>
 </resources>
