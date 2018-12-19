@@ -36,8 +36,23 @@ class App: Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-
         EasyImage.configuration(this).setAllowMultiplePickInGallery(true)
+        doAsync {
+            val tags = AppDatabase.getInstance().hashTagDao().getAll()
+            tags?.forEach {
+                dLog("TAG $it")
+            }
+
+//            val metas = AppDatabase.getInstance().metaDao().getAll()
+//            metas?.forEach {
+//                dLog("META $it")
+//            }
+//
+//            val users = AppDatabase.getInstance().userDao().getAll()
+//            users?.forEach {
+//                dLog("USER $it")
+//            }
+        }
     }
 
     fun getWebFinger(email: String): String? {

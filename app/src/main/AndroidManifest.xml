@@ -56,14 +56,7 @@
     <activity android:name=".activity.UserActivity" />
     <activity android:name=".activity.StickerActivity" android:windowSoftInputMode="stateHidden"  />
     <activity android:name=".activity.SearchActivity" android:windowSoftInputMode="stateHidden"
-              android:launchMode="singleTask"
-              android:theme="@style/SearchTheme">
-      <!--<intent-filter>-->
-        <!--<action android:name="android.intent.action.VIEW"/>-->
-        <!--<action android:name="android.intent.action.MAIN"/>-->
-        <!--<category android:name="android.intent.category.LAUNCHER"/>-->
-      <!--</intent-filter>-->
-    </activity>
+              android:theme="@style/SearchTheme" />
     <service android:name=".service.NotificationJonService" android:exported="true"
              android:permission="android.permission.BIND_JOB_SERVICE" />
   </application>

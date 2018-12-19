@@ -5,8 +5,9 @@ object Consts {
     const val DB_NAME = "DiCa"
     const val TTL_META = 60 * 24 * 3
     const val TTL_USER = 60 * 24 * 5
-    const val UPLOAD_MAX_PHOTOS = 3
+    const val TTL_TAG = 60 * 24 * 5
 
+    const val UPLOAD_MAX_PHOTOS = 3
     const val COMPRESS_PHOTO_QUALITY = 70
     const val API_CONNECT_TIMEOUT = 60.toLong()
     const val API_READ_TIMEOUT = 120.toLong()
@@ -16,6 +17,8 @@ object Consts {
 
     const val REQ_PHOTO_PATH = 999
     const val REQ_STICKER = 987
+
+    const val ENABLE_FULL_TEXT_SEARCH = false
 
     const val OTYPE_ITEM = "item"
     const val OTYPE_INTRO = "intro"
@@ -29,8 +32,6 @@ object Consts {
     const val FG_PHOTO_CROP = "crop"
     const val FG_USERS = "users"
     const val FG_PHOTO_VIEWER = "photoViewer"
-
-    const val SDCARD_FOLDER_OUT = "out"
 
     const val EXTRA_PHOTO_URI = "photoUri"
     const val EXTRA_USER = "user"

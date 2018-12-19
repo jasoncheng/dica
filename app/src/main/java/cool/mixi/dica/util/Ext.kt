@@ -15,6 +15,7 @@ import org.jsoup.parser.Parser
 import java.net.URL
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.util.regex.Pattern
 
 fun Any.eLog(log: String) = Log.e(this::class.java.simpleName, "DICA $log")
 fun Any.iLog(log: String) = Log.i(this::class.java.simpleName, "DICA $log")
@@ -167,46 +168,46 @@ fun String.dicaHTMLFilter(toBBCode: Boolean, baseUri: String): String {
 // 1. If URL or Image w/ newline
 // 2. ignore duplicate url
 // 3. *site title + url*
-fun String.dicaRenderData(): String {
-
-    // strip *site title+url*
-    var newStr = this
-    if(newStr.contains("\\*".toRegex()) && newStr.contains("http")){
-        newStr = newStr.replace("\\*([^*]+)\\*".toRegex(), "")
-    }
-
-    val ar = ArrayList<String>()
-    newStr.lines().forEach {
-        var tmp = it
-        var matcher = Patterns.WEB_URL.matcher(it)
-        while (matcher.find()){
-            val url = matcher.group()
-            var newUrl = url.trim()
-
-            if(!url.startsWith("http")) continue
-            if(it == url) continue
-
-            if(it.endsWith("*")){
-                tmp = tmp.replace("*", "")
-                continue
-            }
-
-            if("*$url" == it){
-                tmp = tmp.replace("*", "")
-                continue
-            }
-
-            if(matcher.start() > 0) newUrl = "\n$newUrl"
-            if(matcher.end() < it.length) newUrl = "$newUrl\n"
-            tmp = tmp.replace(url, newUrl)
-        }
-        ar.add(tmp)
-    }
-    val final = ar.joinToString("\n")
-    ar.clear()
-    dLog("output $final")
-    return final
-}
+//fun String.dicaRenderData(): String {
+//
+//    // strip *site title+url*
+//    var newStr = this
+//    if(newStr.contains("\\*".toRegex()) && newStr.contains("http")){
+//        newStr = newStr.replace("\\*([^*]+)\\*".toRegex(), "")
+//    }
+//
+//    val ar = ArrayList<String>()
+//    newStr.lines().forEach {
+//        var tmp = it
+//        var matcher = Patterns.WEB_URL.matcher(it)
+//        while (matcher.find()){
+//            val url = matcher.group()
+//            var newUrl = url.trim()
+//
+//            if(!url.startsWith("http")) continue
+//            if(it == url) continue
+//
+//            if(it.endsWith("*")){
+//                tmp = tmp.replace("*", "")
+//                continue
+//            }
+//
+//            if("*$url" == it){
+//                tmp = tmp.replace("*", "")
+//                continue
+//            }
+//
+//            if(matcher.start() > 0) newUrl = "\n$newUrl"
+//            if(matcher.end() < it.length) newUrl = "$newUrl\n"
+//            tmp = tmp.replace(url, newUrl)
+//        }
+//        ar.add(tmp)
+//    }
+//    val final = ar.joinToString("\n")
+//    ar.clear()
+//    dLog("output $final")
+//    return final
+//}
 
 fun String.emails(): ArrayList<String> {
     var emails = ArrayList<String>()
@@ -215,6 +216,26 @@ fun String.emails(): ArrayList<String> {
         emails.add(matcher.group())
     }
     return emails
+}
+
+fun String.toHashTag(): String {
+    val m = Pattern.compile("#([\\w]+)").matcher(this)
+    while (m.find()){
+       return this.substring(m.start(), m.end())
+    }
+    return this
+}
+
+fun String.toHashTagArray(ar: ArrayList<String>) {
+    val m = Pattern.compile("#([\\w]+)").matcher(this)
+    while (m.find()){
+        val tag = m.group().tagEscapeHash()
+        if(!ar.contains(tag)) ar.add(tag)
+    }
+}
+
+fun String.tagEscapeHash(): String {
+    return this.replace("#", "", true)
 }
 
 fun List<APLink>.getAvatar(): String {

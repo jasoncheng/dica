@@ -7,8 +7,16 @@ import android.widget.EditText
 import androidx.appcompat.widget.SearchView
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Consts
+import cool.mixi.dica.bean.Status
+import cool.mixi.dica.database.AppDatabase
+import cool.mixi.dica.util.ApiService
+import cool.mixi.dica.util.IStatusDataSource
+import cool.mixi.dica.util.StatusTimeline
+import cool.mixi.dica.util.toHashTag
+import kotlinx.android.synthetic.main.activity_search.*
+import retrofit2.Call
 
-class SearchActivity: BaseActivity() {
+class SearchActivity: BaseActivity(), IStatusDataSource {
 
     private var searchView:SearchView? = null
     private var searchEditText:EditText?= null
@@ -41,8 +49,8 @@ class SearchActivity: BaseActivity() {
             searchView = it.actionView as SearchView
             searchEditText = searchView!!.findViewById(androidx.appcompat.R.id.search_src_text)
             searchTerm?.isNullOrEmpty().let { that ->
-                searchEditText?.hint = if(that == null || !that){
-                    "#friendica"
+                searchEditText?.hint = if (that == null || !that) {
+                    "#${getString(R.string.app_name)}"
                 } else {
                     searchTerm
                 }
@@ -50,8 +58,18 @@ class SearchActivity: BaseActivity() {
 
             searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
-                    title = query
-                    it.collapseActionView()
+                    query?.let { that ->
+                        var prefix = ""
+                        if(!Consts.ENABLE_FULL_TEXT_SEARCH && !that.startsWith("#", true)){
+                            prefix = "#"
+                        }
+
+                        title = "$prefix$that".trim()
+                        searchTerm = title.toString()
+                        it.collapseActionView()
+                        resetSearch()
+
+                    }
                     return true
                 }
 
@@ -60,17 +78,51 @@ class SearchActivity: BaseActivity() {
                 }
 
             })
+            searchView?.setOnSearchClickListener {
+                searchEditText!!.setText(searchTerm)
+                searchEditText!!.setSelection(searchTerm!!.length)
+            }
+            searchView?.setOnCloseListener { false }
         }
-
         return super.onCreateOptionsMenu(menu)
     }
 
+    private fun resetSearch(){
+        stl?.let {
+            it.maxId = 0
+            it.sinceId = 0
+        }
+        home_srl.isRefreshing = true
+        stl?.clear()
+        rv_statuses_list.adapter?.notifyDataSetChanged()
+        stl?.loadNewest(null)
+        AppDatabase.upsertHashTag(searchTerm!!)
+    }
+
     private fun processIntent(){
-        searchTerm = intent.getStringExtra(Consts.EXTRA_SEARCH_TERM)
+        searchTerm = intent.getStringExtra(Consts.EXTRA_SEARCH_TERM).toHashTag()
         searchTerm.isNullOrEmpty().let {
             if(it) return
             title = searchTerm
             searchEditText?.setText(searchTerm)
+            AppDatabase.upsertHashTag(searchTerm!!)
+            initLoad()
         }
+    }
+
+    private fun initLoad(){
+        home_srl.isRefreshing = true
+        stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
+        stl?.loadNewest(null)
+    }
+
+    override fun loaded(data: List<Status>) {}
+
+    override fun sourceOld(): Call<List<Status>>? {
+        return ApiService.create().search("$searchTerm", "","${stl?.maxId}")
+    }
+
+    override fun sourceNew(): Call<List<Status>>? {
+        return ApiService.create().search("$searchTerm","${stl?.sinceId}", "")
     }
 }
