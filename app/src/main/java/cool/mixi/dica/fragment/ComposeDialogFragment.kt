@@ -21,7 +21,9 @@ import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import com.hendraanggrian.appcompat.socialview.Hashtag
 import com.hendraanggrian.appcompat.socialview.Mention
+import com.hendraanggrian.appcompat.widget.HashtagArrayAdapter
 import com.hendraanggrian.appcompat.widget.MentionArrayAdapter
 import cool.mixi.dica.App
 import cool.mixi.dica.R
@@ -194,13 +196,17 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
 
         doAsync {
-            val users = AppDatabase.getInstance().userDao().all()
+            val users = AppDatabase.getInstance().userDao().getAll()
+            val tags = AppDatabase.getInstance().hashTagDao().getAll()
             val adapter = MentionArrayAdapter<Mention>(context!!)
+            val adapterHashTag = HashtagArrayAdapter<Hashtag>(context!!)
             uiThread {
                 users?.forEach { that ->
                     adapter.add(Mention(that.getEmail(), "${that.name}", that.profile_image_url_large))
                 }
+                tags?.forEach { that -> adapterHashTag.add(Hashtag("${that.name}")) }
                 et_text.mentionAdapter = adapter
+                et_text.hashtagAdapter = adapterHashTag
             }
         }
     }

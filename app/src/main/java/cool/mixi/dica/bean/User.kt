@@ -16,10 +16,12 @@ import java.util.*
 data class User (
     var id:Int = 0,
     @ColumnInfo(name = "avatar") var profile_image_url_large: String = "",
-    var url: String = "",
-    var screen_name: String = "",
-    var name: String = "",
-    @TypeConverters(TimestampConverter::class) var updatedAt: Date? = Calendar.getInstance().time,
+    @ColumnInfo var url: String = "",
+    @ColumnInfo var screen_name: String = "",
+    @ColumnInfo var name: String = "",
+
+    @TypeConverters(TimestampConverter::class)
+    @ColumnInfo  var updatedAt: Date? = Calendar.getInstance().time,
 
     @Ignore var statusnet_profile_url: String = "",
     @Ignore var friends_count: Int = 0,

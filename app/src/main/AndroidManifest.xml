@@ -55,6 +55,8 @@
     <activity android:name=".activity.StatusActivity" />
     <activity android:name=".activity.UserActivity" />
     <activity android:name=".activity.StickerActivity" android:windowSoftInputMode="stateHidden"  />
+    <activity android:name=".activity.SearchActivity" android:windowSoftInputMode="stateHidden"
+              android:theme="@style/SearchTheme" />
     <service android:name=".service.NotificationJonService" android:exported="true"
              android:permission="android.permission.BIND_JOB_SERVICE" />
   </application>

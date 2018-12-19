@@ -135,8 +135,10 @@ class IndexActivity : BaseActivity() {
         doAsync {
             AppDatabase.getInstance().metaDao().expireClean()
             AppDatabase.getInstance().userDao().expireClean()
+            AppDatabase.getInstance().hashTagDao().expireClean()
             dLog("User info #${AppDatabase.getInstance().userDao().count()}")
             dLog("Meta info #${AppDatabase.getInstance().metaDao().count()}")
+            dLog("HashTag info #${AppDatabase.getInstance().hashTagDao().count()}")
         }
     }
 

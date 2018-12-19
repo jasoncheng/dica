@@ -82,6 +82,12 @@ interface ApiService {
     @GET("friendica/profile/show")
     fun friendicaProfileShow(@Query("profile_id") profile_id: String?): Call<Profile>
 
+    @GET("search")
+    fun search(
+        @Query("q") query: String,
+        @Query("since_id") since_id: String,
+        @Query("max_id") max_id: String): Call<List<Status>>
+
     @GET("users/show")
     fun usersShow(@Query("user_id") user_id: String): Call<User>
 

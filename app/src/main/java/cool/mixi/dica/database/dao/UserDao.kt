@@ -24,5 +24,6 @@ interface UserDao {
     fun count(): Int
 
     @Query("SELECT * FROM user")
-    fun all(): List<User>?
+    fun getAll(): List<User>?
+
 }
