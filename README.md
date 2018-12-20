@@ -51,6 +51,9 @@ This is a very very very simple [Friendica](https://friendi.ca)  android client,
 
 * [Domain](http://dica.mixi.cool)
 
+## SCREENSHOT
+![](https://user-images.githubusercontent.com/540463/50288187-1e3b6c00-04a0-11e9-9fbc-74418644a8e0.png) ![](https://user-images.githubusercontent.com/540463/50288186-1e3b6c00-04a0-11e9-9515-76090d1eb6ed.png) ![](https://user-images.githubusercontent.com/540463/50288185-1da2d580-04a0-11e9-949c-f08fbeef2ccf.png) ![](https://user-images.githubusercontent.com/540463/50288184-1da2d580-04a0-11e9-9a86-9ba97ea8ec67.png) ![](https://user-images.githubusercontent.com/540463/50288182-1da2d580-04a0-11e9-849e-2dd4562f5cf6.png) ![](https://user-images.githubusercontent.com/540463/50288181-1da2d580-04a0-11e9-83a3-4d124cb12c1b.png) ![](https://user-images.githubusercontent.com/540463/50288180-1d0a3f00-04a0-11e9-9718-7477c13d5c64.png) ![](https://user-images.githubusercontent.com/540463/50288179-1d0a3f00-04a0-11e9-8074-12f9a14b8788.png) 
+
 ## LICENSE
 
 DiCa is released under the The GNU General Public License v3.0 (GPLv3)
