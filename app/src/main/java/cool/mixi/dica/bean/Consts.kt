@@ -12,7 +12,7 @@ object Consts {
     const val API_CONNECT_TIMEOUT = 60.toLong()
     const val API_READ_TIMEOUT = 120.toLong()
     const val API_WRITE_TIMEOUT = 120.toLong()
-    const val CACHE_SIZE_IN_MB = 10
+    const val CACHE_SIZE_IN_MB = 30
     const val TIMELINE_PAGE_SIZE = 20
 
     const val REQ_PHOTO_PATH = 999
