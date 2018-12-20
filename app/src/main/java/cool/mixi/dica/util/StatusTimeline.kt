@@ -16,6 +16,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
+import javax.net.ssl.HttpsURLConnection
 
 interface IStatusDataSource {
     fun sourceOld(): Call<List<Status>>?
@@ -173,8 +174,24 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
             }
         }
 
+        fun showEmptyDataFetch(){
+            ref.get()?.table?.adapter?.let {
+                it as StatusesAdapter
+                it.initLoaded = true
+                it.notifyDataSetChanged()
+            }
+        }
+
         override fun onResponse(call: Call<List<Status>>, response: Response<List<Status>>) {
             if(ref.get() == null){
+                return
+            }
+
+            // 錯誤代碼
+            val responseCode = response.code()
+            if(responseCode != HttpsURLConnection.HTTP_OK){
+                App.instance.toast(App.instance.getString(R.string.common_error).format("$responseCode - ${response.message()}"))
+                showEmptyDataFetch()
                 return
             }
 
@@ -230,11 +247,7 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
 
             // no any data
             if(act.statuses.size == 0 && res!!.isEmpty()){
-                act.table.adapter?.let {
-                    it as StatusesAdapter
-                    it.initLoaded = true
-                    it.notifyDataSetChanged()
-                }
+                showEmptyDataFetch()
                 return
             }
 
