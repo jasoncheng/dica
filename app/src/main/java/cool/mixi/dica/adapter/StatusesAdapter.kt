@@ -276,8 +276,10 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             var likeTxt = context.getString(R.string.likes_counter, likes.size.toString())
             var color = ForegroundColorSpan(ContextCompat.getColor(context, R.color.like_counter))
             var sp = SpannableString(likeTxt)
-            sp.setSpan(color, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-            sp.setSpan(bold, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            try {
+                sp.setSpan(color, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                sp.setSpan(bold, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            }catch (e: Exception){}
             tvLikeDetails.visibility = View.VISIBLE
             tvLikeDetails.text = sp
         }
@@ -749,7 +751,9 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
         }
         var str = txtArr.joinToString("\n")
         var txt = getTextView()
-        txt.text = getTextSpan(str)
+        try {
+            txt.text = getTextSpan(str)
+        }catch (e: Exception){}
         parent.addView(txt)
     }
 

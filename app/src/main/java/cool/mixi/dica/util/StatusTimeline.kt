@@ -174,11 +174,14 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
             }
         }
 
-        fun showEmptyDataFetch(){
-            ref.get()?.table?.adapter?.let {
-                it as StatusesAdapter
-                it.initLoaded = true
-                it.notifyDataSetChanged()
+        private fun showEmptyDataFetch(){
+            ref.get()?.let {
+                it.table?.adapter?.let { that ->
+                    that as StatusesAdapter
+                    that.initLoaded = true
+                    that.notifyDataSetChanged()
+                }
+                it.swipeRefreshLayout.isRefreshing = false
             }
         }
 

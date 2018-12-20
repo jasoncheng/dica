@@ -69,6 +69,9 @@ open class HtmlCrawler {
             return
         }
 
+        // Ignore twitter link (limited query)
+        if(url.contains("//t.co/")){ return; }
+
         // Filter invalid URL
         if(!Patterns.WEB_URL.matcher(url).matches()) {
             iLog("ignore url $url")

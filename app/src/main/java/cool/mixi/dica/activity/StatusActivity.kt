@@ -32,7 +32,6 @@ class StatusActivity: BaseActivity(), IStatusDataSource {
             return
         }
 
-        dLog("StatusId: ${statusId}")
         stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
         home_srl.setOnRefreshListener {
             stl?.loadNewest(this)
