@@ -173,6 +173,12 @@ class FriendicaUtil {
                 // Email
                 if(!url.startsWith("http", true)) continue
 
+                // pod_feeder & github
+                if(url.contains("github") && url.contains("pod_feeder")){
+                    newStr = newStr.replace(url, "", true)
+                    continue
+                }
+
                 val decodeUrl = URLDecoder.decode(url, "UTF-8")
                 val pureUrl = url.urlEscapeQueryAndHash()
                 if(displayedUrl.contains(url)) {
