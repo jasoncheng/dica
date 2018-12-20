@@ -62,4 +62,5 @@
   <string name="max_photo_number_upload">téléchargement de photos maximum limité à %1$s photos</string>
   <string name="status_posting">affichage d\'état ...</string>
   <string name="status_media_uploading">téléchargement du média n ° %1$s</string>
+  <string name="registration">registre ?</string>
 </resources>

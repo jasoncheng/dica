@@ -405,7 +405,10 @@ class ComposeDialogFragment: BaseDialogFragment() {
     }
 
     private fun composeSubmit() {
-        (activity as BaseActivity).loading(getString(R.string.status_saving))
+        activity?.let {
+            (it as BaseActivity).loading(getString(R.string.status_saving))
+            DiCaUtil.hideKeyboard(it)
+        }
 
         var text = et_text.text.toString()
         var lat = ""

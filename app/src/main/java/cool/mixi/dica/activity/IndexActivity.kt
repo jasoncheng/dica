@@ -112,7 +112,6 @@ class IndexActivity : BaseActivity() {
             initViewPager()
         }
 
-
         // TODO: fetch site information for update title (no API)
         val homeName = PrefUtil.getSiteName()
         if (!homeName.isNullOrEmpty() && homeName != getString(R.string.app_name)) {

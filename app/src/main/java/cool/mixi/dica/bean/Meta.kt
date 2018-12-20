@@ -27,4 +27,10 @@ data class Meta(
         this.title = meta.title
         this.description = meta.description
     }
+
+    override fun equals(other: Any?): Boolean {
+        if(other?.javaClass != this.javaClass) return false
+        other as Meta
+        return other.url == this.url
+    }
 }

@@ -1,6 +1,8 @@
 package cool.mixi.dica.util
 
 import android.util.Patterns
+import cool.mixi.dica.App
+import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Meta
 import cool.mixi.dica.database.AppDatabase
 import org.jetbrains.anko.doAsync
@@ -27,6 +29,38 @@ open class HtmlCrawler {
                 }
             }
         }
+    }
+
+    fun friendicaServerList(callback: IHtmlCrawler?): ArrayList<Meta>? {
+        val servers = App.instance.serverList
+        if(servers.size > 0){
+            return servers
+        }
+
+        doAsync {
+            try {
+                val doc = Jsoup.connect(Consts.FRIENDICA_SERVERS_SOURCE)
+                    .followRedirects(true).get()
+                val siteInfo = doc.select("div[class=site-info]")
+                siteInfo.forEach {
+                    val name = it.select("strong[class=name]").text().trim()
+                    val url = it.select("div[class=url] a").attr("href").trim()
+                    val desc = it.select("p[class=description]").text().trim()
+                    val meta = Meta(url, name, null, desc, Date())
+                    if(!App.instance.serverList.contains(meta)){
+                        dLog("Server -> $url | $name | $desc")
+                        App.instance.serverList.add(meta)
+                    }
+                }
+            }catch (e: Exception){}
+
+            uiThread {
+                callback?.let { that -> that.done(
+                    Meta("", null, null, null, null)
+                ) }
+            }
+        }
+        return null
     }
 
     fun run(url: String, callback: IHtmlCrawler) {

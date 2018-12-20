@@ -24,14 +24,17 @@ object Consts {
     const val OTYPE_INTRO = "intro"
 
     const val FRIENDICA_WEB = "https://friendi.ca"
+    const val FRIENDICA_SERVERS_SOURCE = "https://dir.friendica.social/servers"
     const val MIXI_URL = "http://dica.mixi.cool"
     const val API_HOST = "https://meld.de"
-    const val ID_STATUS = "statusId"
+    const val FRIENDICA_REGISTER_PATH = "/register"
 
+    const val ID_STATUS = "statusId"
     const val FG_COMPOSE = "compose"
     const val FG_PHOTO_CROP = "crop"
     const val FG_USERS = "users"
     const val FG_PHOTO_VIEWER = "photoViewer"
+    const val FG_SERVER_LIST = "serverList"
 
     const val EXTRA_PHOTO_URI = "photoUri"
     const val EXTRA_USER = "user"

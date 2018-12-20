@@ -62,4 +62,5 @@
   <string name="max_photo_number_upload">"Maximaler Foto-Upload ist auf %1$s Fotos beschränkt "</string>
   <string name="status_posting">Statusbuchung ...</string>
   <string name="status_media_uploading">Laden von Medien # %1$s</string>
+  <string name="registration">registrieren ?</string>
 </resources>
