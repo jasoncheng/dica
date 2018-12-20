@@ -28,6 +28,7 @@ class App: Application() {
     var cachedUser: ArrayList<User> = ArrayList()
 
     var mediaUris: ArrayList<String> = ArrayList()
+    var serverList: ArrayList<Meta> = ArrayList()
 
     companion object {
         lateinit var instance: App private set
@@ -37,22 +38,6 @@ class App: Application() {
         super.onCreate()
         instance = this
         EasyImage.configuration(this).setAllowMultiplePickInGallery(true)
-        doAsync {
-            val tags = AppDatabase.getInstance().hashTagDao().getAll()
-            tags?.forEach {
-                dLog("TAG $it")
-            }
-
-//            val metas = AppDatabase.getInstance().metaDao().getAll()
-//            metas?.forEach {
-//                dLog("META $it")
-//            }
-//
-//            val users = AppDatabase.getInstance().userDao().getAll()
-//            users?.forEach {
-//                dLog("USER $it")
-//            }
-        }
     }
 
     fun getWebFinger(email: String): String? {

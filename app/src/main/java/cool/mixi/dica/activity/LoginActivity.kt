@@ -1,18 +1,14 @@
 package cool.mixi.dica.activity
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
-import android.view.inputmethod.InputMethodManager
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Consts
 import cool.mixi.dica.bean.Profile
-import cool.mixi.dica.util.ApiService
-import cool.mixi.dica.util.PrefUtil
-import cool.mixi.dica.util.eLog
+import cool.mixi.dica.fragment.FriendicaServerListDialog
+import cool.mixi.dica.util.*
 import kotlinx.android.synthetic.main.activity_login.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -29,15 +25,18 @@ class LoginActivity: BaseActivity() {
 
         et_api.hint = Consts.API_HOST
         bt_login.setOnClickListener {
-            hideKeyboard(this)
+            DiCaUtil.hideKeyboard(this)
             PrefUtil.setUsername(et_username.text.toString())
             PrefUtil.setPassword(et_password.text.toString())
             PrefUtil.setApiUrl(et_api.text.toString())
             login()
         }
 
+        registration.setOnClickListener { launchDlg(true) }
+
         setMiXiLink()
         setFriendicaLink()
+        setServerList()
     }
 
     fun login() {
@@ -71,6 +70,17 @@ class LoginActivity: BaseActivity() {
         }
     }
 
+    fun setServerList(){
+        HtmlCrawler.getInstance().friendicaServerList(null)
+        server_list.setOnClickListener { launchDlg(false) }
+    }
+
+    fun launchDlg(registration: Boolean){
+        val dlg = FriendicaServerListDialog()
+        dlg.registrationMode = registration
+        dlg.show(supportFragmentManager, Consts.FG_SERVER_LIST)
+    }
+
     fun setFriendicaLink(){
         tv_app_description.setOnClickListener {
             val browserIntent = Intent(Intent.ACTION_VIEW)
@@ -79,16 +89,12 @@ class LoginActivity: BaseActivity() {
         }
     }
 
-    fun hideKeyboard(activity: Activity) {
-        val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        //Find the currently focused view, so we can grab the correct window token from it.
-        var view = activity.currentFocus
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = View(activity)
-        }
-        imm!!.hideSoftInputFromWindow(view!!.windowToken, 0)
+
+    fun setServerLink(url: String){
+        et_api.setText(url)
+        PrefUtil.setApiUrl(et_api.text.toString())
     }
+
     class MyCallback(activity: LoginActivity): Callback<Profile> {
 
         private val ref = WeakReference<LoginActivity>(activity)

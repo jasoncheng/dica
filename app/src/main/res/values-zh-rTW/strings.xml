@@ -62,4 +62,5 @@
   <string name="max_photo_number_upload">最多只能上傳 %1$s 張照片</string>
   <string name="status_media_uploading">多媒體 #%1$s 上傳中</string>
   <string name="status_posting">狀態發佈中...</string>
+  <string name="registration">"註冊帳號 ? "</string>
 </resources>
