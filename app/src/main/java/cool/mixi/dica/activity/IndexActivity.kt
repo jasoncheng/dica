@@ -10,6 +10,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Parcelable
 import android.provider.MediaStore
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
@@ -58,8 +59,8 @@ class IndexActivity : BaseActivity() {
         mNotificationRunnable = NotificationRunnable(this)
 
         // if user not login yet
-        if(App.instance.myself == null){
-            if(!PrefUtil.didSetUserCredential()){
+        if (App.instance.myself == null) {
+            if (!PrefUtil.didSetUserCredential()) {
                 logout()
                 return
             }
@@ -70,7 +71,7 @@ class IndexActivity : BaseActivity() {
                         this
                     )
                 )
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 dLog("${e.message}")
                 App.instance.toast(getString(R.string.common_error).format("${e.message}"))
                 logout()
@@ -87,7 +88,7 @@ class IndexActivity : BaseActivity() {
 
         // avatar
         home_avatar.setOnClickListener {
-            if(App.instance.getUnSeenNotificationCount() > 0){
+            if (App.instance.getUnSeenNotificationCount() > 0) {
                 showNotifications()
                 return@setOnClickListener
             }
@@ -96,7 +97,7 @@ class IndexActivity : BaseActivity() {
             var inflater = pop.menuInflater
             inflater.inflate(R.menu.index_avatar_menu, pop.menu)
             pop.setOnMenuItemClickListener { it ->
-                when(it.itemId) {
+                when (it.itemId) {
                     R.id.menu_logout -> logout()
                     R.id.menu_notifications -> showNotifications()
                 }
@@ -107,14 +108,13 @@ class IndexActivity : BaseActivity() {
 
         setAvatar()
 
-        if(App.instance.myself != null){
+        if (App.instance.myself != null) {
             initViewPager()
         }
 
-
         // TODO: fetch site information for update title (no API)
         val homeName = PrefUtil.getSiteName()
-        if(!homeName.isNullOrEmpty() && homeName != getString(R.string.app_name)){
+        if (!homeName.isNullOrEmpty() && homeName != getString(R.string.app_name)) {
             home_title?.text = homeName
         } else {
             HtmlCrawler.getInstance().run(
@@ -130,11 +130,14 @@ class IndexActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // Clean Data
+        App.instance.clear()
         doAsync {
             AppDatabase.getInstance().metaDao().expireClean()
             AppDatabase.getInstance().userDao().expireClean()
+            AppDatabase.getInstance().hashTagDao().expireClean()
             dLog("User info #${AppDatabase.getInstance().userDao().count()}")
             dLog("Meta info #${AppDatabase.getInstance().metaDao().count()}")
+            dLog("HashTag info #${AppDatabase.getInstance().hashTagDao().count()}")
         }
     }
 
@@ -152,25 +155,41 @@ class IndexActivity : BaseActivity() {
         processIntent()
     }
 
-    private fun processIntent(){
-        if(intent != null && intent.getBooleanExtra(Consts.EXTRA_NOTIFICATIONS, false)){
+    private fun processIntent() {
+        if (intent != null && intent.getBooleanExtra(Consts.EXTRA_NOTIFICATIONS, false)) {
             showNotifications()
             return
         }
 
-        if(intent == null || intent.action != Intent.ACTION_SEND){ return }
-        val dlg = ComposeDialogFragment()
-        if("text/plain".equals(intent.type)){
-            dlg.sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
-        } else if(intent.type.contains("(image|video)\\/".toRegex())){
-            val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
-            var path:String = imageUri.path.toLowerCase()
-            val pattern = Pattern.compile("\\.(jpg|jpeg|gif|bmp|mp4)\$", Pattern.CASE_INSENSITIVE)
-            if(! pattern.matcher(path).matches()){
-                path = getRealPathFromURI(imageUri)
-            }
-            dlg.sharedFile = path
+        if (intent == null || (intent.action != Intent.ACTION_SEND && intent.action != Intent.ACTION_SEND_MULTIPLE)) {
+            return
         }
+
+        val dlg = ComposeDialogFragment()
+        when {
+            intent?.action == Intent.ACTION_SEND -> {
+                if ("text/plain".equals(intent.type)) {
+                    dlg.sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
+                } else if (intent.type.contains("(image|video)\\/".toRegex())) {
+                    val imageUri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+                    var path: String = imageUri.path.toLowerCase()
+                    val pattern = Pattern.compile("\\.(jpg|jpeg|gif|bmp|mp4)\$", Pattern.CASE_INSENSITIVE)
+                    if (!pattern.matcher(path).matches()) {
+                        path = getRealPathFromURI(imageUri)
+                    }
+                    dlg.tmpMediaUri.add(path)
+                }
+            }
+            intent?.action == Intent.ACTION_SEND_MULTIPLE
+                    && intent.type?.startsWith("image/") == true -> {
+                intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.forEachIndexed { index, parcelable ->
+                    if(index > Consts.UPLOAD_MAX_PHOTOS -1) return@forEachIndexed
+                    dlg.tmpMediaUri.add(getRealPathFromURI(parcelable as Uri))
+                }
+            }
+            else -> {}
+        }
+
         dlg.show(supportFragmentManager, Consts.FG_COMPOSE)
     }
 
@@ -187,9 +206,9 @@ class IndexActivity : BaseActivity() {
         }
     }
 
-    fun initViewPager(){
+    fun initViewPager() {
         vp_index.adapter = IndexPageAdapter(this, supportFragmentManager)
-        vp_index.setOnPageChangeListener(object: androidx.viewpager.widget.ViewPager.OnPageChangeListener{
+        vp_index.setOnPageChangeListener(object : androidx.viewpager.widget.ViewPager.OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
             }
 
@@ -203,21 +222,21 @@ class IndexActivity : BaseActivity() {
         })
     }
 
-    class MyHtmlCrawler(val activity: IndexActivity): IHtmlCrawler {
+    class MyHtmlCrawler(val activity: IndexActivity) : IHtmlCrawler {
         private val ref = WeakReference<IndexActivity>(activity)
         override fun done(meta: Meta) {
-            if(!meta.title.isNullOrEmpty()){
+            if (!meta.title.isNullOrEmpty()) {
                 var title = meta.title!!.replace(" \\(home\\)".toRegex(), "")
                 PrefUtil.setSiteName(title)
                 ref.get()?.let { it.home_title.text = title }
             }
-            if(!meta.icon.isNullOrEmpty()){
+            if (!meta.icon.isNullOrEmpty()) {
                 PrefUtil.setSiteIcon(meta.icon!!)
             }
         }
     }
 
-    private fun setAvatar(){
+    private fun setAvatar() {
         Glide.with(applicationContext)
             .load(App.instance.myself?.friendica_owner?.profile_image_url_large)
             .apply(RequestOptions().circleCrop())
@@ -232,22 +251,26 @@ class IndexActivity : BaseActivity() {
         finish()
     }
 
-    private fun goLogin(){
+    private fun goLogin() {
         val intent = Intent(this, LoginActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
     }
 
-    class ProfileCallback(activity: IndexActivity): Callback<Profile> {
+    class ProfileCallback(activity: IndexActivity) : Callback<Profile> {
         private val ref = WeakReference<IndexActivity>(activity)
         override fun onFailure(call: Call<Profile>, t: Throwable) {
-            if(ref.get() == null){ return}
+            if (ref.get() == null) {
+                return
+            }
         }
 
         override fun onResponse(call: Call<Profile>, response: Response<Profile>) {
-            if(ref.get() == null){ return}
+            if (ref.get() == null) {
+                return
+            }
             val act = ref.get()!!
-            if( response.code() == HttpsURLConnection.HTTP_UNAUTHORIZED ){
+            if (response.code() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
                 act.logout()
                 return
             }
@@ -260,11 +283,13 @@ class IndexActivity : BaseActivity() {
     }
 
     // Notifications start here
-    class MyNotificationCallback(activity: IndexActivity): Callback<List<Notification>> {
+    class MyNotificationCallback(activity: IndexActivity) : Callback<List<Notification>> {
         private val ref = WeakReference<IndexActivity>(activity)
         override fun onFailure(call: Call<List<Notification>>, t: Throwable) {}
         override fun onResponse(call: Call<List<Notification>>, response: Response<List<Notification>>) {
-            if(ref.get() == null) { return }
+            if (ref.get() == null) {
+                return
+            }
             val activity = ref.get()
             response.body()?.let {
                 App.instance.addNotification(it)
@@ -277,12 +302,12 @@ class IndexActivity : BaseActivity() {
     fun updateUnreadUI() {
         ViewCompat.setElevation(tv_unread, 9.toFloat())
         val count = App.instance.getUnSeenNotificationCount()
-        if(count == 0){
+        if (count == 0) {
             tv_unread.visibility = View.GONE
         } else {
             tv_unread.visibility = View.VISIBLE
             tv_unread.text = count.toString()
-            tv_unread.setOnClickListener{ showNotifications() }
+            tv_unread.setOnClickListener { showNotifications() }
         }
     }
 
@@ -296,18 +321,18 @@ class IndexActivity : BaseActivity() {
     }
 
     // Top SnackBar
-    fun showSnackBar(msg: String){
+    fun showSnackBar(msg: String) {
         snackBar = Snackbar.make(vp_index, msg, Snackbar.LENGTH_LONG)
         snackBar?.view?.setBackgroundColor(ContextCompat.getColor(this.baseContext, R.color.snack_bar_bg))
         snackBar?.show()
     }
 
-    fun hideSnackBar(){
+    fun hideSnackBar() {
         snackBar?.dismiss()
     }
 
     // for Notification
-    class NotificationRunnable(val activity: IndexActivity): Runnable {
+    class NotificationRunnable(val activity: IndexActivity) : Runnable {
         private val ref = SoftReference(activity)
         override fun run() {
             ref.get()?.let {
@@ -316,25 +341,25 @@ class IndexActivity : BaseActivity() {
         }
     }
 
-    fun getNotifications(){
+    fun getNotifications() {
         mHandler.removeCallbacks(mNotificationRunnable)
         mNotificationRunnable?.let {
             mHandler.postDelayed(it, 5000)
         }
     }
 
-    fun setPollNotification(){
+    fun setPollNotification() {
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
         val service = ComponentName(applicationContext, NotificationJonService::class.java)
         val schedule = applicationContext.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
         val isPollEnable = PrefUtil.isPollNotification()
-        if(!isPollEnable){
+        if (!isPollEnable) {
             schedule.cancelAll()
             dLog("schedule cancelAll")
             return
         }
 
-        if(isPollEnable && isSchedule(schedule)){
+        if (isPollEnable && isSchedule(schedule)) {
             dLog("already schedule")
             return
         }
@@ -344,7 +369,7 @@ class IndexActivity : BaseActivity() {
 
     private fun isSchedule(scheduler: JobScheduler): Boolean {
         scheduler.allPendingJobs.forEach {
-            if(it.id == NotificationJonService.jobId) return true
+            if (it.id == NotificationJonService.jobId) return true
         }
         return false
     }

@@ -7,12 +7,16 @@ import cool.mixi.dica.R
 import cool.mixi.dica.activity.StatusActivity
 import cool.mixi.dica.activity.UserActivity
 import cool.mixi.dica.adapter.StatusesAdapter
+import cool.mixi.dica.bean.HashTag
 import cool.mixi.dica.bean.Status
+import cool.mixi.dica.database.AppDatabase
+import org.jetbrains.anko.doAsync
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
+import javax.net.ssl.HttpsURLConnection
 
 interface IStatusDataSource {
     fun sourceOld(): Call<List<Status>>?
@@ -170,8 +174,24 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
             }
         }
 
+        fun showEmptyDataFetch(){
+            ref.get()?.table?.adapter?.let {
+                it as StatusesAdapter
+                it.initLoaded = true
+                it.notifyDataSetChanged()
+            }
+        }
+
         override fun onResponse(call: Call<List<Status>>, response: Response<List<Status>>) {
             if(ref.get() == null){
+                return
+            }
+
+            // 錯誤代碼
+            val responseCode = response.code()
+            if(responseCode != HttpsURLConnection.HTTP_OK){
+                App.instance.toast(App.instance.getString(R.string.common_error).format("$responseCode - ${response.message()}"))
+                showEmptyDataFetch()
                 return
             }
 
@@ -183,6 +203,7 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
             }
 
             val res = response.body()
+            var tags = ArrayList<String>()
 
             // handle sinceId & maxId
             res?.forEachIndexed { idx, it ->
@@ -194,8 +215,9 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
 
                 FriendicaUtil.filterDuplicateLike(it)
 
-//                it.text = it.text.dicaRenderData()
                 FriendicaUtil.statusPreProcess(it)
+
+                it.text.toHashTagArray(tags)
 
                 // NotSafeForWork
                 it.enableNSFW = it.text.contains("#nsfw", true)
@@ -206,6 +228,12 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
                     act.table.adapter?.notifyItemChanged(idx)
                     return
                 }
+            }
+
+            // Save tag for later use
+            doAsync {
+                val tagDao = AppDatabase.getInstance().hashTagDao()
+                tags.forEach { tagDao.add(HashTag(it)) }
             }
 
             // Cache user
@@ -219,7 +247,7 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
 
             // no any data
             if(act.statuses.size == 0 && res!!.isEmpty()){
-                act.table.adapter?.notifyDataSetChanged()
+                showEmptyDataFetch()
                 return
             }
 

@@ -7,15 +7,14 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.theartofdev.edmodo.cropper.CropImageView
-import kotlinx.android.synthetic.main.fg_photo_process.view.*
 import cool.mixi.dica.R
 import cool.mixi.dica.bean.Consts
+import kotlinx.android.synthetic.main.fg_photo_process.view.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -81,14 +80,8 @@ class PhotoProcessFragment: BaseDialogFragment() {
             return
         }
 
-        val out = Environment.getExternalStorageDirectory().toString() + "/" + Consts.SDCARD_FOLDER_OUT
-        val f3 = File(out)
-        if (!f3.exists()) {
-            f3.mkdirs()
-        }
-
-        var outStream: OutputStream? = null
-        val file = File("$out/$originalFileName")
+        var outStream: OutputStream?
+        val file = File.createTempFile(getString(R.string.app_name), "$originalFileName")
         try {
             outStream = FileOutputStream(file)
             bitmap.compress(Bitmap.CompressFormat.JPEG, Consts.COMPRESS_PHOTO_QUALITY, outStream)
@@ -102,6 +95,8 @@ class PhotoProcessFragment: BaseDialogFragment() {
             dismissAllowingStateLoss()
         } catch (e: Exception) {
             Log.e("saveToFile", "===============> " + e.message)
+        } finally {
+            file.deleteOnExit()
         }
 
     }

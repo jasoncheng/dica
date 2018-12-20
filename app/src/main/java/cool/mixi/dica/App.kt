@@ -9,11 +9,13 @@ import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.util.ApiService
 import cool.mixi.dica.util.dLog
 import org.jetbrains.anko.doAsync
+import pl.aprilapps.easyphotopicker.EasyImage
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 import javax.net.ssl.HttpsURLConnection
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 class App: Application() {
@@ -25,6 +27,9 @@ class App: Application() {
     var webFingerUrlCache: HashMap<String, String> = HashMap()
     var cachedUser: ArrayList<User> = ArrayList()
 
+    var mediaUris: ArrayList<String> = ArrayList()
+    var serverList: ArrayList<Meta> = ArrayList()
+
     companion object {
         lateinit var instance: App private set
     }
@@ -32,6 +37,7 @@ class App: Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        EasyImage.configuration(this).setAllowMultiplePickInGallery(true)
     }
 
     fun getWebFinger(email: String): String? {
@@ -79,6 +85,10 @@ class App: Application() {
         }
     }
 
+    fun clear(){
+        mediaUris.clear()
+    }
+
     fun checkIfRequireClearAllNotification(){
         if(getUnSeenNotificationCount() > 0) return
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
@@ -98,4 +108,5 @@ class App: Application() {
         }
         return c
     }
+
 }

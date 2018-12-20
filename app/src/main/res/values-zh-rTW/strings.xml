@@ -59,4 +59,8 @@
   <string name="notify_on">每15分鐘更新</string>
   <string name="notify_off">不通知</string>
   <string name="new_notification_count">你有 %1$s 則通知</string>
+  <string name="max_photo_number_upload">最多只能上傳 %1$s 張照片</string>
+  <string name="status_media_uploading">多媒體 #%1$s 上傳中</string>
+  <string name="status_posting">狀態發佈中...</string>
+  <string name="registration">"註冊帳號 ? "</string>
 </resources>

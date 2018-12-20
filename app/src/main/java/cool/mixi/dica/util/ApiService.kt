@@ -29,18 +29,19 @@ interface ApiService {
         @Field("in_reply_to_status_id") in_reply_to_status_id: Int,
         @Field("lat") lat: String,
         @Field("long") long: String,
-        @Field("group_allow[]") group_allow: ArrayList<Int>?): Call<String>
+        @Field("group_allow[]") group_allow: ArrayList<Int>?,
+        @Field("media_ids") media_ids:String): Call<String>
 
-    @POST("statuses/update_with_media")
-    @Multipart
-    fun statusUpdate(
-        @Part("source") source: RequestBody,
-        @Part("status") status: RequestBody,
-        @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
-        @Part("lat") lat: RequestBody,
-        @Part("long") long: RequestBody,
-        @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
-        @Part("media_ids") mediaIds: RequestBody?): Call<String>
+//    @POST("statuses/update_with_media")
+//    @Multipart
+//    fun statusUpdate(
+//        @Part("source") source: RequestBody,
+//        @Part("status") status: RequestBody,
+//        @Part("in_reply_to_status_id") in_reply_to_status_id: RequestBody,
+//        @Part("lat") lat: RequestBody,
+//        @Part("long") long: RequestBody,
+//        @PartMap group_allow: Map<String, @JvmSuppressWildcards RequestBody>,
+//        @Part("media_ids") mediaIds: RequestBody?): Call<String>
 
     @POST("media/upload")
     @Multipart
@@ -80,6 +81,12 @@ interface ApiService {
 
     @GET("friendica/profile/show")
     fun friendicaProfileShow(@Query("profile_id") profile_id: String?): Call<Profile>
+
+    @GET("search")
+    fun search(
+        @Query("q") query: String,
+        @Query("since_id") since_id: String,
+        @Query("max_id") max_id: String): Call<List<Status>>
 
     @GET("users/show")
     fun usersShow(@Query("user_id") user_id: String): Call<User>
@@ -197,6 +204,7 @@ interface ApiService {
                 .cache(getCache())
                 .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(Consts.API_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(saveCookieInterceptor)
                 .addInterceptor(addCookieInterceptor)
                 .addInterceptor(cacheInterceptor)

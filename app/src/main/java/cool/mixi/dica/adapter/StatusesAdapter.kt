@@ -29,6 +29,7 @@ import com.bumptech.glide.request.RequestOptions
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.activity.BaseActivity
+import cool.mixi.dica.activity.SearchActivity
 import cool.mixi.dica.activity.StatusActivity
 import cool.mixi.dica.activity.UserActivity
 import cool.mixi.dica.bean.Consts
@@ -516,7 +517,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             if(isOffSiteSN){
                 val text = it.toFriendicaShareText()
                 ApiService.create()
-                    .statusUpdate(context.getString(R.string.app_name), text, 0, "", "", ArrayList())
+                    .statusUpdate(context.getString(R.string.app_name), text, 0, "", "", ArrayList(), "")
                     .enqueue(StatusUpdateCallback(dlg, refAdapter))
                 return
             }
@@ -588,6 +589,12 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
     fun gotoUserPage(email: String) {
         val i = Intent(context, UserActivity::class.java)
         i.putExtra(Consts.EXTRA_USER_EMAIL, email)
+        context.startActivity(i)
+    }
+
+    fun gotoSearchPage(hashtag:String){
+        val i = Intent(context, SearchActivity::class.java)
+        i.putExtra(Consts.EXTRA_SEARCH_TERM, hashtag)
         context.startActivity(i)
     }
 
@@ -780,7 +787,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             )
 
             sp.setSpan(
-                TagClickSpan(tagTextColor),
+                TagClickSpan(tagTextColor, refAdapter),
                 mTag.start()+1,
                 mTag.end(),
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -932,12 +939,13 @@ class StatusDestroyCallback(val adapter: SoftReference<StatusesAdapter>?, privat
     }
 }
 
-class TagClickSpan(private val linkColor: Int): ClickableSpan() {
+class TagClickSpan(private val linkColor: Int, val adapter: SoftReference<StatusesAdapter>?): ClickableSpan() {
     override fun onClick(widget: View?) {
         val sp = ((widget as TextView).text as Spanned)
         val start = sp.getSpanStart(this)
         val end = sp.getSpanEnd(this)
-        App.instance.toast(widget.context.getString(R.string.no_api_support)+" #${sp.subSequence(start, end)}")
+        val tag = "#${sp.subSequence(start, end)}"
+        adapter?.get()?.let { it.gotoSearchPage(tag) }
     }
 
     override fun updateDrawState(ds: TextPaint?) {

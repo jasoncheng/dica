@@ -25,7 +25,7 @@
   <string name="status_comment">reageren</string>
   <string name="status_reply_to">Antwoord op: %1$s</string>
   <string name="no_api_support">nog geen API ondersteuning</string>
-  <string name="not_implement_yet">nog niet ge�mplementeerd</string>
+  <string name="not_implement_yet">nog niet geïmplementeerd</string>
   <string name="user_not_found">gebruiker niet gevonden</string>
   <string name="likes_counter">%1$s mensen vinden dit leuk</string>
   <string name="index_public_timeline">publiek</string>
@@ -41,7 +41,7 @@
   <string name="status_source">" - van %1$s"</string>
   <string name="status_retweet">retweet</string>
   <string name="retweeting">retweeting</string>
-  <string name="retweet_fail">retweet niet gelukt (%1$s)</string>
+  <string name="retweet_fail">retweet mislukt (%1$s)</string>
   <string name="fetch_remote_user">gebruikersdata ophalen..</string>
   <string name="post_success">publiceren gelukt</string>
   <string name="post_failure">publiceren mislukt (%1$s)</string>
@@ -50,12 +50,16 @@
   <string name="menu_delete">Verwijder globaal</string>
   <string name="confirm_delete_status">Status echt verwijderen?</string>
   <string name="processing">verwerken.....</string>
-  <string name="new_status_since">you got %1$s new status</string>
-  <string name="sticker_image_search_only">understøtter ikke denne type søgning</string>
+  <string name="new_status_since">Je hebt %1$s nieuwe status</string>
+  <string name="sticker_image_search_only">Nog geen ondersteuning voor dit type zoekactie</string>
   <string name="googleStickerUri"><![CDATA[q=sticker&tbm=isch&tbs=itp:clipart]]></string>
-  <string name="index_network_public">netværk</string>
-  <string name="new_status_more_than_page_size">mere end %1$s nye statuser</string>
-  <string name="notify_off">anmeldelse af</string>
-  <string name="new_notification_count">Du har %1$s anmeldelser</string>
-  <string name="notify_on">Opdateret hvert 15. minut</string>
+  <string name="index_network_public">Netwerk</string>
+  <string name="new_status_more_than_page_size">Meer dan %1$s nieuwe status</string>
+  <string name="notify_off">meldingen uitschakelen</string>
+  <string name="new_notification_count">je hebt %1$s meldingen</string>
+  <string name="notify_on">Iedere 15 min. updaten</string>
+  <string name="max_photo_number_upload">Je kan maximaal %1$s foto\'s uploaden</string>
+  <string name="status_posting">Status aan het posten</string>
+  <string name="status_media_uploading">Media # %1$s aan het uploaden</string>
+  <string name="registration">Tilmeld ?</string>
 </resources>

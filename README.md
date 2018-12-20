@@ -18,6 +18,7 @@ This is a very very very simple [Friendica](https://friendi.ca)  android client,
 * Enable for all [Friendica](https://friendi.ca) base website
 * Support display network public stream: Friendica / Diaspora* / Mastodon
 * Dashboard [Public / Public Networks / Friends / My / Favorite timeline]
+* Hashtag Search
 * Simple user page / status page
 * Status post (photo / location tag / group permission)
 * Support offline capacity
