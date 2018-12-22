@@ -51,8 +51,13 @@ import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
+
+interface ICompose {
+    fun done()
+}
 
 class ComposeDialogFragment: BaseDialogFragment() {
 
@@ -71,6 +76,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
     private var maxPhotoUploadNumber: String? = null
     private var strMsgErr:String? = null
     private var strMsg:String? = null
+
+    var callback:WeakReference<ICompose>? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         previewImageBoxBg = context?.getDrawable(R.drawable.photo_preview_box)
@@ -98,7 +105,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
         editText = roomView?.et_text
         roomView?.et_text?.setText(PrefUtil.getLastStatus())
         roomView?.bt_submit?.setOnClickListener {
-            composeSubmit()
+            composeSubmit(it)
         }
 
         roomView?.iv_emoji?.setOnClickListener {
@@ -355,7 +362,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
     }
 
     class StatusUpdateCallback(fragment: ComposeDialogFragment): Callback<String> {
-        private val ref = WeakReference<ComposeDialogFragment>(fragment)
+        private val ref = SoftReference<ComposeDialogFragment>(fragment)
         override fun onFailure(call: Call<String>, t: Throwable) {
             eLog("${t.message!!}")
             if(ref.get() == null) return
@@ -389,7 +396,12 @@ class ComposeDialogFragment: BaseDialogFragment() {
             var msgToShow: String?
             msgToShow = try {
                 Gson().fromJson(res, Status::class.java)
-                ref.get()?.composeDone()
+                ref.get()?.let {
+                    it.callback?.get()?.let {
+                            that -> that.done()
+                    }
+                    it.composeDone()
+                }
                 strMsg
             }catch (e: java.lang.Exception){
                 strMsgErr?.format(res)
@@ -404,7 +416,8 @@ class ComposeDialogFragment: BaseDialogFragment() {
 
     }
 
-    private fun composeSubmit() {
+    private fun composeSubmit(button: View) {
+        DiCaUtil.hideKeyboard(context, button)
         activity?.let {
             (it as BaseActivity).loading(getString(R.string.status_saving))
             DiCaUtil.hideKeyboard(it)
@@ -426,7 +439,7 @@ class ComposeDialogFragment: BaseDialogFragment() {
             App.instance.selectedGroup
         }
 
-        val ref = WeakReference<ComposeDialogFragment>(this)
+        val ref = SoftReference<ComposeDialogFragment>(this)
         doAsync {
             var firstMediaId = ""
             var errorMsg = StringBuffer()

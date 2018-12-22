@@ -8,7 +8,6 @@ import cool.mixi.dica.bean.Status
 import cool.mixi.dica.util.ApiService
 import cool.mixi.dica.util.IStatusDataSource
 import cool.mixi.dica.util.StatusTimeline
-import cool.mixi.dica.util.dLog
 import kotlinx.android.synthetic.main.activity_status.*
 import retrofit2.Call
 import java.util.*
@@ -33,10 +32,13 @@ class StatusActivity: BaseActivity(), IStatusDataSource {
         }
 
         stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
-        home_srl.setOnRefreshListener {
-            stl?.loadNewest(this)
-        }
+        home_srl.setOnRefreshListener { requireRefresh() }
 
+        stl?.loadNewest(this)
+    }
+
+    override fun requireRefresh() {
+        home_srl.isRefreshing = true
         stl?.loadNewest(this)
     }
 
