@@ -5,7 +5,7 @@ object Consts {
     const val DB_NAME = "DiCa"
     const val TTL_META = 60 * 24 * 3
     const val TTL_USER = 60 * 24 * 5
-    const val TTL_TAG = 60 * 24 * 5
+    const val TTL_TAG = 60 * 24 * 1
 
     const val UPLOAD_MAX_PHOTOS = 3
     const val COMPRESS_PHOTO_QUALITY = 70

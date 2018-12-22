@@ -28,6 +28,7 @@ import cool.mixi.dica.bean.Notification
 import cool.mixi.dica.bean.Profile
 import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.fragment.ComposeDialogFragment
+import cool.mixi.dica.fragment.ICompose
 import cool.mixi.dica.fragment.NotificationDialog
 import cool.mixi.dica.service.NotificationJonService
 import cool.mixi.dica.util.*
@@ -83,7 +84,15 @@ class IndexActivity : BaseActivity() {
 
         // compose
         iv_compose.setOnClickListener {
-            ComposeDialogFragment().show(supportFragmentManager, Consts.FG_COMPOSE)
+            val dlg = ComposeDialogFragment()
+            dlg.show(supportFragmentManager, Consts.FG_COMPOSE)
+            vp_index?.currentItem?.let { what ->
+                vp_index.adapter?.let { that ->
+                    val fg = (that as IndexPageAdapter).getTimelineFragment(what)
+                    fg?.stl?.let { timeline ->
+                        dlg.callback = WeakReference(timeline as ICompose) }
+                }
+            }
         }
 
         // avatar
@@ -96,8 +105,8 @@ class IndexActivity : BaseActivity() {
             var pop = PopupMenu(this, it)
             var inflater = pop.menuInflater
             inflater.inflate(R.menu.index_avatar_menu, pop.menu)
-            pop.setOnMenuItemClickListener { it ->
-                when (it.itemId) {
+            pop.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
                     R.id.menu_logout -> logout()
                     R.id.menu_notifications -> showNotifications()
                 }
