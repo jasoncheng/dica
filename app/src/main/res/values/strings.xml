@@ -22,7 +22,7 @@
   <string name="perm_deny_gps">permission denied</string>
   <string name="status_like">like</string>
   <string name="status_share">share</string>
-  <string name="status_comment">comment</string>
+  <string name="status_comment">comment %1$s</string>
   <string name="status_reply_to">Reply To: %1$s</string>
   <string name="no_api_support">no API support yet</string>
   <string name="not_implement_yet">not implement yet</string>

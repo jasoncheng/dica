@@ -7,6 +7,7 @@ data class Status(
     var id: Int = 0,
     var user: User = User(),
     var friendica_owner: User = User(),
+    var friendica_comments: Int = 0,
     var statusnet_html: String = "",
     var text: String = "",
     var geo: Geo? = Geo(),

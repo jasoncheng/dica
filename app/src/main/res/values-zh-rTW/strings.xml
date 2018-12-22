@@ -21,7 +21,7 @@
   <string name="photo_rotate">翻轉</string>
   <string name="photo_crop">裁切</string>
   <string name="perm_deny_gps">你沒有授權定位權限</string>
-  <string name="status_comment">留言</string>
+  <string name="status_comment">留言 %1$s</string>
   <string name="status_like">喜歡</string>
   <string name="status_share">分享</string>
   <string name="status_reply_to">回覆: %1$s</string>

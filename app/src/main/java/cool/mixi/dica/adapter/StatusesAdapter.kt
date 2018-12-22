@@ -86,6 +86,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
     private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
     private val strSuccessRetweet: String = context.getString(R.string.retweet_success)
     private val strRetweetFail = context.getString(R.string.retweet_fail)
+    private val strComments = context.getString(R.string.status_comment)
     private val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm")
 
     enum class ViewType {
@@ -156,13 +157,21 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
                 }
             }catch (e: java.lang.Exception) {}
 
-
             // private message icon
             if(it.friendica_private) {
                 lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
             } else {
                 lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
             }
+
+            // comments
+            val commentStr = if(it.friendica_comments > 0) {
+                "${it.friendica_comments}"
+            } else {
+                ""
+            }
+            holder.comment?.let { it.text = strComments.format(commentStr) }
+
 
             doLayoutContent(holder, it, pos)
             holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
