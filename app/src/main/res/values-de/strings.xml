@@ -23,7 +23,7 @@
   <string name="perm_deny_gps">Zugriff verweigert</string>
   <string name="status_like">Gefällt mir</string>
   <string name="status_share">Teilen</string>
-  <string name="status_comment">Kommentieren</string>
+  <string name="status_comment">%1$sKommentieren</string>
   <string name="status_reply_to">Antwort auf: %1$s</string>
   <string name="no_api_support">API noch nicht unterstützt</string>
   <string name="not_implement_yet">Noch nicht implementiert</string>

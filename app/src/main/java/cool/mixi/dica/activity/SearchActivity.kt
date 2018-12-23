@@ -87,6 +87,10 @@ class SearchActivity: BaseActivity(), IStatusDataSource {
         return super.onCreateOptionsMenu(menu)
     }
 
+    override fun requireRefresh() {
+        resetSearch()
+    }
+
     private fun resetSearch(){
         stl?.let {
             it.maxId = 0

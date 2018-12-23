@@ -1,8 +1,6 @@
 package cool.mixi.dica.fragment
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,11 +44,7 @@ abstract class TimelineFragment: androidx.fragment.app.Fragment(), IStatusDataSo
         (stl!!.table.adapter as StatusesAdapter).isFavoritesFragment =
                 this.javaClass.simpleName == TimelineFavoritesFragment::class.java.simpleName
 
-        srl.setOnRefreshListener {
-            reloadNotification()
-            stl?.resetQuery()
-            stl?.loadNewest(this)
-        }
+        srl.setOnRefreshListener { requireRefresh() }
 
         if(ifVisible && !isInitLoad){
             stl?.loadNewest(this)
@@ -67,6 +61,14 @@ abstract class TimelineFragment: androidx.fragment.app.Fragment(), IStatusDataSo
             PrefUtil.setTimelineSinceId(this.javaClass.simpleName, it)
         }
     }
+
+    override fun requireRefresh() {
+        reloadNotification()
+        srl.isRefreshing = true
+        stl?.resetQuery()
+        stl?.loadNewest(this)
+    }
+
     override fun loaded(data: List<Status>) {
         stl?.clear()
         stl?.addAll(data)
@@ -116,5 +118,6 @@ abstract class TimelineFragment: androidx.fragment.app.Fragment(), IStatusDataSo
     }
 
     abstract override fun sourceOld(): Call<List<Status>>?
+
     abstract override fun sourceNew(): Call<List<Status>>?
 }

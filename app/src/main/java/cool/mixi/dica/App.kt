@@ -78,7 +78,6 @@ class App: Application() {
                 }
                 var user = it.user
                 user.updatedAt = calendar.time
-                dLog("addUserToDB: ${user.screen_name} ${user.url}")
                 cachedUser.add(user)
                 userDao.upsert(user)
             }

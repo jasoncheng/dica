@@ -84,6 +84,8 @@ class UserActivity: BaseActivity(), IStatusDataSource {
         }
     }
 
+    override fun requireRefresh() {}
+
     private fun getUserInfoFromEmail(email: String = "jasoncheng@mastodon.social"){
         home_srl.isRefreshing = true
         App.instance.toast(strFetchingRemoteUser)

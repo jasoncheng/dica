@@ -10,6 +10,7 @@ import cool.mixi.dica.adapter.StatusesAdapter
 import cool.mixi.dica.bean.HashTag
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.database.AppDatabase
+import cool.mixi.dica.fragment.ICompose
 import org.jetbrains.anko.doAsync
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,16 +19,19 @@ import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
 import javax.net.ssl.HttpsURLConnection
 
+
+
 interface IStatusDataSource {
     fun sourceOld(): Call<List<Status>>?
     fun sourceNew(): Call<List<Status>>?
     fun loaded(data: List<Status>)
+    fun requireRefresh()
 }
 
 class StatusTimeline(val context: Context, val table: androidx.recyclerview.widget.RecyclerView,
                      private val swipeRefreshLayout: androidx.swiperefreshlayout.widget.SwipeRefreshLayout,
                      private val dataSource: IStatusDataSource
-) : androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
+) : androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener, ICompose {
 
     var selfRef: SoftReference<StatusTimeline>? = null
 
@@ -48,15 +52,20 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
     // Handler
     private var mHandler: Handler? = null
     private var moreRunnable: MoreRunnable? = null
+
     fun init(): StatusTimeline {
         mHandler = Handler()
         selfRef = SoftReference(this)
         table.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        table.adapter = StatusesAdapter(statuses, context)
+        table.adapter = StatusesAdapter(statuses, context, WeakReference(this))
         table.setOnScrollListener(OnStatusTableScrollListener(selfRef))
         swipeRefreshLayout.setOnRefreshListener(this)
         swipeRefreshLayout.isRefreshing = true
         return this
+    }
+
+    override fun done() {
+        dataSource?.requireRefresh()
     }
 
     fun clear(){
@@ -174,11 +183,14 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
             }
         }
 
-        fun showEmptyDataFetch(){
-            ref.get()?.table?.adapter?.let {
-                it as StatusesAdapter
-                it.initLoaded = true
-                it.notifyDataSetChanged()
+        private fun showEmptyDataFetch(){
+            ref.get()?.let {
+                it.table?.adapter?.let { that ->
+                    that as StatusesAdapter
+                    that.initLoaded = true
+                    that.notifyDataSetChanged()
+                }
+                it.swipeRefreshLayout.isRefreshing = false
             }
         }
 

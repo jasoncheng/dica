@@ -37,6 +37,7 @@ import cool.mixi.dica.bean.Meta
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.bean.User
 import cool.mixi.dica.fragment.ComposeDialogFragment
+import cool.mixi.dica.fragment.ICompose
 import cool.mixi.dica.fragment.PhotoViewerFragment
 import cool.mixi.dica.fragment.UsersDialog
 import cool.mixi.dica.util.*
@@ -53,6 +54,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.lang.ref.SoftReference
+import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
@@ -61,7 +63,9 @@ import kotlin.collections.ArrayList
 
 
 //TODO: do to much data process on adapter, should refactor later...
-class StatusesAdapter(val data:ArrayList<Status>, val context: Context): androidx.recyclerview.widget.RecyclerView.Adapter<BasicStatusViewHolder>() {
+class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
+                      private val statusTimeline:WeakReference<ICompose>):
+    androidx.recyclerview.widget.RecyclerView.Adapter<BasicStatusViewHolder>() {
 
     var ownerInfo: User? = null
     var isFavoritesFragment: Boolean = false
@@ -82,6 +86,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
     private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
     private val strSuccessRetweet: String = context.getString(R.string.retweet_success)
     private val strRetweetFail = context.getString(R.string.retweet_fail)
+    private val strComments = context.getString(R.string.status_comment)
     private val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm")
 
     enum class ViewType {
@@ -152,13 +157,21 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
                 }
             }catch (e: java.lang.Exception) {}
 
-
             // private message icon
             if(it.friendica_private) {
                 lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
             } else {
                 lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
             }
+
+            // comments
+            val commentStr = if(it.friendica_comments > 0) {
+                "${it.friendica_comments}"
+            } else {
+                ""
+            }
+            holder.comment?.let { it.text = strComments.format(commentStr) }
+
 
             doLayoutContent(holder, it, pos)
             holder.geoAddress?.let { doLayoutGeoAddress(it, pos) }
@@ -276,8 +289,10 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             var likeTxt = context.getString(R.string.likes_counter, likes.size.toString())
             var color = ForegroundColorSpan(ContextCompat.getColor(context, R.color.like_counter))
             var sp = SpannableString(likeTxt)
-            sp.setSpan(color, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-            sp.setSpan(bold, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            try {
+                sp.setSpan(color, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                sp.setSpan(bold, 0, sizeStr.length, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            }catch (e: Exception){}
             tvLikeDetails.visibility = View.VISIBLE
             tvLikeDetails.text = sp
         }
@@ -498,6 +513,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
             bundle.putInt(Consts.EXTRA_IN_REPLY_STATUS_ID, st.id)
             val dlg = ComposeDialogFragment()
             dlg.arguments = bundle
+            dlg.callback = statusTimeline
             dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_COMPOSE)
         }
     }
@@ -749,7 +765,9 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context): android
         }
         var str = txtArr.joinToString("\n")
         var txt = getTextView()
-        txt.text = getTextSpan(str)
+        try {
+            txt.text = getTextSpan(str)
+        }catch (e: Exception){}
         parent.addView(txt)
     }
 

@@ -82,7 +82,7 @@ interface ApiService {
     @GET("friendica/profile/show")
     fun friendicaProfileShow(@Query("profile_id") profile_id: String?): Call<Profile>
 
-    @GET("search")
+    @GET("search?exclude_replies=true")
     fun search(
         @Query("q") query: String,
         @Query("since_id") since_id: String,
