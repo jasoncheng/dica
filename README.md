@@ -41,6 +41,8 @@ This is a very very very simple [Friendica](https://friendi.ca)  android client,
 	
 * [Google Play Store Beta Tester Program](https://play.google.com/apps/testing/cool.mixi.dica)
 
+* [GITHUB](https://github.com/jasoncheng/dica/tree/apk/apk)
+
 ## LINKS
 
 * [Support Forum](https://meld.de/profile/dica)
