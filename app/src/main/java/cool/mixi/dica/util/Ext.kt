@@ -165,50 +165,6 @@ fun String.dicaHTMLFilter(toBBCode: Boolean, baseUri: String): String {
     return sb.toString()
 }
 
-// 1. If URL or Image w/ newline
-// 2. ignore duplicate url
-// 3. *site title + url*
-//fun String.dicaRenderData(): String {
-//
-//    // strip *site title+url*
-//    var newStr = this
-//    if(newStr.contains("\\*".toRegex()) && newStr.contains("http")){
-//        newStr = newStr.replace("\\*([^*]+)\\*".toRegex(), "")
-//    }
-//
-//    val ar = ArrayList<String>()
-//    newStr.lines().forEach {
-//        var tmp = it
-//        var matcher = Patterns.WEB_URL.matcher(it)
-//        while (matcher.find()){
-//            val url = matcher.group()
-//            var newUrl = url.trim()
-//
-//            if(!url.startsWith("http")) continue
-//            if(it == url) continue
-//
-//            if(it.endsWith("*")){
-//                tmp = tmp.replace("*", "")
-//                continue
-//            }
-//
-//            if("*$url" == it){
-//                tmp = tmp.replace("*", "")
-//                continue
-//            }
-//
-//            if(matcher.start() > 0) newUrl = "\n$newUrl"
-//            if(matcher.end() < it.length) newUrl = "$newUrl\n"
-//            tmp = tmp.replace(url, newUrl)
-//        }
-//        ar.add(tmp)
-//    }
-//    val final = ar.joinToString("\n")
-//    ar.clear()
-//    dLog("output $final")
-//    return final
-//}
-
 fun String.emails(): ArrayList<String> {
     var emails = ArrayList<String>()
     val matcher = Patterns.EMAIL_ADDRESS.matcher(this)
