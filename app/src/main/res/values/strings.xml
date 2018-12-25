@@ -30,7 +30,7 @@
   <string name="likes_counter">%1$s people like</string>
   <string name="index_public_timeline">public</string>
   <string name="index_friends_timeline">friends</string>
-  <string name="app_description">A simple unofficial client for Friendica</string>
+  <string name="app_description">A simple client for Friendica</string>
   <string name="index_my_timeline">my</string>
   <string name="notifications">notifications</string>
   <string name="mark_all_notifications_seen">mark all notifications seen</string>

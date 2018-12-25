@@ -61,8 +61,6 @@ import java.util.regex.Pattern
 import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
 
-
-//TODO: do to much data process on adapter, should refactor later...
 class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
                       private val statusTimeline:WeakReference<ICompose>):
     androidx.recyclerview.widget.RecyclerView.Adapter<BasicStatusViewHolder>() {
@@ -199,7 +197,6 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BasicStatusViewHolder {
         val inflater = LayoutInflater.from(context)
 
-        // EmptyView & UserPage HeaderView
         if(viewType == ViewType.USER_PROFILE.ordinal){
             return UserProfileViewHolder(
                 inflater.inflate(R.layout.rv_user_item_header, parent, false)

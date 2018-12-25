@@ -31,7 +31,7 @@
   <string name="likes_counter">Gefällt %1$s Leuten</string>
   <string name="index_public_timeline">Öffentlich</string>
   <string name="index_friends_timeline">Freunde</string>
-  <string name="app_description">Ein einfacher inoffizieller Client für Friendica</string>
+  <string name="app_description">Ein einfacher Client für Friendica</string>
   <string name="index_my_timeline">Meine</string>
   <string name="notifications">Benachrichtigungen</string>
   <string name="mark_all_notifications_seen">Alle Benachrichtigungen als gelesen markieren</string>

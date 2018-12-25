@@ -7,10 +7,12 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.location.Address
 import android.location.Location
+import android.media.ExifInterface
 import android.os.Bundle
 import android.view.*
 import android.widget.EditText
@@ -254,6 +256,11 @@ class ComposeDialogFragment: BaseDialogFragment() {
             }
 
             if(p0.size == 1){
+                p1?.let {
+                    if(it == EasyImage.ImageSource.CAMERA_IMAGE) {
+                        applyRotationIfNeeded(p0[0])
+                    }
+                }
                 handleImagePick(p0[0])
                 return
             }
@@ -272,6 +279,32 @@ class ComposeDialogFragment: BaseDialogFragment() {
         }
 
         override fun onCanceled(source: EasyImage.ImageSource?, type: Int) {
+        }
+
+        private fun applyRotationIfNeeded(imageFile: File) {
+            val exif = ExifInterface(imageFile.absolutePath)
+            val exifRotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
+            val rotation = when(exifRotation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                else -> 0
+            }
+            if (rotation == 0) return
+            val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
+            val matrix = Matrix().apply { postRotate(rotation.toFloat()) }
+            val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+            bitmap.recycle()
+
+            lateinit var out: FileOutputStream
+            try {
+                out = FileOutputStream(imageFile)
+                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            } catch (e: Exception) {
+            } finally {
+                rotatedBitmap.recycle()
+                out.close()
+            }
         }
     }
 
