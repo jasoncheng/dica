@@ -38,10 +38,6 @@ class App: Application() {
         super.onCreate()
         instance = this
         EasyImage.configuration(this).setAllowMultiplePickInGallery(true)
-        val url = "https://jason.holi.chat/photo/20074432915c238a4649eff671019090-2.jpg"
-        val reg = "\\/photo\\/([a-z0-9]+)-".toRegex()
-        val result = reg.find(url)
-        dLog("${result?.groupValues?.get(1)}")
     }
 
     fun getWebFinger(email: String): String? {
