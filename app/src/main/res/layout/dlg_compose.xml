@@ -8,7 +8,7 @@
               android:padding="4dp">
 
   <LinearLayout
-          android:id="@+id/group_permission"
+          android:id="@+id/group_permmain_radiogroupission"
           android:orientation="horizontal"
           android:layout_width="match_parent" android:layout_height="wrap_content">
     <RadioGroup
