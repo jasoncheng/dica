@@ -92,6 +92,8 @@ interface ApiService {
         @Field("photo_id") photo_id: String,
         @Field("allow_gid") allow_gid: String = "",
         @Field("deny_gid") deny_gid: String = "",
+        @Field("allow_cid") allow_cid: String = "",
+        @Field("deny_cid") deny_cid: String = "",
         @Field("album") album: String = "Wall Photos"
     ): Call<String>
 

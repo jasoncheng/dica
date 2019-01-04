@@ -483,13 +483,7 @@ class ComposeDialogFragment : BaseDialogFragment() {
                     uiThread { (that as BaseActivity).loadingState(strUploading.format("${index + 1}")) }
                 }
 
-//                val g =  RequestBody.create(MediaType.parse("text/plain"), allowGids)
-//                val a = RequestBody.create(MediaType.parse("text/plain"),  "Wall Photos")
-
                 try {
-//                    val r1 = ApiService.create().friendicaPhotoCreate(g, body, a).execute()
-//                    dLog("friendicaPhotoCreate ${r1.body()} - ${r1.message()} - ${r1.errorBody()}")
-
                     val response = ApiService.create().mediaUpload(body).execute()
                     dLog("media/upload: ${response.body()}, ${response.message()}, ${response.errorBody()}")
                     if (response == null || !response.isSuccessful) {
