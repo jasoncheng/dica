@@ -86,13 +86,7 @@ class IndexActivity : BaseActivity() {
         iv_compose.setOnClickListener {
             val dlg = ComposeDialogFragment()
             dlg.show(supportFragmentManager, Consts.FG_COMPOSE)
-            vp_index?.currentItem?.let { what ->
-                vp_index.adapter?.let { that ->
-                    val fg = (that as IndexPageAdapter).getTimelineFragment(what)
-                    fg?.stl?.let { timeline ->
-                        dlg.callback = WeakReference(timeline as ICompose) }
-                }
-            }
+            setComposeDialogCallback(dlg)
         }
 
         // avatar
@@ -164,6 +158,16 @@ class IndexActivity : BaseActivity() {
         processIntent()
     }
 
+    fun setComposeDialogCallback(dlg: ComposeDialogFragment){
+        vp_index?.currentItem?.let { what ->
+            vp_index.adapter?.let { that ->
+                val fg = (that as IndexPageAdapter).getTimelineFragment(what)
+                fg?.stl?.let { timeline ->
+                    dlg.callback = WeakReference(timeline as ICompose) }
+            }
+        }
+    }
+
     private fun processIntent() {
         if (intent != null && intent.getBooleanExtra(Consts.EXTRA_NOTIFICATIONS, false)) {
             showNotifications()
@@ -200,6 +204,7 @@ class IndexActivity : BaseActivity() {
         }
 
         dlg.show(supportFragmentManager, Consts.FG_COMPOSE)
+        setComposeDialogCallback(dlg)
     }
 
     private fun getRealPathFromURI(contentUri: Uri): String {

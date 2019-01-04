@@ -79,6 +79,24 @@ interface ApiService {
     @FormUrlEncoded
     fun statusRetweet(@Field("id") id: Int): Call<Status>
 
+    @POST("friendica/photo/create")
+    @Multipart
+    fun friendicaPhotoCreate(
+        @Part("allow_gid") allow_gid: RequestBody,
+        @Part media: MultipartBody.Part,
+        @Part("album") album: RequestBody): Call<String>
+
+    @POST("friendica/photo/update")
+    @FormUrlEncoded
+    fun friendicaPhotoUpdate(
+        @Field("photo_id") photo_id: String,
+        @Field("allow_gid") allow_gid: String = "",
+        @Field("deny_gid") deny_gid: String = "",
+        @Field("allow_cid") allow_cid: String = "",
+        @Field("deny_cid") deny_cid: String = "",
+        @Field("album") album: String = "Wall Photos"
+    ): Call<String>
+
     @GET("friendica/profile/show")
     fun friendicaProfileShow(@Query("profile_id") profile_id: String?): Call<Profile>
 

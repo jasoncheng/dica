@@ -97,7 +97,7 @@ class PhotoProcessFragment: BaseDialogFragment() {
             eLog("saveToFile ${e.message}")
         } finally {
             outStream?.close()
-//            file.deleteOnExit()
+            file.deleteOnExit()
         }
 
     }
