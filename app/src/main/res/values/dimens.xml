@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="status_avatar_size">34dp</dimen>
-    <dimen name="notification_avatar_size">34dp</dimen>
-    <dimen name="reply_avatar_size">26dp</dimen>
-    <dimen name="user_page_profile_avatar">140dp</dimen>
-    <dimen name="users_dialog_avatar">100dp</dimen>
+  <dimen name="status_avatar_size">34dp</dimen>
+  <dimen name="notification_avatar_size">34dp</dimen>
+  <dimen name="reply_avatar_size">26dp</dimen>
+  <dimen name="user_page_profile_avatar">140dp</dimen>
+  <dimen name="users_dialog_avatar">100dp</dimen>
+  <dimen name="status_action_margin_left">6dp</dimen>
+  <dimen name="status_action_padding">5dp</dimen>
+  <dimen name="status_action_drawable_padding">4dp</dimen>
 </resources>

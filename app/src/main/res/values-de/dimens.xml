@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="status_action_margin_left">6dp</dimen>
+  <dimen name="status_action_padding">2dp</dimen>
+  <dimen name="status_action_drawable_padding">3dp</dimen>
+</resources>
