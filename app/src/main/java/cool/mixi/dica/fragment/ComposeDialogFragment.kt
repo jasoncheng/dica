@@ -503,8 +503,11 @@ class ComposeDialogFragment : BaseDialogFragment() {
 
                             // set photo permission
                             media.image!!.hashId()?.let {hashId ->
+                                // get album name
+                                val photo = ApiService.create().friendicaPhoto(hashId).execute().body()
+                                dLog("photo $photo")
                                 dLog("permissionResult - $allowGids - $hashId}")
-                                ApiService.create().friendicaPhotoUpdate(hashId, allowGids).execute()
+                                ApiService.create().friendicaPhotoUpdate(hashId, photo?.album, allowGids).execute()
                             }
                         }
                     } catch (e: Exception) {
