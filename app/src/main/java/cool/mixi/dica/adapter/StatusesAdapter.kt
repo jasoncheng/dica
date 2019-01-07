@@ -10,9 +10,11 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
 import android.text.format.DateUtils
+import android.text.method.ScrollingMovementMethod
 import android.text.style.*
 import android.text.util.Linkify.ALL
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -63,7 +65,7 @@ import kotlin.collections.ArrayList
 
 class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
                       private val statusTimeline:WeakReference<ICompose>):
-    androidx.recyclerview.widget.RecyclerView.Adapter<BasicStatusViewHolder>() {
+    androidx.recyclerview.widget.RecyclerView.Adapter<BasicStatusViewHolder>(), View.OnTouchListener {
 
     var ownerInfo: User? = null
     var isFavoritesFragment: Boolean = false
@@ -198,9 +200,11 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
         val inflater = LayoutInflater.from(context)
 
         if(viewType == ViewType.USER_PROFILE.ordinal){
-            return UserProfileViewHolder(
+            val holder = UserProfileViewHolder(
                 inflater.inflate(R.layout.rv_user_item_header, parent, false)
             )
+            holder.userDescription?.movementMethod = ScrollingMovementMethod()
+            return holder
         } else if(viewType == ViewType.EMPTY.ordinal) {
             return if(context is UserActivity) {
                 EmptyHolder(inflater.inflate(R.layout.empty_view_user_page, parent, false))
@@ -381,10 +385,16 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
         renderContent(holder.contentBox, st)
     }
 
+    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        v?.parent?.requestDisallowInterceptTouchEvent(true)
+        return false
+    }
+
     private fun doLayoutHeaderUserProfile(holder: BasicStatusViewHolder){
         holder.userName?.text = ownerInfo?.screen_name
         if(ownerInfo?.description != null && ownerInfo?.description?.isEmpty() == false){
             holder.userDescription?.text = ownerInfo?.description
+            holder.userDescription?.setOnTouchListener(this)
             holder.userDescription?.visibility = View.VISIBLE
         } else {
             holder.userDescription?.visibility = View.GONE
