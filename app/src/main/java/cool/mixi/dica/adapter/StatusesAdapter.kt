@@ -653,24 +653,18 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
         var txtAr = ArrayList<String>()
 
         lines.forEachIndexed { _, it ->
-            var newIt = if(it.endsWith("/") && it.length > 2){
-                it.substring(0, it.length-2)
-            } else {
-                it
-            }
-
             when {
-                newIt.startsWith("http", true) -> {
+                it.startsWith("http", true) -> {
                     if(isPureText){
                         renderText(parent, txtAr)
                         txtAr.clear()
                     }
                     isPureText = false
-                    renderUrl(parent, status, newIt)
+                    renderUrl(parent, status, it)
                 }
                 else -> {
                     isPureText = true
-                    txtAr.add(newIt)
+                    txtAr.add(it)
                 }
             }
         }

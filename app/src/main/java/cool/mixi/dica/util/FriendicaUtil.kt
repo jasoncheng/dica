@@ -168,7 +168,7 @@ class FriendicaUtil {
             var displayedUrl = ArrayList<String>()
             while (matcher.find()){
                 var url = matcher.group()
-                url = url.replace("\\/$", "")
+                url = url.replace("(\\*|\\))$".toRegex(), "")
 
                 // Email
                 if(!url.startsWith("http", true)) continue

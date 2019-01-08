@@ -22,10 +22,7 @@ import com.google.android.material.snackbar.Snackbar
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.adapter.IndexPageAdapter
-import cool.mixi.dica.bean.Consts
-import cool.mixi.dica.bean.Meta
-import cool.mixi.dica.bean.Notification
-import cool.mixi.dica.bean.Profile
+import cool.mixi.dica.bean.*
 import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.fragment.ComposeDialogFragment
 import cool.mixi.dica.fragment.ICompose
