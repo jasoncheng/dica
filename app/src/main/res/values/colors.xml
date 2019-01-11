@@ -22,4 +22,5 @@
     <color name="snack_bar_bg">#c1000000</color>
     <color name="sticker_loading_bg">#AF999999</color>
     <color name="photoPreviewBoxBg">#9FA8DA</color>
+    <color name="compose_bg">#efefef</color>
 </resources>
