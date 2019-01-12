@@ -527,58 +527,20 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
 
     private fun actRetweet(view: View){
         val position = (view.parent.parent as ViewGroup).tag as Int
-        var dlg : AlertDialog?
         data.getOrNull(position).let {
             if(it == null) return
-            var view =  LayoutInflater.from(context).inflate(R.layout.loading_dialog, null)
-            view.findViewById<TextView>(R.id.tv_loading).text = context.getString(R.string.retweeting)
-            val builder = AlertDialog.Builder(context)
-            builder.setCancelable(true).setView(view)
-            dlg = builder.show()
 
-
-            if(isOffSiteSN){
-                val text = it.toFriendicaShareText()
-                ApiService.create()
-                    .statusUpdate(context.getString(R.string.app_name), text, 0, "", "", ArrayList(), "")
-                    .enqueue(StatusUpdateCallback(dlg, refAdapter))
-                return
+            var bundle = Bundle()
+            var tweetContent = it.toFriendicaShareText()
+            it.retweeted_status?.let { status ->
+                tweetContent = status.toFriendicaShareText()
             }
 
-            FriendicaUtil.retweet(it.id, object: IRetweet {
-                override fun done() {
-                    dlg?.dismiss()
-                    App.instance.toast(strSuccessRetweet)
-                }
-
-                override fun fail(reason: String) {
-                    dlg?.dismiss()
-                    App.instance.toast(strRetweetFail.format(reason))
-                }
-            })
-        }
-    }
-
-    private class StatusUpdateCallback(val dialog: AlertDialog?, val adapter: SoftReference<StatusesAdapter>): Callback<String> {
-        override fun onFailure(call: Call<String>, t: Throwable) {
-            dialog?.dismiss()
-            adapter.get()?.let {
-                App.instance.toast(it.strRetweetFail!!.format("${t.message}"))
-            }
-        }
-
-        override fun onResponse(call: Call<String>, response: Response<String>) {
-            dialog?.dismiss()
-            if(response.code() != HttpsURLConnection.HTTP_OK) {
-                adapter.get()?.let {
-                    App.instance.toast(it.strRetweetFail.format("${response.code()}"))
-                }
-                return
-            }
-
-            adapter.get()?.let {
-                App.instance.toast(it.strSuccessRetweet)
-            }
+            bundle.putString(Consts.EXTRA_RETWEET_TEXT, tweetContent)
+            val dlg = ComposeDialogFragment()
+            dlg.arguments = bundle
+            dlg.callback = statusTimeline
+            dlg.myShow((context as BaseActivity).supportFragmentManager, Consts.FG_COMPOSE)
         }
     }
 
@@ -733,7 +695,7 @@ class StatusesAdapter(val data:ArrayList<Status>, val context: Context,
                 }
 
                 it.title?.let {that ->
-                    if(status.displayedTitle.containsKey(that)) {
+                    if(status?.displayedTitle?.containsKey(that)) {
                         if (url != status.displayedTitle[that]) {
                             return
                         }

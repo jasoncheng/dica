@@ -25,19 +25,12 @@ interface ISeenNotify {
     fun fail()
 }
 
-interface IRetweet {
-    fun done()
-    fun fail(reason: String)
-}
-
 class FriendicaUtil {
 
     companion object {
         private val serviceUnavailable = App.instance.getString(R.string.common_error)
         fun getProxyUrlPartial(originalUrl: String): String{
             var tmpUrl = TextUtils.htmlEncode(originalUrl)
-            var shortpath = tmpUrl.md5()
-//            var longpath = shortpath.substring(0, 2)
             var longpath = ""
             var base64 =
                 String(android.util.Base64.encode(
@@ -115,24 +108,6 @@ class FriendicaUtil {
                     if(response.code() != HttpsURLConnection.HTTP_OK
                         || !response.body().toString().contains("success")) {
                         callback?.fail()
-                        return
-                    }
-                    callback?.done()
-                }
-
-            })
-        }
-
-        fun retweet(nid: Int, callback: IRetweet?) {
-            ApiService.create().statusRetweet(nid).enqueue(object : Callback<Status>{
-                override fun onFailure(call: Call<Status>, t: Throwable) {
-                    callback?.fail("${t.message}")
-                }
-
-                override fun onResponse(call: Call<Status>, response: Response<Status>) {
-                    if(response.code() != HttpsURLConnection.HTTP_OK) {
-                        dLog(response.message())
-                        callback?.fail(response.code().toString())
                         return
                     }
                     callback?.done()

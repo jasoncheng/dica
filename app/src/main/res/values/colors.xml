@@ -23,4 +23,8 @@
     <color name="sticker_loading_bg">#AF999999</color>
     <color name="photoPreviewBoxBg">#9FA8DA</color>
     <color name="compose_bg">#efefef</color>
+    <color name="recycling_circle">#80d8ff</color>
+    <color name="recycling_bg">#FAFAFA</color>
+    <color name="recycling_bg_dark">#B0BEC5</color>
+    <color name="recycling_border">#F5F5F5</color>
 </resources>
