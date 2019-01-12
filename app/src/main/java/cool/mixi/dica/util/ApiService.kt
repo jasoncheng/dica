@@ -75,19 +75,19 @@ interface ApiService {
         @Field("id") status_id: Int
     ): Call<String>
 
-    @POST("statuses/retweet")
-    @FormUrlEncoded
-    fun statusRetweet(@Field("id") id: Int): Call<Status>
+//    @POST("statuses/retweet")
+//    @FormUrlEncoded
+//    fun statusRetweet(@Field("id") id: Int): Call<Status>
 
     @GET("friendica/photo")
     fun friendicaPhoto(@Query("photo_id") photo_id: String): Call<Photo>
 
-    @POST("friendica/photo/create")
-    @Multipart
-    fun friendicaPhotoCreate(
-        @Part("allow_gid") allow_gid: RequestBody,
-        @Part media: MultipartBody.Part,
-        @Part("album") album: RequestBody): Call<String>
+//    @POST("friendica/photo/create")
+//    @Multipart
+//    fun friendicaPhotoCreate(
+//        @Part("allow_gid") allow_gid: RequestBody,
+//        @Part media: MultipartBody.Part,
+//        @Part("album") album: RequestBody): Call<String>
 
     @POST("friendica/photo/update")
     @FormUrlEncoded

@@ -70,48 +70,55 @@
 
   <androidx.constraintlayout.widget.ConstraintLayout
           android:id="@+id/cl_box"
+          android:padding="4dp"
           android:layout_width="match_parent"
           android:layout_height="wrap_content">
 
     <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
+            android:layout_width="@dimen/compose_button_size"
+            android:layout_height="@dimen/compose_button_size"
             android:src="@drawable/emoji"
             android:id="@+id/iv_emoji"
+            android:scaleType="fitXY"
+            android:background="@color/compose_bg"
+            android:padding="@dimen/compose_button_padding"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="8dp"
             app:layout_constraintTop_toTopOf="@+id/iv_location"
             app:layout_constraintBottom_toBottomOf="@+id/iv_location"/>
 
     <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
-            android:src="@drawable/round_photo_size_select_actual_black"
-            android:id="@+id/iv_from_album"
-            app:layout_constraintTop_toTopOf="@+id/iv_location"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_location"
-            app:layout_constraintStart_toEndOf="@+id/iv_emoji" android:layout_marginStart="4dp"/>
+        android:layout_width="@dimen/compose_button_size"
+        android:layout_height="@dimen/compose_button_size"
+        android:src="@drawable/ic_gallery"
+        android:id="@+id/iv_from_album"
+        android:padding="@dimen/compose_button_padding"
+        android:background="@color/compose_bg"
+        app:layout_constraintTop_toTopOf="@+id/iv_location"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_location"
+        app:layout_constraintStart_toEndOf="@+id/iv_emoji" android:layout_marginStart="@dimen/compose_button_margin"/>
     <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp" tools:srcCompat="@tools:sample/avatars"
-            android:src="@drawable/round_photo_camera_black"
+            android:layout_width="@dimen/compose_button_size"
+            android:layout_height="@dimen/compose_button_size"
+            android:src="@drawable/ic_camera"
             android:id="@+id/iv_from_camera"
-            app:layout_constraintStart_toEndOf="@+id/iv_from_album" android:layout_marginStart="4dp"
+            android:background="@color/compose_bg"
+            android:padding="@dimen/compose_button_padding"
+            app:layout_constraintStart_toEndOf="@+id/iv_from_album" android:layout_marginStart="@dimen/compose_button_margin"
             app:layout_constraintTop_toTopOf="@+id/iv_location"
             app:layout_constraintBottom_toBottomOf="@+id/iv_location"/>
     <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/round_add_location_mid"
-            android:id="@+id/iv_location"
-            android:includeFontPadding="false"
-            android:textSize="12sp"
-            android:gravity="center_vertical"
-            app:layout_constraintStart_toEndOf="@+id/iv_from_camera" android:layout_marginStart="4dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_gps"
+        android:id="@+id/iv_location"
+        android:includeFontPadding="false"
+        android:textSize="12sp"
+        android:gravity="center_vertical"
+        android:drawablePadding="4dp"
+        app:layout_constraintStart_toEndOf="@+id/iv_from_camera" android:layout_marginStart="@dimen/compose_button_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="4dp"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 

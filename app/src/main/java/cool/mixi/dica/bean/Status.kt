@@ -2,6 +2,7 @@ package cool.mixi.dica.bean
 
 import cool.mixi.dica.util.dicaHTMLFilter
 import cool.mixi.dica.util.getBaseUri
+import java.util.*
 
 data class Status(
     var id: Int = 0,
@@ -23,6 +24,7 @@ data class Status(
     var attachments: ArrayList<Attachment>? = ArrayList(),
     var apEntry: APEntry? = APEntry(),
     var avatar:String = "",
+    var retweeted_status: Status? = null,
 
     // extra params
     var enableNSFW: Boolean = false,
@@ -36,13 +38,24 @@ data class Status(
     }
 
     fun toFriendicaShareText(): String {
+        var author = this.apEntry?.author?.name
+        var profile = this.apEntry?.author?.uri
+        var link = this.apEntry?.id
+        this.user.url.isEmpty().let {
+            if(it) return@let
+            author = this.user.screen_name
+            profile = this.user.url
+            avatar = this.user.profile_image_url_large
+            link = this.external_url
+        }
+
         var sb = StringBuffer()
         sb.append("[share ")
-        sb.append("author='${this.apEntry?.author?.name}' ")
+        sb.append("author='$author' ")
         sb.append("avatar='${this.avatar}' ")
         sb.append("posted='${this.created_at}' ")
-        sb.append("profile='${this.apEntry?.author?.uri}' ")
-        sb.append("link='${this.apEntry?.id}' ")
+        sb.append("profile='$profile' ")
+        sb.append("link='$link' ")
         sb.append("] ")
         sb.append("\n${this.statusnet_html
             .replace("\\[".toRegex(), "(")

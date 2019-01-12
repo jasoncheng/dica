@@ -4,21 +4,21 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.graphics.Matrix
+import android.graphics.*
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.location.Address
 import android.location.Location
 import android.media.ExifInterface
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.*
 import android.view.*
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
@@ -37,6 +37,7 @@ import cool.mixi.dica.bean.Media
 import cool.mixi.dica.bean.Status
 import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.util.*
+import cool.mixi.dica.view.MySocialEditTextView
 import kotlinx.android.synthetic.main.dlg_compose.*
 import kotlinx.android.synthetic.main.dlg_compose.view.*
 import okhttp3.MediaType
@@ -72,13 +73,15 @@ class ComposeDialogFragment : BaseDialogFragment() {
 
     private var inReplyStatusId: Int = 0
     private var inReplyScreenName: String? = ""
-    private var editText: EditText? = null
+    private var retweetText: String? = ""
+    private var editText: MySocialEditTextView? = null
     private var commonError: String? = null
     var sharedText: String? = null
     private var previewImageBoxBg: Drawable? = null
     private var maxPhotoUploadNumber: String? = null
     private var strMsgErr: String? = null
     private var strMsg: String? = null
+    private var retweetMode = false
 
     var callback: WeakReference<ICompose>? = null
 
@@ -154,9 +157,15 @@ class ComposeDialogFragment : BaseDialogFragment() {
         if (arguments != null) {
             inReplyScreenName = arguments?.getString(Consts.EXTRA_IN_REPLY_USERNAME)
             inReplyStatusId = arguments?.getInt(Consts.EXTRA_IN_REPLY_STATUS_ID, 0)!!
-            var str = getString(R.string.status_reply_to).format(inReplyScreenName)
-            roomView?.group_reply?.visibility = View.VISIBLE
-            roomView?.tv_reply_to?.text = str
+            retweetText = arguments?.getString(Consts.EXTRA_RETWEET_TEXT)
+
+            inReplyScreenName?.let {
+                var str = getString(R.string.status_reply_to).format(inReplyScreenName)
+                roomView?.group_reply?.visibility = View.VISIBLE
+                roomView?.tv_reply_to?.text = str
+            }
+
+            retweetText?.let { retweetMode = true }
         }
 
         return roomView!!
@@ -205,11 +214,6 @@ class ComposeDialogFragment : BaseDialogFragment() {
             tmpMediaUri.clear()
         }
 
-
-        sharedText?.let { str ->
-            editText?.let { it.setText(str) }
-        }
-
         doAsync {
             val users = AppDatabase.getInstance().userDao().getAll()
             val tags = AppDatabase.getInstance().hashTagDao().getAll()
@@ -222,8 +226,39 @@ class ComposeDialogFragment : BaseDialogFragment() {
                 tags?.forEach { that -> adapterHashTag.add(Hashtag("${that.name}")) }
                 et_text.mentionAdapter = adapter
                 et_text.hashtagAdapter = adapterHashTag
+                if(retweetMode){
+                    setSpanForRetweet(editText)
+                }
             }
         }
+
+        editText?.let {
+            if (!retweetMode && sharedText != null) {
+                it.setText(sharedText)
+                return
+            }
+        }
+    }
+
+    private fun setSpanForRetweet(it: MySocialEditTextView?){
+        if(it == null) return
+
+        it.setHyperlinkEnabled(false)
+        it.compoundDrawablePadding = it.text.toString().length * 10
+        val span = SpannableStringBuilder("$retweetText")
+        val start = 0
+        val end = retweetText!!.length
+        val bgCircleColor = ContextCompat.getColor(context!!, R.color.recycling_circle)
+        span.setSpan(BulletSpan(10, bgCircleColor, 20), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        span.setSpan(BackgroundColorSpan(Color.DKGRAY), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        span.setSpan(ForegroundColorSpan(Color.LTGRAY), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        span.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        span.setSpan(ScaleXSpan(0.6f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        span.append("\n\n")
+        it.text = span
+        it.requestFocus()
+        it.setSelection(it.text.length)
+        it.requestFocus(it.text.length)
     }
 
     private fun isOverPhotosLimit(): Boolean {
@@ -413,8 +448,9 @@ class ComposeDialogFragment : BaseDialogFragment() {
                 ref.get()?.let {
 
                     // Reload Status Timeline
-                    if((it.callback == null || it.callback!!.get() == null)
-                        && it.activity != null && it.activity is IndexActivity) {
+                    if ((it.callback == null || it.callback!!.get() == null)
+                        && it.activity != null && it.activity is IndexActivity
+                    ) {
                         (it.activity as IndexActivity).setComposeDialogCallback(it)
                     }
 
@@ -502,7 +538,7 @@ class ComposeDialogFragment : BaseDialogFragment() {
                             firstMediaId = ""
 
                             // set photo permission
-                            media.image!!.hashId()?.let {hashId ->
+                            media.image!!.hashId()?.let { hashId ->
                                 // get album name
                                 val photo = ApiService.create().friendicaPhoto(hashId).execute().body()
                                 dLog("photo $photo")
