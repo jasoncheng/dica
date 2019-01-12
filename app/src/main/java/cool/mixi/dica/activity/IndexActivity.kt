@@ -12,20 +12,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Parcelable
 import android.provider.MediaStore
+import android.text.TextUtils
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.gms.common.util.IOUtils
 import com.google.android.material.snackbar.Snackbar
 import cool.mixi.dica.App
 import cool.mixi.dica.R
 import cool.mixi.dica.adapter.IndexPageAdapter
-import cool.mixi.dica.bean.Consts
-import cool.mixi.dica.bean.Meta
-import cool.mixi.dica.bean.Notification
-import cool.mixi.dica.bean.Profile
+import cool.mixi.dica.bean.*
 import cool.mixi.dica.database.AppDatabase
 import cool.mixi.dica.fragment.ComposeDialogFragment
 import cool.mixi.dica.fragment.ICompose
@@ -37,6 +36,8 @@ import org.jetbrains.anko.doAsync
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
 import java.lang.ref.SoftReference
 import java.lang.ref.WeakReference
 import java.util.regex.Pattern
@@ -209,14 +210,45 @@ class IndexActivity : BaseActivity() {
 
     private fun getRealPathFromURI(contentUri: Uri): String {
         var cursor: Cursor? = null
+        var path = ""
         try {
             val tmp = arrayOf(MediaStore.Images.Media.DATA)
             cursor = contentResolver.query(contentUri, tmp, null, null, null)
             val columnIndex = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             cursor.moveToFirst()
-            return cursor.getString(columnIndex)
+            path = cursor.getString(columnIndex)
+        } catch (e: Exception){
+            val fileName = getFileName(contentUri)
+            if (!TextUtils.isEmpty(fileName)) {
+                val copyFile = File(applicationContext.filesDir.toString() + File.separator + fileName)
+                copy(contentUri, copyFile)
+                path = copyFile.absolutePath
+            }
         } finally {
             cursor?.close()
+            return path
+        }
+    }
+
+    private fun getFileName(uri: Uri?): String? {
+        if (uri == null) return null
+        var fileName: String? = null
+        val path = uri.path
+        val cut = path!!.lastIndexOf('/')
+        if (cut != -1) {
+            fileName = path.substring(cut + 1)
+        }
+        return fileName
+    }
+
+    private fun copy(srcUri: Uri, dstFile: File) {
+        try {
+            val inputStream = applicationContext.contentResolver.openInputStream(srcUri) ?: return
+            val outputStream = FileOutputStream(dstFile)
+            IOUtils.copyStream(inputStream, outputStream)
+            inputStream.close()
+            outputStream.close()
+        } catch (e: Exception) {
         }
     }
 

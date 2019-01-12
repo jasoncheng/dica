@@ -48,5 +48,6 @@ object Consts {
     const val EXTRA_NOTIFICATIONS = "notifications"
     const val EXTRA_IN_REPLY_STATUS_ID = "in_reply_to_status_id"
     const val EXTRA_IN_REPLY_USERNAME = "in_reply_to_screen_name"
+    const val EXTRA_RETWEET_TEXT = "retweet_txt"
     const val EXTRA_STICKER_URI = "sticker"
 }

@@ -199,7 +199,6 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
                 return
             }
 
-            // 錯誤代碼
             val responseCode = response.code()
             if(responseCode != HttpsURLConnection.HTTP_OK){
                 App.instance.toast(App.instance.getString(R.string.common_error).format("$responseCode - ${response.message()}"))
