@@ -23,15 +23,20 @@ data class Status(
     var friendica_activities: FriendicaActivities = FriendicaActivities(),
     var attachments: ArrayList<Attachment>? = ArrayList(),
     var apEntry: APEntry? = APEntry(),
-    var avatar:String = "",
+    var avatar: String = "",
     var retweeted_status: Status? = null,
+
+    // extra params for status page (comments)
+    var indent: Int = 0,
+    var firstCommentId: Int = 0,
+    var isHide: Boolean = false,
 
     // extra params
     var enableNSFW: Boolean = false,
-    var displayedTitle: HashMap<String,String> = HashMap()
+    var displayedTitle: HashMap<String, String> = HashMap()
 ) {
     override fun equals(other: Any?): Boolean {
-        if(other?.javaClass != this.javaClass)  return false
+        if (other?.javaClass != this.javaClass) return false
 
         other as Status
         return other.id == this.id
@@ -42,7 +47,7 @@ data class Status(
         var profile = this.apEntry?.author?.uri
         var link = this.apEntry?.id
         this.user.url.isEmpty().let {
-            if(it) return@let
+            if (it) return@let
             author = this.user.screen_name
             profile = this.user.url
             avatar = this.user.profile_image_url_large
@@ -57,10 +62,12 @@ data class Status(
         sb.append("profile='$profile' ")
         sb.append("link='$link' ")
         sb.append("] ")
-        sb.append("\n${this.statusnet_html
-            .replace("\\[".toRegex(), "(")
-            .replace("\\]".toRegex(), ")")
-            .dicaHTMLFilter(true, external_url.getBaseUri())}\n")
+        sb.append(
+            "\n${this.statusnet_html
+                .replace("\\[".toRegex(), "(")
+                .replace("\\]".toRegex(), ")")
+                .dicaHTMLFilter(true, external_url.getBaseUri())}\n"
+        )
         sb.append("[/share]")
         return sb.toString()
     }
