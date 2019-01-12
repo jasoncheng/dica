@@ -12,7 +12,7 @@ android {
         applicationId 'cool.mixi.dica'
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 19011201
+        versionCode 19011301
         versionName "0.2.1"
     }
     signingConfigs {
@@ -53,7 +53,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.1.0-alpha02'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
 
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
