@@ -6,8 +6,8 @@
                                                    android:layout_height="wrap_content">
 
   <ImageView
-      android:layout_width="@dimen/status_avatar_size"
-      android:layout_height="@dimen/status_avatar_size" tools:srcCompat="@tools:sample/avatars"
+      android:layout_width="@dimen/status_avatar_size_small"
+      android:layout_height="@dimen/status_avatar_size_small" tools:srcCompat="@tools:sample/avatars"
       android:id="@+id/avatar"
       app:layout_constraintStart_toStartOf="parent"
       android:layout_marginStart="8dp" android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"/>
@@ -16,9 +16,9 @@
   <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                 android:orientation="vertical"
                 app:layout_constraintStart_toEndOf="@+id/avatar"
-                app:layout_constraintTop_toTopOf="parent"
                 android:paddingLeft="5dp" app:layout_constraintEnd_toStartOf="@+id/more_options"
-                android:layout_marginEnd="8dp">
+                android:layout_marginEnd="8dp"
+                app:layout_constraintTop_toTopOf="@+id/avatar" app:layout_constraintBottom_toBottomOf="@+id/avatar">
 
     <TextView
         android:id="@+id/tv_status_user_name"
@@ -26,8 +26,8 @@
         android:textSize="14sp"
         android:layout_height="wrap_content"
         android:drawablePadding="4dp"
-        app:layout_constraintStart_toEndOf="@+id/avatar"
-        android:layout_marginTop="4dp"/>
+        android:text="1234"
+        app:layout_constraintStart_toEndOf="@+id/avatar" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

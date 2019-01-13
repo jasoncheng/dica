@@ -5,10 +5,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
+import android.text.*
 import android.text.format.DateUtils
 import android.text.method.ScrollingMovementMethod
 import android.text.style.*
@@ -83,11 +80,10 @@ class StatusesAdapter(
     private val favoritesDrawable = context.getDrawable(R.drawable.favorites_sel)
     private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
     private val statusSourceColor = ContextCompat.getColor(context, R.color.txt_status_source)
+    private val statusDatetimeColor = ContextCompat.getColor(context, R.color.txt_datetime)
     private val tagTextColor = ContextCompat.getColor(context, R.color.txt_tag)
     private val emailTextColor = ContextCompat.getColor(context, R.color.txt_email)
     private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
-    private val strSuccessRetweet: String = context.getString(R.string.retweet_success)
-    private val strRetweetFail = context.getString(R.string.retweet_fail)
     private val strComments = context.getString(R.string.status_comment)
     private val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm")
 
@@ -96,6 +92,7 @@ class StatusesAdapter(
         STATUS,
         STATUS_SIMPLE,
         REPLY,
+        REPLY_L2,
         EMPTY
     }
 
@@ -150,28 +147,28 @@ class StatusesAdapter(
             if (it == null) return
 
             // DateTime process
-            var lockContainer = holder.datetime
-            try {
-                var date = Date(it.created_at)
-                if (context !is UserActivity) {
-                    doLayoutUserBox(holder, it, pos)
-                    holder.datetime?.text = DateUtils.getRelativeTimeSpanString(date.time).toString()
-                    lockContainer = holder.userName
-                } else {
-                    holder.datetime?.let { that ->
-                        that.text = sdf.format(date)
-                        doAppendSourceLayout(that, that.text.toString(), it)
-                    }
-                }
-            } catch (e: java.lang.Exception) {
-            }
+            doLayoutUserBox(holder, it, pos)
+//            var lockContainer = holder.datetime
+//            try {
+//                var date = Date(it.created_at)
+//                if (context !is UserActivity) {
+//                    doLayoutUserBox(holder, it, pos)
+//                    lockContainer = holder.userName
+//                } else {
+//                    holder.datetime?.let { that ->
+//                        that.text = sdf.format(date)
+//                        doAppendPostInfoLayout(that, it)
+//                    }
+//                }
+//            } catch (e: java.lang.Exception) {
+//            }
 
-            // private message icon
-            if (it.friendica_private) {
-                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
-            } else {
-                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
-            }
+            //TODO: private message icon
+//            if (it.friendica_private) {
+//                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
+//            } else {
+//                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+//            }
 
             // comments
             val commentStr = if (it.friendica_comments > 0) {
@@ -179,7 +176,13 @@ class StatusesAdapter(
             } else {
                 ""
             }
-            holder.comment?.let { it.text = strComments.format(commentStr) }
+
+            holder.comment?.let {
+                if (holder is StatusReplyViewHolder) {
+                    return@let
+                }
+                it.text = strComments.format(commentStr)
+            }
 
 
             doLayoutContent(holder, it, pos)
@@ -203,7 +206,11 @@ class StatusesAdapter(
 
         val st = data[position]
         return if (st.in_reply_to_status_id != 0) {
-            ViewType.REPLY.ordinal
+            if (st.indent > 0) {
+                ViewType.REPLY_L2.ordinal
+            } else {
+                ViewType.REPLY.ordinal
+            }
         } else {
             ViewType.STATUS.ordinal
         }
@@ -229,6 +236,9 @@ class StatusesAdapter(
         var holder = when (viewType) {
             ViewType.REPLY.ordinal -> StatusReplyViewHolder(
                 inflater.inflate(R.layout.reply_list_item, parent, false)
+            )
+            ViewType.REPLY_L2.ordinal -> StatusReplyViewHolder(
+                inflater.inflate(R.layout.reply_list_item_level2, parent, false)
             )
             ViewType.STATUS_SIMPLE.ordinal -> StatusNoUserInfoViewHolder(
                 inflater.inflate(R.layout.rv_user_item, parent, false)
@@ -323,40 +333,73 @@ class StatusesAdapter(
     }
 
     private fun doLayoutUserBox(holder: BasicStatusViewHolder, st: Status, pos: Int) {
-        holder.userName?.text = st.user.screen_name
-        holder.userName?.tag = pos
-        holder.userName?.setOnClickListener { gotoUserPage(it) }
+        if (context is UserActivity) {
+            holder.datetime?.text = Date(st.created_at).toString()
+        } else {
+            val createdAt = Date(st.created_at).time
+            holder.datetime?.text = DateUtils.getRelativeTimeSpanString(createdAt).toString()
+        }
 
-        st.source?.let { doAppendSourceLayout(holder.userName!!, st.user.screen_name, st) }
+        holder.userName?.let {userName ->
+            userName.text = st.user.screen_name
+            userName.tag = pos
+            userName?.setOnClickListener { gotoUserPage(it) }
+            doAppendPostInfoLayout(holder, st)
+        }
 
-        holder.avatar?.setTag(R.id.avatar_tag, pos)
-        holder.avatar?.setOnClickListener { gotoUserPage(it) }
-
-        Glide.with(context.applicationContext)
-            .load(st.user.profile_image_url_large)
-            .apply(RequestOptions().circleCrop())
-            .into(holder.avatar!!)
+        holder.avatar?.let {
+            it.setTag(R.id.avatar_tag, pos)
+            it.setOnClickListener { gotoUserPage(it) }
+            Glide.with(context.applicationContext)
+                .load(st.user.profile_image_url_large)
+                .apply(RequestOptions().circleCrop())
+                .into(it)
+        }
     }
 
-    private fun doAppendSourceLayout(view: TextView, orgStr: String, st: Status) {
-        val it = st.source!!
-        if (it.isEmpty() || it.isBlank()) return
+    private fun doAppendPostInfoLayout(holder: BasicStatusViewHolder, st: Status) {
 
-        // for Friendica legacy version API
-        val source = it.replace(" \\(\\)".toRegex(), "").trim()
+        if(holder.userName == null){ return }
 
-        val str = context.getString(R.string.status_source).format(source)
-        val start = orgStr.length
-        val end = start + str.length
-        var sp = SpannableString("$orgStr$str")
-        var color = ForegroundColorSpan(statusSourceColor)
-        try {
-            sp.setSpan(color, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-            sp.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-            sp.setSpan(RelativeSizeSpan(0.8f), start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-            view?.text = sp
-        } catch (e: Exception) {
+        val ssb = SpannableStringBuilder(holder.userName?.text)
+
+        // append datetime
+        if (holder is StatusReplyViewHolder) {
+            ssb.append(" - ")
+            val datetimeText = holder.datetime?.text
+            holder.datetime?.visibility = View.GONE
+            var sp = SpannableString("$datetimeText")
+            var color = ForegroundColorSpan(statusDatetimeColor)
+            try {
+                sp.setSpan(color, 0, sp.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sp.setSpan(RelativeSizeSpan(0.8f), 0, sp.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sp.setSpan(StyleSpan(Typeface.ITALIC), 0, sp.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                ssb.append(sp)
+            } catch (e: Exception) {
+            }
         }
+
+        // append source
+        st.source?.let {
+            ssb.append(" - ")
+            val sourceDetails = it.trim()
+            val source = sourceDetails.replace(" \\(.*\\)".toRegex(), "").trim()
+            var sp = if (holder is StatusReplyViewHolder) {
+                SpannableString("$source")
+            } else {
+                SpannableString("$sourceDetails")
+            }
+            var color = ForegroundColorSpan(statusSourceColor)
+            try {
+                sp.setSpan(color, 0, sp.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sp.setSpan(RelativeSizeSpan(0.8f), 0, sp.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                sp.setSpan(StyleSpan(Typeface.ITALIC), 0, sp.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                ssb.append(sp)
+            } catch (e: Exception) {
+            }
+        }
+
+        holder.userName!!.text = ssb
     }
 
     private fun doLayoutGeoAddress(view: TextView, pos: Int) {
@@ -994,7 +1037,7 @@ class OffSiteUserClickSpan(private val linkColor: Int, val adapter: SoftReferenc
 open class BasicStatusViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
     open var userName: TextView? = view.tv_status_user_name
     open var avatar: ImageView? = view.avatar
-    var statusMenu: ImageView? = view.more_options
+    var statusMenu: TextView? = view.more_options
     var contentBox: ViewGroup? = view.content_box
     var notSafeForWork: TextView? = view.tv_nsfw
     var emptyDescription: TextView? = view.tv_empty

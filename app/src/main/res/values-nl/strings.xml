@@ -38,7 +38,7 @@
   <string name="index_favorites_timeline">favorieten</string>
   <string name="status_favorites">favorieten</string>
   <string name="no_any_status">geen data</string>
-  <string name="status_source">" - van %1$s"</string>
+  <string name="status_source">" - %1$s"</string>
   <string name="status_retweet">retweet</string>
   <string name="retweeting">retweeting</string>
   <string name="retweet_fail">retweet mislukt (%1$s)</string>
