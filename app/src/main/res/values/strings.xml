@@ -33,12 +33,12 @@
   <string name="app_description">A simple client for Friendica</string>
   <string name="index_my_timeline">my</string>
   <string name="notifications">notifications</string>
-  <string name="mark_all_notifications_seen">mark all notifications seen</string>
+  <string name="mark_all_notifications_seen">mark all seen</string>
   <string name="status_not_exists">item not exists</string>
   <string name="index_favorites_timeline">favorites</string>
   <string name="status_favorites">favorites</string>
   <string name="no_any_status">no data here</string>
-  <string name="status_source">" - from %1$s"</string>
+  <string name="status_source">" - %1$s"</string>
   <string name="status_retweet">retweet</string>
   <string name="retweeting">retweeting</string>
   <string name="retweet_fail">retweet fail (%1$s)</string>
@@ -55,7 +55,7 @@
   <string name="sticker_image_search_only">not support this type of search</string>
   <string name="index_network_public">network</string>
   <string name="new_status_more_than_page_size">more than %1$s new statuses</string>
-  <string name="notify_on">per 15 mins check</string>
+  <string name="notify_on">15 mins</string>
   <string name="notify_off">notification off</string>
   <string name="new_notification_count">you have %1$s new notification(s)</string>
   <string name="max_photo_number_upload">maximum photo upload limited to %1$s photos</string>
