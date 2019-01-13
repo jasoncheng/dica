@@ -87,7 +87,7 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
 
                 map[i]?.forEach {
                     if (it.id == status.in_reply_to_status_id) {
-                        status.indent = it.indent+1
+                        status.indent = it.indent + 1
                         status.firstCommentId = i
                         map[i]?.add(status)
                         return@insideLoop
@@ -104,14 +104,14 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
             arr?.sortWith(compareBy { it.id })
             map[statusId]?.let {
                 val threadSize = it.size
-                if(threadSize > Consts.MAX_SECOND_LEVEL_COMMENTS) {
+                if (threadSize > Consts.MAX_SECOND_LEVEL_COMMENTS) {
                     it.forEachIndexed { index, status ->
-                        if(index == 0){
+                        if (index == 0) {
                             status.isHide = false
                             status.showExpandText = true
                         } else status.isHide = index < threadSize - Consts.MAX_SECOND_LEVEL_COMMENTS
 
-                        if(status.isHide) it[0].hideCommentsCount++
+                        if (status.isHide) it[0].hideCommentsCount++
                     }
                 }
                 finalArray.addAll(it)
@@ -120,12 +120,11 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
 
         finalArray.forEach {
             var space = ""
-            for(i in 0..it.indent){
+            for (i in 0..it.indent) {
                 space += "  "
             }
             dLog("$space |- ${it.id} - ${it.firstCommentId} - ${it.in_reply_to_status_id} ${it.friendica_owner.screen_name}")
         }
-
 
         stl?.allLoaded = true
         stl?.clear()

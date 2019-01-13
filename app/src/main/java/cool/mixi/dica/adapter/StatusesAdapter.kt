@@ -152,7 +152,7 @@ class StatusesAdapter(
             // Expand/Collapse
             holder.expandComments?.let { view ->
                 view.tag = it.id
-                view.visibility = if(it.showExpandText && it.hideCommentsCount > 0) {
+                view.visibility = if (it.showExpandText && it.hideCommentsCount > 0) {
                     view.text = strHideCommentsCount.format("${it.hideCommentsCount}")
                     View.VISIBLE
                 } else {
@@ -161,7 +161,7 @@ class StatusesAdapter(
             }
 
             val param = holder.itemView.layoutParams
-            if(it.isHide) {
+            if (it.isHide) {
                 param.height = 0
                 holder.itemView.visibility = View.GONE
             } else {
@@ -348,7 +348,7 @@ class StatusesAdapter(
             holder.datetime?.text = DateUtils.getRelativeTimeSpanString(createdAt).toString()
         }
 
-        holder.userName?.let {userName ->
+        holder.userName?.let { userName ->
             userName.text = st.user.screen_name
             userName.tag = pos
             userName?.setOnClickListener { gotoUserPage(it) }
@@ -367,7 +367,9 @@ class StatusesAdapter(
 
     private fun doAppendPostInfoLayout(holder: BasicStatusViewHolder, st: Status) {
 
-        if(holder.userName == null){ return }
+        if (holder.userName == null) {
+            return
+        }
 
         val ssb = SpannableStringBuilder(holder.userName?.text)
 
@@ -806,16 +808,16 @@ class StatusesAdapter(
         parent.addView(txt)
     }
 
-    private fun expandComments(view: View){
+    private fun expandComments(view: View) {
         val statusId = view.tag
         data.forEachIndexed { index, status ->
-            if(statusId == status.id) {
+            if (statusId == status.id) {
                 status.showExpandText = false
                 notifyItemChanged(index)
                 return@forEachIndexed
             }
 
-            if(statusId == status.firstCommentId){
+            if (statusId == status.firstCommentId) {
                 status.isHide = false
                 notifyItemChanged(index)
             }
