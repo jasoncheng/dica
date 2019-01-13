@@ -85,7 +85,9 @@ class StatusesAdapter(
     private val emailTextColor = ContextCompat.getColor(context, R.color.txt_email)
     private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
     private val strComments = context.getString(R.string.status_comment)
+    private val strHideCommentsCount = context.getString(R.string.expand_comments)
     private val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm")
+    private var refAdapter: SoftReference<StatusesAdapter> = SoftReference(this)
 
     enum class ViewType {
         USER_PROFILE,
@@ -122,7 +124,6 @@ class StatusesAdapter(
         Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL
     )
 
-    private var refAdapter: SoftReference<StatusesAdapter> = SoftReference(this)
 
     override fun onBindViewHolder(holder: BasicStatusViewHolder, position: Int) {
         if (holder is EmptyHolder) {
@@ -146,22 +147,28 @@ class StatusesAdapter(
         data.getOrNull(pos).let { it ->
             if (it == null) return
 
-            // DateTime process
             doLayoutUserBox(holder, it, pos)
-//            var lockContainer = holder.datetime
-//            try {
-//                var date = Date(it.created_at)
-//                if (context !is UserActivity) {
-//                    doLayoutUserBox(holder, it, pos)
-//                    lockContainer = holder.userName
-//                } else {
-//                    holder.datetime?.let { that ->
-//                        that.text = sdf.format(date)
-//                        doAppendPostInfoLayout(that, it)
-//                    }
-//                }
-//            } catch (e: java.lang.Exception) {
-//            }
+
+            // Expand/Collapse
+            holder.expandComments?.let { view ->
+                view.tag = it.id
+                view.visibility = if(it.showExpandText && it.hideCommentsCount > 0) {
+                    view.text = strHideCommentsCount.format("${it.hideCommentsCount}")
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            }
+
+            val param = holder.itemView.layoutParams
+            if(it.isHide) {
+                param.height = 0
+                holder.itemView.visibility = View.GONE
+            } else {
+                param.height = LinearLayout.LayoutParams.WRAP_CONTENT
+                holder.itemView.visibility = View.VISIBLE
+            }
+            holder.itemView.layoutParams = param
 
             //TODO: private message icon
 //            if (it.friendica_private) {
@@ -250,6 +257,7 @@ class StatusesAdapter(
 
         // Control click on content
         if (context is StatusActivity) {
+            holder.expandComments?.setOnClickListener { expandComments(it) }
         } else {
             holder.contentBox?.setOnClickListener { gotoStatusPage(it) }
         }
@@ -798,6 +806,22 @@ class StatusesAdapter(
         parent.addView(txt)
     }
 
+    private fun expandComments(view: View){
+        val statusId = view.tag
+        data.forEachIndexed { index, status ->
+            if(statusId == status.id) {
+                status.showExpandText = false
+                notifyItemChanged(index)
+                return@forEachIndexed
+            }
+
+            if(statusId == status.firstCommentId){
+                status.isHide = false
+                notifyItemChanged(index)
+            }
+        }
+    }
+
     private fun getTextSpan(str: String): SpannableString {
         var s = str
         var sp: SpannableString
@@ -1051,6 +1075,7 @@ open class BasicStatusViewHolder(view: View) : androidx.recyclerview.widget.Recy
     var tvLikeDetails: TextView? = actGroup?.tv_like_details
     var userDescription: TextView? = view.tv_description
     var geoAddress: TextView? = view.tv_geo_address
+    var expandComments: TextView? = view.expand_all_comments
 }
 
 class UserProfileViewHolder(view: View) : BasicStatusViewHolder(view)

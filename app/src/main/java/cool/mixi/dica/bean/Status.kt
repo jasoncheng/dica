@@ -30,6 +30,8 @@ data class Status(
     var indent: Int = 0,
     var firstCommentId: Int = 0,
     var isHide: Boolean = false,
+    var showExpandText: Boolean = false,
+    var hideCommentsCount: Int = 0,
 
     // extra params
     var enableNSFW: Boolean = false,

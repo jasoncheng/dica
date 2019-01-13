@@ -46,6 +46,16 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
         stl?.loadNewest(this)
     }
 
+
+    /*
+    [Handle Forum Thread]
+    1. constructor data
+    2. sort array && flat
+    3. control hidden
+    Original Status:
+      [SecondLevel ID1] = [..]
+      [SecondLevel ID2] = [..]
+     */
     override fun loaded(data: List<Status>) {
         if (data.isEmpty()) {
             App.instance.toast(getString(R.string.status_not_exists))
@@ -53,20 +63,7 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
             return
         }
 
-        stl?.allLoaded = true
         Collections.reverse(data)
-        stl?.clear()
-        stl?.addAll(data!!)
-        rv_statuses_list.adapter?.notifyDataSetChanged()
-
-        /*
-        [Handle Forum Thread]
-        1. constructor data
-        2. sort array && flat
-        Original Status:
-          [SecondLevel ID1] = [..]
-          [SecondLevel ID2] = [..]
-         */
         var firstStatus: Status = data[0]
         val firstId = firstStatus.id
         val map: ArrayMap<Int, ArrayList<Status>> = ArrayMap()
@@ -106,6 +103,17 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
             val arr = map[statusId]
             arr?.sortWith(compareBy { it.id })
             map[statusId]?.let {
+                val threadSize = it.size
+                if(threadSize > Consts.MAX_SECOND_LEVEL_COMMENTS) {
+                    it.forEachIndexed { index, status ->
+                        if(index == 0){
+                            status.isHide = false
+                            status.showExpandText = true
+                        } else status.isHide = index < threadSize - Consts.MAX_SECOND_LEVEL_COMMENTS
+
+                        if(status.isHide) it[0].hideCommentsCount++
+                    }
+                }
                 finalArray.addAll(it)
             }
         }
@@ -117,6 +125,12 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
             }
             dLog("$space |- ${it.id} - ${it.firstCommentId} - ${it.in_reply_to_status_id} ${it.friendica_owner.screen_name}")
         }
+
+
+        stl?.allLoaded = true
+        stl?.clear()
+        stl?.addAll(finalArray)
+        rv_statuses_list.adapter?.notifyDataSetChanged()
     }
 
     override fun sourceOld(): Call<List<Status>>? {

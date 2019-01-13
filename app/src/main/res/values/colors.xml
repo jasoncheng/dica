@@ -27,4 +27,5 @@
     <color name="recycling_bg">#FAFAFA</color>
     <color name="recycling_bg_dark">#B0BEC5</color>
     <color name="recycling_border">#F5F5F5</color>
+    <color name="txt_expand_and_collapse">#1565c0</color>
 </resources>

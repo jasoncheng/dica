@@ -62,4 +62,5 @@
   <string name="status_media_uploading">media #%1$s uploading</string>
   <string name="status_posting">status posting...</string>
   <string name="registration">registration ?</string>
+  <string name="expand_comments">- show all (%1$s)</string>
 </resources>

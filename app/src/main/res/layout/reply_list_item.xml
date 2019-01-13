@@ -10,6 +10,7 @@
   <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginStart="@dimen/status_avatar_size_small">
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -24,6 +25,15 @@
                   android:padding="8dp"
                   android:id="@+id/content_box" android:orientation="vertical"/>
     <include layout="@layout/box_status_action_comment" android:id="@+id/actGroup"/>
+
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+              android:id="@+id/expand_all_comments"
+              android:padding="8dp"
+              android:textStyle="italic|bold"
+              android:layout_marginTop="4dp"
+              android:textColor="@color/txt_expand_and_collapse"
+              android:text="@string/expand_comments"/>
   </LinearLayout>
 
 </LinearLayout>
