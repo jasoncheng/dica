@@ -39,7 +39,7 @@
   <string name="index_favorites_timeline">關注的</string>
   <string name="status_favorites">關注</string>
   <string name="no_any_status">喔喔...目前沒資料喔</string>
-  <string name="status_source">" - 透過 %1$s"</string>
+  <string name="status_source">" - %1$s"</string>
   <string name="status_retweet">轉推</string>
   <string name="retweeting">轉推中</string>
   <string name="retweet_fail">轉推失敗 (%1$s)</string>

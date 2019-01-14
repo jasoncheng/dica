@@ -67,7 +67,6 @@ interface ICompose {
 
 class ComposeDialogFragment : BaseDialogFragment() {
 
-
     var tmpMediaUri: ArrayList<String> = ArrayList()
 
     var roomView: View? = null
