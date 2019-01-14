@@ -172,12 +172,13 @@ class StatusesAdapter(
             }
             holder.itemView.layoutParams = param
 
-            //TODO: private message icon
-//            if (it.friendica_private) {
-//                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, privateMessage, null)
-//            } else {
-//                lockContainer?.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
-//            }
+            holder.privateLock?.let { view ->
+                view.visibility = if(it.friendica_private) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
+            }
 
             // comments
             val commentStr = if (it.friendica_comments > 0) {
@@ -1083,6 +1084,7 @@ open class BasicStatusViewHolder(view: View) : androidx.recyclerview.widget.Recy
     var userDescription: TextView? = view.tv_description
     var geoAddress: TextView? = view.tv_geo_address
     var expandComments: TextView? = view.expand_all_comments
+    var privateLock: ImageView? = view.private_lock
 }
 
 class UserProfileViewHolder(view: View) : BasicStatusViewHolder(view)
