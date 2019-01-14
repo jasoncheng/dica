@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <dimen name="status_avatar_size">34dp</dimen>
-  <dimen name="status_avatar_size_small">24dp</dimen>
+  <dimen name="status_avatar_size_small">20dp</dimen>
   <dimen name="notification_avatar_size">34dp</dimen>
   <dimen name="reply_avatar_size">26dp</dimen>
   <dimen name="user_page_profile_avatar">140dp</dimen>

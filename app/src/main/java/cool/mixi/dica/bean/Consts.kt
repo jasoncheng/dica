@@ -18,7 +18,7 @@ object Consts {
     const val REQ_PHOTO_PATH = 999
     const val REQ_STICKER = 987
 
-    const val COLLAPSE_WHEN_COMMENTS_REACH = 3
+    const val MAX_First_LEVEL_COMMENTS = 2
     const val MAX_SECOND_LEVEL_COMMENTS = 2
 
     const val ENABLE_FULL_TEXT_SEARCH = false

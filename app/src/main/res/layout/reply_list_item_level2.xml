@@ -4,26 +4,29 @@
               android:layout_marginEnd="@dimen/comment_margin_end"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:orientation="vertical">
+              android:orientation="horizontal">
 
-  <include layout="@layout/box_status_user_in_commit"/>
-  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginStart="@dimen/status_avatar_size_small">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:id="@+id/tv_nsfw"
-        android:visibility="gone"
-        android:textColor="@color/txt_nsfw"
-        android:text="#nsfw"
-        android:padding="8dp"/>
+  <View android:layout_width="5dp" android:layout_height="match_parent" android:background="@drawable/reply_vertical_line"
+  android:layout_marginBottom="4dp"/>
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+    <include layout="@layout/box_status_user_in_commit"/>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:padding="8dp"
-                  android:id="@+id/content_box" android:orientation="vertical"/>
-    <include layout="@layout/box_status_action_comment" android:id="@+id/actGroup"/>
+                  android:orientation="vertical"
+                  android:layout_marginStart="@dimen/status_avatar_size_small">
+      <TextView
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:paddingTop="4dp"
+          android:paddingBottom="4dp"
+          android:id="@+id/tv_nsfw"
+          android:visibility="gone"
+          android:textColor="@color/txt_nsfw"
+          android:text="#nsfw"
+          android:padding="8dp"/>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:id="@+id/content_box" android:orientation="vertical"/>
+      <include layout="@layout/box_status_action_comment" android:id="@+id/actGroup"/>
+    </LinearLayout>
   </LinearLayout>
-
 </LinearLayout>

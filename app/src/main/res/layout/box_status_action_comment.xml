@@ -43,6 +43,6 @@
   <TextView android:id="@+id/tv_like_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/status_action_padding"
-            android:layout_marginLeft="@dimen/status_action_margin_left"/>
+            android:textSize="@dimen/status_action_font_size"
+            android:padding="@dimen/status_action_padding" />
 </LinearLayout>

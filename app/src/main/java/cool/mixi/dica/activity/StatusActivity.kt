@@ -97,27 +97,45 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
         }
 
         val finalArray = ArrayList<Status>()
+        val topLevelComments = map.keys.size
         finalArray.add(firstStatus)
+        if(topLevelComments > Consts.MAX_First_LEVEL_COMMENTS){
+            firstStatus.showExpandText = true
+        }
 
+        var topLevelIndex = -1
         map.keys.forEach { statusId ->
+            topLevelIndex++
             val arr = map[statusId]
             arr?.sortWith(compareBy { it.id })
+
+            // first level collapse
+            if(firstStatus.showExpandText && topLevelIndex < topLevelComments - Consts.MAX_First_LEVEL_COMMENTS){
+                arr?.get(0)?.isHide = true
+                firstStatus.hideCommentsCount++
+            }
+
+            // second level collapse
             map[statusId]?.let {
                 val threadSize = it.size
                 if (threadSize > Consts.MAX_SECOND_LEVEL_COMMENTS) {
                     it.forEachIndexed { index, status ->
                         if (index == 0) {
-                            status.isHide = false
+                            status.isHide = it[0].isHide
                             status.showExpandText = true
-                        } else status.isHide = index < threadSize - Consts.MAX_SECOND_LEVEL_COMMENTS
+                        } else {
+                            status.isHide = index < threadSize - Consts.MAX_SECOND_LEVEL_COMMENTS
+                        }
 
-                        if (status.isHide) it[0].hideCommentsCount++
+                        if (status.isHide && index != 0) it[0].hideCommentsCount++
                     }
                 }
+
                 finalArray.addAll(it)
             }
         }
 
+        //TODO: debug only
         finalArray.forEach {
             var space = ""
             for (i in 0..it.indent) {

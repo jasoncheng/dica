@@ -83,6 +83,7 @@ class StatusesAdapter(
     private val statusDatetimeColor = ContextCompat.getColor(context, R.color.txt_datetime)
     private val tagTextColor = ContextCompat.getColor(context, R.color.txt_tag)
     private val emailTextColor = ContextCompat.getColor(context, R.color.txt_email)
+    private val emailTextLightColor = ContextCompat.getColor(context, R.color.txt_email_light)
     private val recyclingBG = context.getDrawable(R.drawable.recycling_status_bg)
     private val strComments = context.getString(R.string.status_comment)
     private val strHideCommentsCount = context.getString(R.string.expand_comments)
@@ -152,6 +153,7 @@ class StatusesAdapter(
             // Expand/Collapse
             holder.expandComments?.let { view ->
                 view.tag = it.id
+                view.text = ""
                 view.visibility = if (it.showExpandText && it.hideCommentsCount > 0) {
                     view.text = strHideCommentsCount.format("${it.hideCommentsCount}")
                     View.VISIBLE
@@ -161,12 +163,12 @@ class StatusesAdapter(
             }
 
             val param = holder.itemView.layoutParams
-            if (it.isHide) {
-                param.height = 0
-                holder.itemView.visibility = View.GONE
-            } else {
+            if (!it.isHide && !isParentNodeHide(it)) {
                 param.height = LinearLayout.LayoutParams.WRAP_CONTENT
                 holder.itemView.visibility = View.VISIBLE
+            } else {
+                param.height = 0
+                holder.itemView.visibility = View.GONE
             }
             holder.itemView.layoutParams = param
 
@@ -298,6 +300,15 @@ class StatusesAdapter(
         return data.size + extraSize
     }
 
+    private fun isParentNodeHide(status: Status): Boolean {
+        data.forEach {
+            if(status.firstCommentId == it.id){
+                return it.isHide
+            }
+        }
+        return false
+    }
+
     private fun amILike(status: Status): Boolean {
         return status.friendica_activities.like.contains(App.instance.myself?.friendica_owner)
     }
@@ -373,8 +384,16 @@ class StatusesAdapter(
 
         val ssb = SpannableStringBuilder(holder.userName?.text)
 
-        // append datetime
+        // append status text and datetime
         if (holder is StatusReplyViewHolder) {
+            if(st.in_reply_to_user_id != st.user.id){
+                st.in_reply_to_screen_name.isNullOrEmpty().let {
+                    if(!it && st.indent > 0 && !st.text.startsWith("@")){
+                        st.text = "@${st.in_reply_to_screen_name} ${st.text}"
+                    }
+                }
+            }
+
             ssb.append(" - ")
             val datetimeText = holder.datetime?.text
             holder.datetime?.visibility = View.GONE
@@ -688,7 +707,7 @@ class StatusesAdapter(
             when {
                 it.startsWith("http", true) -> {
                     if (isPureText) {
-                        renderText(parent, txtAr)
+                        renderText(parent, txtAr, status)
                         txtAr.clear()
                     }
                     isPureText = false
@@ -700,7 +719,7 @@ class StatusesAdapter(
                 }
             }
         }
-        renderText(parent, txtAr)
+        renderText(parent, txtAr, status)
 
         // Style: Extra photos (show extra attachment photo, if not wrap into status.text)
         status.attachments?.forEach {
@@ -763,7 +782,7 @@ class StatusesAdapter(
             HtmlCrawler.getInstance().get(url).let {
                 if (it == null) {
                     HtmlCrawler.getInstance().run(url, MyHtmlCrawler(status, refAdapter))
-                    renderText(parent, url)
+                    renderText(parent, url, status)
                     return
                 }
 
@@ -775,23 +794,23 @@ class StatusesAdapter(
                     }
                     status.displayedTitle.put(that, url)
                 }
-                renderWebUrl(parent, it)
+                renderWebUrl(parent, it, status)
             }
         }
     }
 
     // Pure Text (QUOTE / Recycling / TAG)
-    private fun renderText(parent: ViewGroup, txt: String) {
+    private fun renderText(parent: ViewGroup, txt: String, status: Status) {
         txt.trim().isNullOrEmpty().let {
             if (it) return
         }
 
         val ar = ArrayList<String>()
         ar.add(txt)
-        renderText(parent, ar)
+        renderText(parent, ar, status)
     }
 
-    private fun renderText(parent: ViewGroup, txtArr: ArrayList<String>) {
+    private fun renderText(parent: ViewGroup, txtArr: ArrayList<String>, status: Status) {
         if (txtArr.size == 0) return
         if (txtArr.size == 1) {
             txtArr[0].trim().isNullOrEmpty().let {
@@ -802,14 +821,15 @@ class StatusesAdapter(
         var str = txtArr.joinToString("\n")
         var txt = getTextView()
         try {
-            txt.text = getTextSpan(str)
-        } catch (e: Exception) {
-        }
+            txt.text = getTextSpan(str, status)
+        } catch (e: Exception) {}
         parent.addView(txt)
     }
 
     private fun expandComments(view: View) {
         val statusId = view.tag
+        var firstLevelId = 0
+
         data.forEachIndexed { index, status ->
             if (statusId == status.id) {
                 status.showExpandText = false
@@ -820,11 +840,17 @@ class StatusesAdapter(
             if (statusId == status.firstCommentId) {
                 status.isHide = false
                 notifyItemChanged(index)
+                firstLevelId = status.id
+            }
+
+            if(firstLevelId == status.firstCommentId) {
+                notifyItemChanged(index)
             }
         }
     }
 
-    private fun getTextSpan(str: String): SpannableString {
+    private fun getTextSpan(str: String, status: Status): SpannableString {
+        val spanFlag = Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         var s = str
         var sp: SpannableString
 
@@ -843,27 +869,22 @@ class StatusesAdapter(
         }
         sp = SpannableString(s)
         indexAr.forEach {
-            sp.setSpan(
-                MyQuoteSpan(quoteSpanColor, 20, 30), it[0], it[1], Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            sp.setSpan(MyQuoteSpan(quoteSpanColor, 20, 30), it[0], it[1], spanFlag)
         }
 
         // Style: TAG
         val mTag = compilerTag.matcher(s)
         while (mTag.find()) {
-            sp.setSpan(
-                ForegroundColorSpan(tagTextColor),
-                mTag.start() + 1,
-                mTag.end(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            sp.setSpan(ForegroundColorSpan(tagTextColor),mTag.start() + 1,mTag.end(), spanFlag)
+            sp.setSpan(TagClickSpan(tagTextColor, refAdapter), mTag.start() + 1,mTag.end(), spanFlag)
+        }
 
-            sp.setSpan(
-                TagClickSpan(tagTextColor, refAdapter),
-                mTag.start() + 1,
-                mTag.end(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+        // Style: reply mode (exclude talk to self)
+        "^(@[\\w]+)\\s".toRegex().find(str)?.let {
+            val start = str.indexOf(it.value)
+            val end = start+it.value.length
+            sp.setSpan(ForegroundColorSpan(emailTextLightColor), start, start+it.value.length, spanFlag)
+            sp.setSpan(StyleSpan(Typeface.ITALIC), start, end, spanFlag)
         }
 
         // Style: Mentions (It could be come from url, if so, ignore it!)
@@ -872,13 +893,8 @@ class StatusesAdapter(
             for (it in mMentions) {
                 var start = s.indexOf(it, 0, true)
                 var end = start + it.length
-                sp.setSpan(RelativeSizeSpan(1.2f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                sp.setSpan(
-                    OffSiteUserClickSpan(emailTextColor, refAdapter),
-                    start,
-                    end,
-                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE
-                )
+                sp.setSpan(RelativeSizeSpan(1.2f), start, end, spanFlag)
+                sp.setSpan(OffSiteUserClickSpan(emailTextColor, refAdapter), start, end, spanFlag)
                 sp.setSpan(NoUnderLinSpan(it), start, end, 0)
             }
         }
@@ -893,31 +909,16 @@ class StatusesAdapter(
             indexAr2.add(arrayOf(start, end).toIntArray())
         }
         indexAr2.forEach {
-            sp.setSpan(
-                RelativeSizeSpan(1.2f),
-                it[0],
-                it[1],
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            sp.setSpan(
-                AbsoluteSizeSpan(0),
-                it[0],
-                it[0] + 1,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            sp.setSpan(
-                AbsoluteSizeSpan(0),
-                it[1] - 1,
-                it[1],
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            sp.setSpan(RelativeSizeSpan(1.2f), it[0], it[1], spanFlag)
+            sp.setSpan(AbsoluteSizeSpan(0), it[0], it[0] + 1, spanFlag)
+            sp.setSpan(AbsoluteSizeSpan(0), it[1] - 1, it[1], spanFlag)
         }
         return sp
     }
 
-    private fun renderWebUrl(parent: ViewGroup, meta: Meta) {
+    private fun renderWebUrl(parent: ViewGroup, meta: Meta, status: Status) {
         if (meta.icon.isNullOrEmpty() || meta.title.isNullOrEmpty()) {
-            return renderText(parent, meta.url)
+            return renderText(parent, meta.url, status)
         }
 
         val inflater = LayoutInflater.from(context)
@@ -1024,8 +1025,10 @@ class TagClickSpan(private val linkColor: Int, val adapter: SoftReference<Status
         val sp = ((widget as TextView).text as Spanned)
         val start = sp.getSpanStart(this)
         val end = sp.getSpanEnd(this)
-        val tag = "#${sp.subSequence(start, end)}"
-        adapter?.get()?.let { it.gotoSearchPage(tag) }
+        try {
+            val tag = "#${sp.subSequence(start, end)}"
+            adapter?.get()?.let { it.gotoSearchPage(tag) }
+        }catch (e: Exception){}
     }
 
     override fun updateDrawState(ds: TextPaint?) {
@@ -1048,8 +1051,10 @@ class OffSiteUserClickSpan(private val linkColor: Int, val adapter: SoftReferenc
         val sp = ((widget as TextView).text as Spanned)
         val start = sp.getSpanStart(this)
         val end = sp.getSpanEnd(this)
-        var email = sp.subSequence(start, end).toString()
-        adapter?.get()?.gotoUserPage(email)
+        try {
+            var email = sp.subSequence(start, end).toString()
+            adapter?.get()?.gotoUserPage(email)
+        }catch (e: Exception){}
     }
 
     override fun updateDrawState(ds: TextPaint?) {
