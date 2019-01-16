@@ -13,12 +13,14 @@ import android.media.ExifInterface
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.Spanned
-import android.text.style.*
+import android.text.style.BackgroundColorSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.ScaleXSpan
+import android.text.style.StyleSpan
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
@@ -64,7 +66,6 @@ interface ICompose {
 }
 
 class ComposeDialogFragment : BaseDialogFragment() {
-
 
     var tmpMediaUri: ArrayList<String> = ArrayList()
 
@@ -248,12 +249,12 @@ class ComposeDialogFragment : BaseDialogFragment() {
         val span = SpannableStringBuilder("$retweetText")
         val start = 0
         val end = retweetText!!.length
-        val bgCircleColor = ContextCompat.getColor(context!!, R.color.recycling_circle)
-        span.setSpan(BulletSpan(10, bgCircleColor, 20), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        span.setSpan(BackgroundColorSpan(Color.DKGRAY), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        span.setSpan(ForegroundColorSpan(Color.LTGRAY), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        span.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        span.setSpan(ScaleXSpan(0.6f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        try {
+            span.setSpan(BackgroundColorSpan(Color.DKGRAY), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            span.setSpan(ForegroundColorSpan(Color.LTGRAY), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            span.setSpan(StyleSpan(Typeface.ITALIC), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            span.setSpan(ScaleXSpan(0.6f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }catch (e: Exception){}
         span.append("\n\n")
         it.text = span
         it.requestFocus()

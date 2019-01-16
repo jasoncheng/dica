@@ -39,7 +39,7 @@
   <string name="index_favorites_timeline">Favoriten</string>
   <string name="status_favorites">Favoriten</string>
   <string name="no_any_status">Keine Daten</string>
-  <string name="status_source">" - von %1$s"</string>
+  <string name="status_source">" - %1$s"</string>
   <string name="status_retweet">Retweet</string>
   <string name="retweeting">retweeten</string>
   <string name="retweet_fail">Retweet fehlgeschlagen (%1$s)</string>
