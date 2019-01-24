@@ -22,7 +22,7 @@
   <string name="perm_deny_gps">toegang geweigerd</string>
   <string name="status_like">vind ik leuk</string>
   <string name="status_share">delen</string>
-  <string name="status_comment">reageren %1$s</string>
+  <string name="status_comment">%1$s</string>
   <string name="status_reply_to">Antwoord op: %1$s</string>
   <string name="no_api_support">nog geen API ondersteuning</string>
   <string name="not_implement_yet">nog niet geïmplementeerd</string>

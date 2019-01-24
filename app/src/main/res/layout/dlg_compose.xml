@@ -4,8 +4,8 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:background="@android:color/white"
-              android:padding="4dp">
+              android:background="@color/compose_bg"
+              android:padding="4dp" android:elevation="20dp">
 
   <LinearLayout
           android:id="@+id/group_permmain_radiogroupission"
@@ -16,20 +16,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:orientation="horizontal">
+            android:orientation="horizontal" android:background="@android:color/holo_blue_dark" android:padding="5dp"
+            android:fadingEdge="vertical">
       <RadioButton
               android:id="@+id/rb_public"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_weight="0"
               android:checked="true"
-              android:text="@string/permission_public"/>
+              android:text="@string/permission_public" android:drawableStart="@drawable/dialog_public"
+              android:textStyle="bold"/>
       <RadioButton
               android:id="@+id/rb_assign"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_weight="0"
-              android:text="@string/permission_assign"/>
+              android:text="@string/permission_assign" android:drawableStart="@drawable/dialog_private"
+              android:textAllCaps="false" android:textAlignment="textEnd" android:textStyle="bold"/>
     </RadioGroup>
   </LinearLayout>
 
@@ -65,60 +68,60 @@
           app:hyperlinkColor="@color/txt_email"
           app:hashtagColor="@color/txt_tag"
           android:layout_marginTop="8dp"
-          android:hint="@string/compose_text"  />
+          android:hint="@string/compose_text" android:minHeight="250dp" android:fadingEdge="horizontal|vertical"/>
 
 
   <androidx.constraintlayout.widget.ConstraintLayout
           android:id="@+id/cl_box"
           android:padding="4dp"
           android:layout_width="match_parent"
-          android:layout_height="wrap_content">
+          android:layout_height="wrap_content" android:background="@android:color/holo_blue_dark">
 
     <ImageView
             android:layout_width="@dimen/compose_button_size"
             android:layout_height="@dimen/compose_button_size"
-            android:src="@drawable/emoji"
+            android:src="@drawable/dialog_smiley"
             android:id="@+id/iv_emoji"
             android:scaleType="fitXY"
-            android:background="@color/compose_bg"
             android:padding="@dimen/compose_button_padding"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/iv_location"
             app:layout_constraintBottom_toBottomOf="@+id/iv_location"/>
 
     <ImageView
-        android:layout_width="@dimen/compose_button_size"
-        android:layout_height="@dimen/compose_button_size"
-        android:src="@drawable/ic_gallery"
-        android:id="@+id/iv_from_album"
-        android:padding="@dimen/compose_button_padding"
-        android:background="@color/compose_bg"
-        app:layout_constraintTop_toTopOf="@+id/iv_location"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_location"
-        app:layout_constraintStart_toEndOf="@+id/iv_emoji" android:layout_marginStart="@dimen/compose_button_margin"/>
+            android:layout_width="@dimen/compose_button_size"
+            android:layout_height="@dimen/compose_button_size"
+            android:src="@drawable/dialog_album"
+            android:id="@+id/iv_from_album"
+            android:padding="@dimen/compose_button_padding"
+            app:layout_constraintTop_toTopOf="@+id/iv_location"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_location"
+            app:layout_constraintStart_toEndOf="@+id/iv_emoji"
+            android:layout_marginStart="@dimen/compose_button_margin"/>
     <ImageView
             android:layout_width="@dimen/compose_button_size"
             android:layout_height="@dimen/compose_button_size"
-            android:src="@drawable/ic_camera"
+            android:src="@drawable/dialog_photo"
             android:id="@+id/iv_from_camera"
-            android:background="@color/compose_bg"
             android:padding="@dimen/compose_button_padding"
-            app:layout_constraintStart_toEndOf="@+id/iv_from_album" android:layout_marginStart="@dimen/compose_button_margin"
+            app:layout_constraintStart_toEndOf="@+id/iv_from_album"
+            android:layout_marginStart="@dimen/compose_button_margin"
             app:layout_constraintTop_toTopOf="@+id/iv_location"
             app:layout_constraintBottom_toBottomOf="@+id/iv_location"/>
     <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_gps"
-        android:id="@+id/iv_location"
-        android:includeFontPadding="false"
-        android:textSize="12sp"
-        android:gravity="center_vertical"
-        android:drawablePadding="4dp"
-        app:layout_constraintStart_toEndOf="@+id/iv_from_camera" android:layout_marginStart="@dimen/compose_button_margin"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="4dp"
-        app:layout_constraintEnd_toEndOf="parent"/>
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/dialog_gps"
+            android:id="@+id/iv_location"
+            android:includeFontPadding="false"
+            android:textSize="12sp"
+            android:gravity="center_vertical"
+            android:drawablePadding="4dp"
+            app:layout_constraintStart_toEndOf="@+id/iv_from_camera"
+            android:layout_marginStart="@dimen/compose_button_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="4dp"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -127,13 +130,14 @@
 
 
     <Button
-            android:text="@string/compose_submit"
-            android:layout_width="wrap_content"
+            android:layout_width="49dp"
             android:layout_height="wrap_content" android:id="@+id/bt_submit"
             android:includeFontPadding="false"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@drawable/dialog_submit"
+    />
 
 
     <LinearLayout android:id="@+id/photo_box" android:orientation="horizontal"

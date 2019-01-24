@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
+              xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
               android:layout_marginLeft="@dimen/status_action_margin_left"
-              android:layout_width="wrap_content"
+              android:layout_width="match_parent"
               android:layout_height="wrap_content">
 
   <LinearLayout android:layout_width="match_parent"
@@ -12,13 +12,13 @@
               android:textSize="@dimen/status_action_font_size"
               android:gravity="center_vertical"
               android:padding="@dimen/status_action_padding_icon_only" android:layout_height="match_parent"
-              android:drawableLeft="@drawable/thumb_up"/>
+              android:drawableStart="@drawable/action_like"/>
     <TextView android:id="@+id/tv_comment" android:textSize="@dimen/status_action_font_size"
               android:drawablePadding="@dimen/status_action_drawable_padding" android:layout_width="wrap_content"
               android:padding="@dimen/status_action_padding_icon_only" android:layout_height="match_parent"
               android:layout_marginStart="4dp"
               android:gravity="center_vertical"
-              android:drawableLeft="@drawable/comment"/>
+              android:drawableStart="@drawable/action_comment"/>
     <TextView android:id="@+id/tv_retweet" android:textSize="@dimen/status_action_font_size"
               android:drawablePadding="@dimen/status_action_drawable_padding" android:layout_width="wrap_content"
               android:padding="@dimen/status_action_padding_icon_only" android:layout_height="match_parent"
@@ -30,19 +30,19 @@
               android:padding="@dimen/status_action_padding_icon_only" android:layout_height="match_parent"
               android:layout_marginStart="4dp"
               android:gravity="center_vertical"
-              android:drawableLeft="@drawable/favorites"/>
+              android:drawableStart="@drawable/action_favourite"/>
     <TextView android:layout_width="match_parent" android:layout_height="match_parent"
-              android:drawableLeft="@drawable/ic_menu" android:textSize="@dimen/status_action_font_size"
+              android:textSize="@dimen/status_action_font_size"
               android:drawablePadding="@dimen/status_action_padding"
               android:layout_marginStart="4dp"
               android:gravity="center_vertical"
               android:padding="@dimen/status_action_padding_icon_only"
-              android:id="@+id/more_options"/>
+              android:id="@+id/more_options" android:drawableEnd="@drawable/action_menu"/>
 
   </LinearLayout>
   <TextView android:id="@+id/tv_like_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="@dimen/status_action_font_size"
-            android:padding="@dimen/status_action_padding" />
+            android:padding="@dimen/status_action_padding"/>
 </LinearLayout>

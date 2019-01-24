@@ -74,11 +74,11 @@ class StatusesAdapter(
     var isOffSiteSN = false
 
     private val quoteSpanColor: Int = ContextCompat.getColor(context, R.color.quote_span_border)
-    private val likeDrawable = context.getDrawable(R.drawable.thumb_up_sel)
-    private val unlikeDrawable = context.getDrawable(R.drawable.thumb_up)
+    private val likeDrawable = context.getDrawable(R.drawable.action_like)
+    private val unlikeDrawable = context.getDrawable(R.drawable.action_unlike)
     private val privateMessage = context.getDrawable(R.drawable.lock)
-    private val favoritesDrawable = context.getDrawable(R.drawable.favorites_sel)
-    private val unFavoritesDrawable = context.getDrawable(R.drawable.favorites)
+    private val favoritesDrawable = context.getDrawable(R.drawable.action_favourite)
+    private val unFavoritesDrawable = context.getDrawable(R.drawable.action_unfavourite)
     private val statusSourceColor = ContextCompat.getColor(context, R.color.txt_status_source)
     private val statusDatetimeColor = ContextCompat.getColor(context, R.color.txt_datetime)
     private val tagTextColor = ContextCompat.getColor(context, R.color.txt_tag)

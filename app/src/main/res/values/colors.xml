@@ -19,11 +19,11 @@
   <color name="txt_email">#827717</color>
   <color name="txt_email_light">#9e9d24</color>
   <color name="box_bg_website">#e1f5fe</color>
-  <color name="txt_nsfw">#3949ab</color>
+  <color name="txt_nsfw">#3949AB</color>
   <color name="snack_bar_bg">#c1000000</color>
   <color name="sticker_loading_bg">#AF999999</color>
   <color name="photoPreviewBoxBg">#9FA8DA</color>
-  <color name="compose_bg">#efefef</color>
+  <color name="compose_bg">#EFEFEF</color>
   <color name="recycling_circle">#80d8ff</color>
   <color name="recycling_bg">#FAFAFA</color>
   <color name="recycling_bg_dark">#B0BEC5</color>
@@ -31,4 +31,5 @@
   <color name="txt_expand_and_collapse">#3f51b5</color>
   <color name="reply_v_line_strong">#c5cae9</color>
   <color name="reply_v_line_light">#e8eaf6</color>
+    <color name="status_header">#D4FF6600</color>
 </resources>

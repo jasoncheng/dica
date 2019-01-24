@@ -23,7 +23,7 @@
   <string name="perm_deny_gps">permission refuser</string>
   <string name="status_like">comme</string>
   <string name="status_share">partager</string>
-  <string name="status_comment">commentaire %1$s</string>
+  <string name="status_comment">%1$s</string>
   <string name="status_reply_to">répondre à: %1$s</string>
   <string name="no_api_support">pas de support API encore</string>
   <string name="not_implement_yet">noch nicht implementieren</string>
