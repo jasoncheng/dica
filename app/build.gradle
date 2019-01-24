@@ -16,17 +16,17 @@ android {
         versionName "0.2.2"
     }
     signingConfigs {
-        jason {
-            keyAlias 'androidreleasekey'
-            keyPassword '38armani'
-            storeFile file('./release.keystore')
-            storePassword '38armani'
+        matt {
+            keyAlias 'key0'
+            keyPassword 'Qu7xx0lin2k'
+            storeFile file('/home/mattthomson/StudioProjects/keystore/app_sign_key.jks')
+            storePassword 'Qu7xx0lin2k'
         }
     }
     buildTypes {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.jason
+            signingConfig signingConfigs.matt
             zipAlignEnabled true
             shrinkResources true
             minifyEnabled true
@@ -37,7 +37,7 @@ android {
             }
         }
         debug {
-            signingConfig signingConfigs.jason
+            signingConfig signingConfigs.matt
         }
     }
 }
@@ -51,12 +51,10 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0-alpha02'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
-
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.4.0'
     implementation 'com.squareup.retrofit2:converter-simplexml:2.3.0'
-
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     implementation 'com.github.tajchert:nammu:1.2.0'
@@ -64,12 +62,9 @@ dependencies {
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
     implementation 'org.jsoup:jsoup:1.11.3'
     implementation 'org.jetbrains.anko:anko-commons:0.10.4'
-
     implementation 'com.github.chrisbanes:PhotoView:2.1.3'
-
     implementation 'androidx.room:room-runtime:2.1.0-alpha03'
     kapt 'androidx.room:room-compiler:2.1.0-alpha03'
-
-    implementation "com.hendraanggrian.appcompat:socialview:0.1"
-    implementation "com.hendraanggrian.appcompat:socialview-commons:0.1"
+    implementation 'com.hendraanggrian.appcompat:socialview:0.1'
+    implementation 'com.hendraanggrian.appcompat:socialview-commons:0.1'
 }

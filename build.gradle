@@ -4,13 +4,12 @@ buildscript {
     ext.kotlin_version = '1.3.10'
     repositories {
         google()
-        maven {
-            url "https://maven.google.com"
-        }
         jcenter()
+        maven { url 'https://maven.google.com' }
+        maven { url 'https://www.mvnjar.com/central/maven2' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -22,9 +21,8 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url 'https://jitpack.io'
-        }
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://www.mvnjar.com/central/maven2' }
     }
 }
 
