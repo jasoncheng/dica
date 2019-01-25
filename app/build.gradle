@@ -13,7 +13,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 19011403
-        versionName "0.2.2"
+        versionName '0.2.2'
     }
     signingConfigs {
         matt {
@@ -35,11 +35,16 @@ android {
                 checkReleaseBuilds false
                 abortOnError false
             }
+            proguardFile '/home/mattthomson/StudioProjects/dica/app/proguard-rules.pro'
         }
         debug {
             signingConfig signingConfigs.matt
+            proguardFile '/home/mattthomson/StudioProjects/dica/app/proguard-rules.pro'
         }
     }
+    productFlavors {
+    }
+    buildToolsVersion '28.0.3'
 }
 
 dependencies {

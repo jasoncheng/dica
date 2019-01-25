@@ -50,6 +50,7 @@ class IndexActivity : BaseActivity() {
     private var snackBar: Snackbar? = null
     var tabNames: Array<String>? = null
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -104,6 +105,7 @@ class IndexActivity : BaseActivity() {
                 when (menuItem.itemId) {
                     R.id.menu_logout -> logout()
                     R.id.menu_notifications -> showNotifications()
+                    R.id.menu_help -> showHelp()
                 }
                 true
             }
@@ -130,6 +132,7 @@ class IndexActivity : BaseActivity() {
         // Intent Process
         processIntent()
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -418,5 +421,10 @@ class IndexActivity : BaseActivity() {
             if (it.id == NotificationJonService.jobId) return true
         }
         return false
+    }
+
+    private fun showHelp() {
+        val helpIntent = Intent(this, HelpActivity::class.java)
+        startActivity(helpIntent)
     }
 }

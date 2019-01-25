@@ -5,47 +5,51 @@
                 android:background="#efefef">
 
     <RelativeLayout
-        android:id="@+id/actionArea"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:padding="4dp">
+            android:id="@+id/actionArea"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:padding="4dp" android:background="@android:color/holo_orange_dark">
 
         <Button
-            android:id="@+id/crop_reset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/photo_reset"/>
+                android:id="@+id/crop_reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                style="@android:style/Widget.Material.Light.Button.Borderless"
+                android:text="@string/photo_reset" android:drawableStart="@drawable/photo_reset"/>
 
         <Button
-            android:id="@+id/crop_rotate"
-            android:layout_toRightOf="@+id/crop_reset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/photo_rotate"/>
+                android:id="@+id/crop_rotate"
+                android:layout_toRightOf="@+id/crop_reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/photo_rotate"
+                style="@android:style/Widget.Material.Light.Button.Borderless" android:text="@string/photo_rotate"/>
 
         <Button
-            android:id="@+id/crop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/crop_rotate"
-            android:text="@string/photo_crop"/>
+                android:id="@+id/crop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/crop_rotate"
+                android:drawableStart="@drawable/photo_crop"
+                style="@android:style/Widget.Material.Light.Button.Borderless" android:text="@string/photo_crop"/>
 
         <Button
-            android:id="@+id/crop_ok"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:text="@android:string/ok"/>
+                android:id="@+id/crop_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                style="@android:style/Widget.Material.Light.Button.Borderless"
+                android:drawableStart="@drawable/dialog_submit" android:text="@string/compose_submit"/>
     </RelativeLayout>
 
     <com.theartofdev.edmodo.cropper.CropImageView
-        android:id="@+id/cropImageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/actionArea"
-        android:layout_centerInParent="true" />
+            android:id="@+id/cropImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/actionArea"
+            android:layout_centerInParent="true" android:outlineProvider="background"/>
 
     <!--custom:cropMinCropResultWidthPX="100"-->
     <!--custom:cropMinCropResultHeightPX="100"-->

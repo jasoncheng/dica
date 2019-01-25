@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/menu_help" android:id="@+id/menu_help"/>
     <item android:title="@string/notifications" android:id="@+id/menu_notifications"
           android:icon="@drawable/notification_icon"/>
     <item android:title="@string/logout" android:id="@+id/menu_logout" />
