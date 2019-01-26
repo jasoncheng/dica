@@ -32,4 +32,5 @@
   <color name="reply_v_line_strong">#c5cae9</color>
   <color name="reply_v_line_light">#e8eaf6</color>
     <color name="status_header">#D4FF6600</color>
+    <color name="status_background">#A63949AB</color>
 </resources>

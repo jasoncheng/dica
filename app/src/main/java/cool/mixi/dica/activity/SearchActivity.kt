@@ -74,6 +74,7 @@ class SearchActivity: BaseActivity(), IStatusDataSource {
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
+
                     return true
                 }
 
