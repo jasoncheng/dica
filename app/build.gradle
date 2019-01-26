@@ -72,4 +72,5 @@ dependencies {
     kapt 'androidx.room:room-compiler:2.1.0-alpha03'
     implementation 'com.hendraanggrian.appcompat:socialview:0.1'
     implementation 'com.hendraanggrian.appcompat:socialview-commons:0.1'
+    implementation 'androidx.viewpager:viewpager:1.0.0'
 }

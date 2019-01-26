@@ -106,6 +106,7 @@ class IndexActivity : BaseActivity() {
                     R.id.menu_logout -> logout()
                     R.id.menu_notifications -> showNotifications()
                     R.id.menu_help -> showHelp()
+                    R.id.menu_search -> showSearch()
                 }
                 true
             }
@@ -426,5 +427,11 @@ class IndexActivity : BaseActivity() {
     private fun showHelp() {
         val helpIntent = Intent(this, HelpActivity::class.java)
         startActivity(helpIntent)
+    }
+
+    private fun showSearch() {
+        val i = Intent(this, SearchActivity::class.java)
+        i.putExtra(Consts.EXTRA_SEARCH_TERM, "")
+        startActivity(i)
     }
 }

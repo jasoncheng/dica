@@ -24,6 +24,11 @@
             android:windowSoftInputMode="stateHidden|adjustResize"
             tools:targetApi="m">
         <activity
+                android:name=".activity_main_alt"
+                android:label="@string/title_activity_main_alt"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
                 android:name=".activity.HelpActivity"
                 android:label="@string/title_activity_help"
                 android:parentActivityName=".activity.IndexActivity"

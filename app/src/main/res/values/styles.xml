@@ -43,4 +43,5 @@
     <!--<item name="android:textColor">@color/txt_tag</item>-->
     <!--</style>-->
 
+    <string name="MainMenu">\@menu/activity_main_menu</string>
 </resources>
