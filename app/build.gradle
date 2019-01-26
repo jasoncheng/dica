@@ -16,17 +16,23 @@ android {
         versionName '0.2.2'
     }
     signingConfigs {
+        jason {
+            keyAlias 'androidreleasekey'
+            keyPassword '38armani'
+            storeFile file('./release.keystore')
+            storePassword '38armani'
+        }
         matt {
-            keyAlias 'key0'
+            keyAlias 'releasekey'
             keyPassword 'Qu7xx0lin2k'
-            storeFile file('/home/mattthomson/StudioProjects/keystore/app_sign_key.jks')
-            storePassword 'Qu7xx0lin2k'
+            storeFile file('./mtrelease.keystore')
+            storePassword 'Qui7xx0lin2k'
         }
     }
     buildTypes {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.matt
+            signingConfig signingConfigs.jason
             zipAlignEnabled true
             shrinkResources true
             minifyEnabled true
@@ -35,11 +41,9 @@ android {
                 checkReleaseBuilds false
                 abortOnError false
             }
-            proguardFile '/home/mattthomson/StudioProjects/dica/app/proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.matt
-            proguardFile '/home/mattthomson/StudioProjects/dica/app/proguard-rules.pro'
+            signingConfig signingConfigs.jason
         }
     }
     productFlavors {
