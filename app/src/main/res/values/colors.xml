@@ -33,4 +33,5 @@
   <color name="reply_v_line_light">#e8eaf6</color>
     <color name="status_header">#D4FF6600</color>
     <color name="status_background">#A63949AB</color>
+    <color name="helpBackground">#616161</color>
 </resources>

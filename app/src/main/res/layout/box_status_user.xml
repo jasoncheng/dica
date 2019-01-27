@@ -4,7 +4,7 @@
                                                    xmlns:app="http://schemas.android.com/apk/res-auto"
                                                    android:layout_width="match_parent"
                                                    android:layout_height="wrap_content"
-                                                   android:background="@color/status_background"
+                                                   android:background="@color/helpBackground"
                                                    android:elevation="5dp">
 
   <ImageView
@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
-            android:textColor="@color/txt_datetime"
+            android:textColor="@android:color/white"
             android:textStyle="italic"
             android:id="@+id/tv_datetime"
     />
@@ -47,7 +47,7 @@
             android:id="@+id/tv_geo_address"
             android:textSize="12sp"
             android:textAlignment="viewStart"
-            android:textColor="@color/txt_geo_address"
+            android:textColor="@android:color/white"
             android:textStyle="italic"/>
 
   </LinearLayout>

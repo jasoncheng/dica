@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:showIn="@layout/activity_help"
-        tools:context=".activity.HelpActivity">
+        tools:context=".activity.HelpActivity" android:background="@color/helpBackground">
 
     <WebView
             android:layout_width="match_parent"
