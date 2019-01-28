@@ -113,7 +113,7 @@
             android:contentDescription="TODO"/>
     <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
             android:drawableLeft="@drawable/dialog_gps_white"
             android:id="@+id/iv_location"
             android:includeFontPadding="false"
@@ -123,8 +123,8 @@
             app:layout_constraintStart_toEndOf="@+id/iv_from_camera"
             android:layout_marginStart="@dimen/compose_button_margin"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="4dp"
-            app:layout_constraintEnd_toEndOf="parent" android:elevation="5dp"/>
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="8dp"
+            android:elevation="5dp" app:layout_constraintEnd_toStartOf="@+id/bt_submit"/>
     <Button
             android:layout_width="49dp"
             android:layout_height="wrap_content" android:id="@+id/bt_submit"
