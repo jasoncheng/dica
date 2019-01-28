@@ -13,20 +13,20 @@ android {
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 19011403
-        versionName '0.2.2'
+        versionName "0.2.2"
     }
     signingConfigs {
-        matt {
-            keyAlias 'key0'
-            keyPassword 'Qu7xx0lin2k'
-            storeFile file('/home/mattthomson/StudioProjects/keystore/app_sign_key.jks')
-            storePassword 'Qui7xx0lin2k'
+        jason {
+            keyAlias 'androidreleasekey'
+            keyPassword '38armani'
+            storeFile file('./release.keystore')
+            storePassword '38armani'
         }
     }
     buildTypes {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.matt
+            signingConfig signingConfigs.jason
             zipAlignEnabled true
             shrinkResources true
             minifyEnabled true
@@ -37,7 +37,7 @@ android {
             }
         }
         debug {
-            signingConfig signingConfigs.matt
+            signingConfig signingConfigs.jason
         }
     }
     productFlavors {
