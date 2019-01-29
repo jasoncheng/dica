@@ -119,6 +119,7 @@ class SearchActivity: BaseActivity(), IStatusDataSource {
         home_srl.isRefreshing = true
         stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
         stl?.loadNewest(null)
+
     }
 
     override fun loaded(data: List<Status>) {}

@@ -60,5 +60,5 @@
           app:layout_constraintHorizontal_bias="0.013" android:layout_marginTop="8dp"
           app:layout_constraintTop_toTopOf="@+id/avatar"
           app:layout_constraintVertical_bias="0.464"
-          android:focusable="true" app:layout_constraintBottom_toBottomOf="@+id/avatar"/>
+          android:focusable="true" app:layout_constraintBottom_toBottomOf="@+id/avatar" android:visibility="invisible"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
