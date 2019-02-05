@@ -55,6 +55,7 @@
             app:hyperlinkColor="@color/txt_email"
             app:hashtagColor="@color/txt_tag"
             android:layout_marginTop="8dp"
+            android:inputType="textCapSentences"
             android:hint="@string/compose_text"/>
 
 
