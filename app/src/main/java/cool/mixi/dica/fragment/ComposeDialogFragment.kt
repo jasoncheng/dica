@@ -209,6 +209,9 @@ class ComposeDialogFragment : BaseDialogFragment() {
         if (tmpMediaUri.size == 0) {
             // Restore from cache
             App.instance.mediaUris.forEach { addPhotoPreviewFromLocalCache(it) }
+        } else if (tmpMediaUri.size == 1) {
+            handleImagePick(File(tmpMediaUri[0]))
+            tmpMediaUri.clear()
         } else {
             // share to DiCa
             tmpMediaUri.iterator().forEach { addPhotoPreview(compressFilePath(it)) }
@@ -351,6 +354,10 @@ class ComposeDialogFragment : BaseDialogFragment() {
     }
 
     private fun handleImagePick(imageFile: File) {
+        if (!imageFile.exists()) {
+            return
+        }
+
         var filePath = imageFile.absolutePath
         if (filePath.toLowerCase().endsWith(".gif")) {
             return
