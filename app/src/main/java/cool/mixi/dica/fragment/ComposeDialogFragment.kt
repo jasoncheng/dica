@@ -672,7 +672,8 @@ class ComposeDialogFragment : BaseDialogFragment() {
         val bitmap: Bitmap = BitmapFactory.decodeFile(filePath)
         val ext = filePath.substringAfterLast(".", "")
         var outStream: OutputStream?
-        val file = File.createTempFile(getString(R.string.app_name), ".$ext")
+        val file = File.createTempFile(getString(R.string.app_name), "")
+//        val file = File.createTempFile(getString(R.string.app_name), ".$ext")
         try {
             outStream = FileOutputStream(file)
             bitmap!!.compress(Bitmap.CompressFormat.JPEG, Consts.COMPRESS_PHOTO_QUALITY, outStream)

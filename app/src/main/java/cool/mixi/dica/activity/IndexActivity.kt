@@ -163,12 +163,13 @@ class IndexActivity : BaseActivity() {
         processIntent()
     }
 
-    fun setComposeDialogCallback(dlg: ComposeDialogFragment){
+    fun setComposeDialogCallback(dlg: ComposeDialogFragment) {
         vp_index?.currentItem?.let { what ->
             vp_index.adapter?.let { that ->
                 val fg = (that as IndexPageAdapter).getTimelineFragment(what)
                 fg?.stl?.let { timeline ->
-                    dlg.callback = WeakReference(timeline as ICompose) }
+                    dlg.callback = WeakReference(timeline as ICompose)
+                }
             }
         }
     }
@@ -200,12 +201,14 @@ class IndexActivity : BaseActivity() {
             }
             intent?.action == Intent.ACTION_SEND_MULTIPLE
                     && intent.type?.startsWith("image/") == true -> {
-                intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.forEachIndexed { index, parcelable ->
-                    if(index > Consts.UPLOAD_MAX_PHOTOS -1) return@forEachIndexed
-                    dlg.tmpMediaUri.add(getRealPathFromURI(parcelable as Uri))
-                }
+                intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
+                    ?.forEachIndexed { index, parcelable ->
+                        if (index > Consts.UPLOAD_MAX_PHOTOS - 1) return@forEachIndexed
+                        dlg.tmpMediaUri.add(getRealPathFromURI(parcelable as Uri))
+                    }
             }
-            else -> {}
+            else -> {
+            }
         }
 
         dlg.show(supportFragmentManager, Consts.FG_COMPOSE)
@@ -221,7 +224,7 @@ class IndexActivity : BaseActivity() {
             val columnIndex = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             cursor.moveToFirst()
             path = cursor.getString(columnIndex)
-        } catch (e: Exception){
+        } catch (e: Exception) {
             val fileName = getFileName(contentUri)
             if (!TextUtils.isEmpty(fileName)) {
                 val copyFile = File(applicationContext.filesDir.toString() + File.separator + fileName)
