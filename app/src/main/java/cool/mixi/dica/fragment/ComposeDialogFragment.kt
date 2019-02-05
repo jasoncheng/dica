@@ -93,7 +93,7 @@ class ComposeDialogFragment : BaseDialogFragment() {
         strMsgErr = getString(R.string.post_failure)
         strMsg = getString(R.string.post_success)
 
-        dialog.let {
+        dialog?.let {
             setStyle(DialogFragment.STYLE_NORMAL, R.style.BottomDialog)
             it.requestWindowFeature(Window.FEATURE_NO_TITLE)
             it.setCanceledOnTouchOutside(true)
@@ -106,7 +106,7 @@ class ComposeDialogFragment : BaseDialogFragment() {
 
 
         roomView = inflater?.inflate(R.layout.dlg_compose, container)
-        dialog.setTitle("")
+        dialog?.setTitle("")
 
 
         editText = roomView?.et_text
@@ -184,7 +184,7 @@ class ComposeDialogFragment : BaseDialogFragment() {
             App.instance.loadGroup()
         }
 
-        dialog.window.setLayout(
+        dialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )

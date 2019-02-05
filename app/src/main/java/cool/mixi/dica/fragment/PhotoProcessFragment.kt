@@ -76,8 +76,10 @@ class PhotoProcessFragment: BaseDialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog.window!!.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.WHITE))
+        dialog?.window?.let {
+            it.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            it.setBackgroundDrawable(ColorDrawable(Color.WHITE))
+        }
     }
 
     private fun saveToFile() {

@@ -59,6 +59,7 @@ class StatusTimeline(val context: Context, val table: androidx.recyclerview.widg
         table.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         table.adapter = StatusesAdapter(statuses, context, WeakReference(this))
         table.setOnScrollListener(OnStatusTableScrollListener(selfRef))
+        table.isNestedScrollingEnabled = false
         swipeRefreshLayout.setOnRefreshListener(this)
         swipeRefreshLayout.isRefreshing = true
         return this

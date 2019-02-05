@@ -37,7 +37,6 @@ class StatusActivity : BaseActivity(), IStatusDataSource {
 
         stl = StatusTimeline(this, rv_statuses_list, home_srl, this).init()
         home_srl.setOnRefreshListener { requireRefresh() }
-
         stl?.loadNewest(this)
     }
 

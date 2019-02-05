@@ -1,151 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:background="@color/compose_bg"
-              android:padding="4dp" android:elevation="20dp">
+              android:background="@android:color/white"
+              android:padding="4dp">
 
-  <LinearLayout
-          android:id="@+id/group_permmain_radiogroupission"
-          android:orientation="horizontal"
-          android:layout_width="match_parent" android:layout_height="wrap_content">
-    <RadioGroup
-            android:id="@+id/main_radiogroup"
+    <LinearLayout
+            android:id="@+id/group_permmain_radiogroupission"
+            android:orientation="horizontal"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+        <RadioGroup
+                android:id="@+id/main_radiogroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:orientation="horizontal">
+            <RadioButton
+                    android:id="@+id/rb_public"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:checked="true"
+                    android:text="@string/permission_public"/>
+            <RadioButton
+                    android:id="@+id/rb_assign"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="@string/permission_assign"/>
+        </RadioGroup>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/group_reply"
+                  android:visibility="gone"
+                  android:paddingStart="4dp"
+                  android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:text="reply to..."
+                  android:id="@+id/tv_reply_to"
+                  android:drawableStart="@drawable/round_reply_black"/>
+    </LinearLayout>
+
+    <cool.mixi.dica.view.MySocialEditTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" android:background="@color/helpBackground" android:padding="5dp"
-            android:fadingEdge="vertical">
-      <RadioButton
-              android:id="@+id/rb_public"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_weight="0"
-              android:checked="true"
-              android:text="@string/permission_public" android:drawableStart="@drawable/dialog_public_white"
-              android:textStyle="bold" android:textColor="@android:color/white"/>
-      <RadioButton
-              android:id="@+id/rb_assign"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_weight="0"
-              android:text="@string/permission_assign" android:drawableStart="@drawable/dialog_private_white"
-              android:textAllCaps="false" android:textAlignment="textEnd" android:textStyle="bold"
-              android:buttonTint="@android:color/white" android:textColor="@android:color/white"/>
-    </RadioGroup>
-  </LinearLayout>
-
-  <LinearLayout android:id="@+id/group_reply"
-                android:visibility="gone"
-                android:paddingLeft="4dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content">
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:text="@string/dialog_reply_to"
-              android:id="@+id/tv_reply_to"
-              android:drawableStart="@drawable/round_reply_black"/>
-  </LinearLayout>
-
-  <!--<EditText-->
-  <!--android:layout_width="match_parent"-->
-  <!--android:layout_height="wrap_content"-->
-  <!--android:hint="@string/compose_text"-->
-  <!--android:ems="10"-->
-  <!--android:maxLines="5"-->
-  <!--android:id="@+id/et_text"-->
-  <!--android:singleLine="false"-->
-  <!--android:gravity="top|left"-->
-  <!--android:layout_marginTop="8dp"/>-->
-  <cool.mixi.dica.view.MySocialEditTextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:ems="10"
-          android:id="@+id/et_text"
-          android:singleLine="false"
-          android:gravity="start|top"
-          app:mentionColor="@color/txt_email"
-          app:hyperlinkColor="@color/txt_email"
-          app:hashtagColor="@color/txt_tag"
-          android:layout_marginTop="8dp"
-          android:hint="@string/compose_text" android:fadingEdge="horizontal|vertical" android:minHeight="250dp"
-          android:maxLines="13"/>
+            android:ems="10"
+            android:maxLines="6"
+            android:id="@+id/et_text"
+            android:singleLine="false"
+            android:gravity="top|left"
+            app:mentionColor="@color/txt_email"
+            app:hyperlinkColor="@color/txt_email"
+            app:hashtagColor="@color/txt_tag"
+            android:layout_marginTop="8dp"
+            android:hint="@string/compose_text"/>
 
 
-  <androidx.constraintlayout.widget.ConstraintLayout
-          android:id="@+id/cl_box"
-          android:padding="4dp"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content" android:background="@color/helpBackground">
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_box"
+            android:padding="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <ImageView
-            android:layout_width="@dimen/compose_button_size"
-            android:layout_height="@dimen/compose_button_size"
-            android:src="@drawable/dialog_smiley_white"
-            android:id="@+id/iv_emoji"
-            android:scaleType="fitXY"
-            android:padding="@dimen/compose_button_padding"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/iv_location"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_location" android:elevation="5dp"
-            android:contentDescription="emoji button "/>
+        <ImageView
+                android:layout_width="@dimen/compose_button_size"
+                android:layout_height="@dimen/compose_button_size"
+                android:src="@drawable/emoji"
+                android:id="@+id/iv_emoji"
+                android:scaleType="fitXY"
+                android:background="@color/compose_bg"
+                android:padding="@dimen/compose_button_padding"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/iv_location"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_location"/>
 
-    <ImageView
-            android:layout_width="@dimen/compose_button_size"
-            android:layout_height="@dimen/compose_button_size"
-            android:src="@drawable/dialog_album_white"
-            android:id="@+id/iv_from_album"
-            android:padding="@dimen/compose_button_padding"
-            app:layout_constraintTop_toTopOf="@+id/iv_location"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_location"
-            app:layout_constraintStart_toEndOf="@+id/iv_emoji"
-            android:layout_marginStart="@dimen/compose_button_margin" android:elevation="5dp"
-            android:contentDescription="TODO"/>
-    <ImageView
-            android:layout_width="@dimen/compose_button_size"
-            android:layout_height="@dimen/compose_button_size"
-            android:src="@drawable/dialog_camera_white"
-            android:id="@+id/iv_from_camera"
-            android:padding="@dimen/compose_button_padding"
-            app:layout_constraintStart_toEndOf="@+id/iv_from_album"
-            android:layout_marginStart="@dimen/compose_button_margin"
-            app:layout_constraintTop_toTopOf="@+id/iv_location"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_location" android:elevation="5dp"
-            android:contentDescription="TODO"/>
-    <TextView
-            android:layout_width="0dp"
-            android:layout_height="24dp"
-            android:drawableLeft="@drawable/dialog_gps_white"
-            android:id="@+id/iv_location"
-            android:includeFontPadding="false"
-            android:textSize="12sp"
-            android:gravity="center_vertical"
-            android:drawablePadding="4dp"
-            app:layout_constraintStart_toEndOf="@+id/iv_from_camera"
-            android:layout_marginStart="@dimen/compose_button_margin"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="8dp"
-            android:elevation="5dp" app:layout_constraintEnd_toStartOf="@+id/bt_submit"/>
-    <Button
-            android:layout_width="49dp"
-            android:layout_height="wrap_content" android:id="@+id/bt_submit"
-            android:includeFontPadding="false"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@drawable/dialog_submit_white"
-    />
+        <ImageView
+                android:layout_width="@dimen/compose_button_size"
+                android:layout_height="@dimen/compose_button_size"
+                android:src="@drawable/ic_gallery"
+                android:id="@+id/iv_from_album"
+                android:padding="@dimen/compose_button_padding"
+                android:background="@color/compose_bg"
+                app:layout_constraintTop_toTopOf="@+id/iv_location"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_location"
+                app:layout_constraintStart_toEndOf="@+id/iv_emoji"
+                android:layout_marginStart="@dimen/compose_button_margin"/>
+        <ImageView
+                android:layout_width="@dimen/compose_button_size"
+                android:layout_height="@dimen/compose_button_size"
+                android:src="@drawable/ic_camera"
+                android:id="@+id/iv_from_camera"
+                android:background="@color/compose_bg"
+                android:padding="@dimen/compose_button_padding"
+                app:layout_constraintStart_toEndOf="@+id/iv_from_album"
+                android:layout_marginStart="@dimen/compose_button_margin"
+                app:layout_constraintTop_toTopOf="@+id/iv_location"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_location"/>
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_gps"
+                android:id="@+id/iv_location"
+                android:includeFontPadding="false"
+                android:textSize="12sp"
+                android:gravity="center_vertical"
+                android:drawablePadding="4dp"
+                app:layout_constraintStart_toEndOf="@+id/iv_from_camera"
+                android:layout_marginStart="@dimen/compose_button_margin"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="4dp"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-  <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
-                                                     android:layout_height="wrap_content">
+    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
+                                                       android:layout_height="wrap_content">
 
 
-    <LinearLayout android:id="@+id/photo_box" android:orientation="horizontal"
-                  android:layout_width="0dp" android:layout_height="wrap_content"
-                  app:layout_constraintStart_toStartOf="parent" android:layout_marginBottom="4dp"
-                  app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="4dp"
-                  app:layout_constraintTop_toTopOf="parent"/>
-  </androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+                android:text="@string/compose_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/bt_submit"
+                android:includeFontPadding="false"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+        <LinearLayout android:id="@+id/photo_box" android:orientation="horizontal"
+                      android:layout_width="0dp" android:layout_height="wrap_content"
+                      app:layout_constraintEnd_toStartOf="@+id/bt_submit" android:layout_marginStart="8dp"
+                      app:layout_constraintStart_toStartOf="parent" android:layout_marginBottom="4dp"
+                      app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="4dp"
+                      app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

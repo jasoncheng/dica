@@ -61,7 +61,7 @@ class NotificationDialog: BaseDialogFragment(), androidx.swiperefreshlayout.widg
 
     override fun onStart() {
         super.onStart()
-        dialog.window.setLayout(
+        dialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
