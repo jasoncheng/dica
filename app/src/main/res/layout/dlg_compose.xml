@@ -46,7 +46,6 @@
     <cool.mixi.dica.view.MySocialEditTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
             android:maxLines="6"
             android:id="@+id/et_text"
             android:singleLine="false"
@@ -55,7 +54,7 @@
             app:hyperlinkColor="@color/txt_email"
             app:hashtagColor="@color/txt_tag"
             android:layout_marginTop="8dp"
-            android:inputType="textCapSentences"
+            android:inputType="textCapSentences|textMultiLine"
             android:hint="@string/compose_text"/>
 
 

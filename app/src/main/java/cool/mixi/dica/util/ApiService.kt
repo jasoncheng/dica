@@ -180,12 +180,19 @@ interface ApiService {
 
         private val cacheInterceptor = Interceptor {
             val request = if(NetworkUtil.isNetworkConnected()) {
-                it.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build()
+                it.request().newBuilder()
+                    .cacheControl(CacheControl.Builder()
+                        .maxAge(30, TimeUnit.SECONDS)
+                        .build())
+                    .build()
             } else {
-                it.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build()
+                it.request().newBuilder().cacheControl(
+                    CacheControl.Builder().onlyIfCached().maxStale(30, TimeUnit.DAYS).build()
+                ).build()
             }
 
-            it.proceed(request)
+            val res = it.proceed(request)
+            res.newBuilder().build()
         }
 
         private val saveCookieInterceptor = Interceptor {
@@ -209,6 +216,12 @@ interface ApiService {
             it.proceed(builder.build())
         }
 
+        private val rewriteCacheControlHeader = Interceptor {
+            val res = it.proceed(it.request())
+            res.newBuilder().removeHeader("Pragma")
+                .header("Cache-Control", String.format("max-age=%d", 60)).build()
+        }
+
         private fun getCache(): Cache {
             return Cache(File(App.instance.cacheDir, "http-cache"), cacheSize.toLong())
         }
@@ -223,12 +236,13 @@ interface ApiService {
 
             clientBuilder
                 .cache(getCache())
+                .addInterceptor(cacheInterceptor)
+                .addNetworkInterceptor(rewriteCacheControlHeader)
                 .connectTimeout(Consts.API_CONNECT_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(Consts.API_READ_TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(Consts.API_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(saveCookieInterceptor)
                 .addInterceptor(addCookieInterceptor)
-                .addInterceptor(cacheInterceptor)
             return clientBuilder
         }
 

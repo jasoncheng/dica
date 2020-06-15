@@ -929,7 +929,7 @@ class StatusesAdapter(
         view.layoutParams = childParams
 
         Glide.with(context.applicationContext).load(meta.icon).apply(RequestOptions().skipMemoryCache(true))
-            .into(view.site_avatar)
+            .into(view.site_avatar)·
         if (meta.description.isNullOrEmpty()) {
             view.site_desc.text = meta.url
         } else {

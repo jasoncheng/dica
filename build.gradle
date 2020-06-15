@@ -9,7 +9,7 @@ buildscript {
         maven { url 'https://www.mvnjar.com/central/maven2' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath 'com.android.tools.build:gradle:3.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
